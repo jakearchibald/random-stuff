@@ -1,19 +1,52 @@
-import { promises as fs } from "fs";
-import path from "path";
-import { Plugin } from "vite";
+import { promises as fs } from 'fs';
+import { Plugin } from 'vite';
+import { glob } from 'glob';
 
-export function publicIndexPlugin({
-  publicDir = "public",
-  indexFile = "index.html",
-} = {}): Plugin {
-  let resolvedPublicDir: string;
+function extractHTMLTitle(html: string): string {
+  const match = html.match(/<title>(.*?)<\/title>/);
+  return match ? match[1].trim() : '';
+}
 
+function extractScriptTitle(script: string): string {
+  const match = script.match(/^\/\/\s*title:(.*)/im);
+  return match ? match[1].trim() : '';
+}
+
+export function publicIndexPlugin(): Plugin {
   async function generateIndex() {
-    const dirs = await fs.readdir(resolvedPublicDir, { withFileTypes: true });
-    const links = dirs
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => `<li><a href="/${dirent.name}/">${dirent.name}</a></li>`) // link to directory
-      .join("\n");
+    const paths = [
+      ...(await glob('public/*/index.html')),
+      ...(await glob('src/routes/*/index.ts')),
+    ];
+
+    const entries = (
+      await Promise.all(
+        paths.map(async (path) => {
+          const dirName =
+            /^(public|src\/routes)\/([^/]*)\/index\.(html|ts)$/.exec(
+              path
+            )?.[2]!;
+
+          const fileContent = await fs.readFile(
+            new URL('../' + path, import.meta.url),
+            'utf8'
+          );
+
+          const title = path.endsWith('.html')
+            ? extractHTMLTitle(fileContent)
+            : extractScriptTitle(fileContent);
+
+          return [dirName, title];
+        })
+      )
+    ).sort((a, b) => a[0].localeCompare(b[0]));
+
+    const links = entries
+      .map(
+        ([dirName, title]) =>
+          `<li><a href="/${dirName}/">${dirName}</a> ${title}</li>`
+      )
+      .join('\n');
 
     const html = `<!DOCTYPE html>
       <html lang="en">
@@ -28,14 +61,14 @@ export function publicIndexPlugin({
       </body>
       </html>`;
 
-    const indexPath = path.join(resolvedPublicDir, indexFile);
+    const indexPath = new URL('../public/index.html', import.meta.url);
 
     let current;
 
     try {
-      current = await fs.readFile(indexPath, "utf8");
+      current = await fs.readFile(indexPath, 'utf8');
     } catch (e: any) {
-      if (e.code !== "ENOENT") throw e;
+      if (e.code !== 'ENOENT') throw e;
       current = null;
     }
 
@@ -44,10 +77,7 @@ export function publicIndexPlugin({
   }
 
   return {
-    name: "vite-plugin-public-index",
-    configResolved(config) {
-      resolvedPublicDir = path.resolve(config.root, publicDir);
-    },
+    name: 'vite-plugin-public-index',
     async buildStart() {
       await generateIndex();
     },
