@@ -1,7 +1,0 @@
-/valid-xhtml/
-  Cache-Control: public, max-age=31556952, immutable
-  Content-Type: application/xhtml+xml
-
-/invalid-xhtml-drs/
-  Cache-Control: public, max-age=31556952, immutable
-  Content-Type: application/xhtml+xml
