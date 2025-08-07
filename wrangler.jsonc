@@ -7,7 +7,7 @@
   "name": "random-static-stuff",
   "compatibility_date": "2025-07-08",
   "assets": {
-    "directory": "./public"
+    "directory": "./dist"
   },
   "observability": {
     "enabled": true
