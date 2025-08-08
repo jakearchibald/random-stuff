@@ -7,17 +7,21 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // Fix missing trailing slash.
-    if (
-      !url.pathname.endsWith('/') &&
-      routeModules['./routes' + url.pathname + '/index.ts']
-    ) {
-      return Response.redirect(new URL(url.pathname + '/', url).href);
+    const route = url.pathname.endsWith('/')
+      ? routeModules[`./routes${url.pathname}index.ts`]
+      : routeModules[`./routes${url.pathname}.ts`];
+
+    if (!route) {
+      // Fix missing trailing slash.
+      if (
+        !url.pathname.endsWith('/') &&
+        routeModules['./routes' + url.pathname + '/index.ts']
+      ) {
+        return Response.redirect(new URL(url.pathname + '/', url).href);
+      }
+
+      return new Response('Not found', { status: 404 });
     }
-
-    const route = routeModules['./routes' + url.pathname + 'index.ts'];
-
-    if (!route) return new Response('Not found', { status: 404 });
 
     const module = await route();
 
