@@ -1,15 +1,21 @@
 import { promises as fs } from 'fs';
 import { Plugin } from 'vite';
 import { glob } from 'glob';
+import dedent from 'dedent';
 
 function extractHTMLTitle(html: string): string {
   const match = html.match(/<title>(.*?)<\/title>/);
-  return match ? match[1].trim() : '';
+  return match?.[1].trim() || '';
 }
 
 function extractScriptTitle(script: string): string {
   const match = script.match(/^\/\/\s*title:(.*)/im);
-  return match ? match[1].trim() : '';
+  return match?.[1].trim() || '';
+}
+
+async function writeIfChanged(filePath: string | URL, content: string) {
+  const current = await fs.readFile(filePath, 'utf8').catch(() => null);
+  if (current !== content) await fs.writeFile(filePath, content);
 }
 
 export function publicIndexPlugin(): Plugin {
@@ -43,37 +49,28 @@ export function publicIndexPlugin(): Plugin {
 
     const links = entries
       .map(
-        ([dirName, title]) =>
-          `<li><a href="/${dirName}/">${dirName}</a> ${title}</li>`
+        ([dirName, title]) => dedent`
+          <li>
+            <a href="/${dirName}/">${dirName}</a>
+            ${title && `- ${title}`}
+          </li>
+        `
       )
       .join('\n');
 
-    const html = `<!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <title>Index</title>
-      </head>
-      <body>
-        <ul>
-          ${links}
-        </ul>
-      </body>
-      </html>`;
+    const html = dedent`
+      <!DOCTYPE html>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Index</title>
+      <ul>
+        ${links}
+      </ul>
+    `;
 
     const indexPath = new URL('../public/index.html', import.meta.url);
 
-    let current;
-
-    try {
-      current = await fs.readFile(indexPath, 'utf8');
-    } catch (e: any) {
-      if (e.code !== 'ENOENT') throw e;
-      current = null;
-    }
-
-    if (current === html) return;
-    await fs.writeFile(indexPath, html);
+    await writeIfChanged(indexPath, html);
   }
 
   return {

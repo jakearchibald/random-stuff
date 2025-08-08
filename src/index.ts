@@ -17,26 +17,22 @@ export default {
 
     const route = routeModules['./routes' + url.pathname + 'index.ts'];
 
-    if (route) {
-      const module = await route();
+    if (!route) return new Response('Not found', { status: 404 });
 
-      if (!('default' in module)) {
-        throw new Error(
-          `Route module for ${url.pathname} is missing default export`
-        );
-      }
+    const module = await route();
 
-      if (typeof module.default !== 'function') {
-        throw new Error(
-          `Route module for ${url.pathname} default export is not a function`
-        );
-      }
-
-      return module.default(request, env, ctx);
+    if (!('default' in module)) {
+      throw new Error(
+        `Route module for ${url.pathname} is missing default export`
+      );
     }
 
-    return new Response('Not found', {
-      status: 404,
-    });
+    if (typeof module.default !== 'function') {
+      throw new Error(
+        `Route module for ${url.pathname} default export is not a function`
+      );
+    }
+
+    return module.default(request, env, ctx);
   },
 } satisfies ExportedHandler<Env>;
