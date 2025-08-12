@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Media Combinations</title>
+<style>
+  video,
+  audio,
+  img {
+    width: 300px;
+    display: block;
+  }
+  video,
+  img {
+    aspect-ratio: 1080/720;
+  }
+
+  td,
+  th {
+    border: 1px solid black;
+  }
+</style>
+
+<h1>Different formats in different 'players'</h1>
+
+<p>
+  Urgh I'm sorry there's a lot of my face here. And I'm doubly sorry that making
+  this situation better means more of my face on this page.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="4">Media format</th>
+    </tr>
+    <tr>
+      <th>Player</th>
+      <th>Video</th>
+      <th>Audio</th>
+      <th>Animated image</th>
+      <th>Still image</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th><code>&lt;video controls playsinline&gt;</code></th>
+      <td><video controls playsinline src="video.mp4"></video></td>
+      <td><video controls playsinline src="audio.aac"></video></td>
+      <td><video controls playsinline src="animated-image.avif"></video></td>
+      <td><video controls playsinline src="image.avif"></video></td>
+    </tr>
+    <tr>
+      <th><code>&lt;video muted loop playsinline&gt;</code></th>
+      <td><video muted loop playsinline src="video.mp4"></video></td>
+      <td><video muted loop playsinline src="audio.aac"></video></td>
+      <td><video muted loop playsinline src="animated-image.avif"></video></td>
+      <td><video muted loop playsinline src="image.avif"></video></td>
+    </tr>
+    <tr>
+      <th><code>&lt;audio controls&gt;</code></th>
+      <td><audio controls src="video.mp4"></audio></td>
+      <td><audio controls src="audio.aac"></audio></td>
+      <td>
+        <audio controls src="animated-image.avif"></audio> (expected failure)
+      </td>
+      <td><audio controls src="image.avif"></audio> (expected failure)</td>
+    </tr>
+    <tr>
+      <th><code>&lt;img&gt;</code></th>
+      <td><img src="video.mp4" /></td>
+      <td><img src="audio.aac" /> (expected failure)</td>
+      <td>
+        <img src="animated-image.avif" />
+      </td>
+      <td><img src="image.avif" /></td>
+    </tr>
+  </tbody>
+</table>
