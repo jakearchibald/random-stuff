@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>idb-keyval clear test</title>
+<h1>idb-keyval clear test</h1>
+<h2>Actions</h2>
+<div class="actions"></div>
+<h2>Results</h2>
+<div class="results"></div>
+<script type="module">
+  import {
+    setMany,
+    entries,
+    clear,
+  } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
+
+  const buttons = {
+    [`Set data`]() {
+      setMany([
+        ['Random number 1', Math.random()],
+        ['Random number 2', Math.random()],
+        ['Random number 3', Math.random()],
+        ['Random number 4', Math.random()],
+        ['Random number 5', Math.random()],
+      ]);
+    },
+    [`Clear data`]() {
+      clear();
+    },
+    async [`Show data`]() {
+      const resultsDiv = document.querySelector('.results');
+      resultsDiv.innerHTML = '';
+      const allEntries = await entries();
+
+      if (allEntries.length === 0) {
+        const p = document.createElement('p');
+        p.textContent = `No data found.`;
+        resultsDiv.append(p);
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      for (const [key, value] of allEntries) {
+        const li = document.createElement('li');
+        li.textContent = `${key}: ${value}`;
+        ul.append(li);
+      }
+      resultsDiv.append(ul);
+    },
+  };
+
+  const actionsDiv = document.querySelector('.actions');
+
+  for (const [text, handler] of Object.entries(buttons)) {
+    const btn = document.createElement('button');
+    btn.textContent = text;
+    btn.onclick = handler;
+    actionsDiv.append(btn, ' ');
+  }
+</script>
