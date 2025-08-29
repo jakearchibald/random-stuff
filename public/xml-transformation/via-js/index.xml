@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="styles.css"?>
+<authors>
+  <script xmlns="http://www.w3.org/1999/xhtml" src="script.js" defer="" />
+  <author>
+    <name>Douglas Adams</name>
+    <book>
+      <title>The Hitchhiker's Guide to the Galaxy</title>
+      <genre>Science Fiction Comedy</genre>
+    </book>
+    <book>
+      <title>The Restaurant at the End of the Universe</title>
+      <genre>Science Fiction Comedy</genre>
+    </book>
+    <book>
+      <title>Dirk Gently's Holistic Detective Agency</title>
+      <genre>Science Fiction Comedy</genre>
+    </book>
+  </author>
+  <author>
+    <name>George Orwell</name>
+    <book>
+      <title>1984</title>
+      <genre>Dystopian Fiction</genre>
+    </book>
+    <book>
+      <title>Animal Farm</title>
+      <genre>Political Satire</genre>
+    </book>
+    <book>
+      <title>Down and Out in Paris and London</title>
+      <genre>Memoir</genre>
+    </book>
+  </author>
+  <author>
+    <name>Agatha Christie</name>
+    <book>
+      <title>Murder on the Orient Express</title>
+      <genre>Mystery</genre>
+    </book>
+    <book>
+      <title>The Murder of Roger Ackroyd</title>
+      <genre>Mystery</genre>
+    </book>
+    <book>
+      <title>And Then There Were None</title>
+      <genre>Mystery</genre>
+    </book>
+  </author>
+</authors>
