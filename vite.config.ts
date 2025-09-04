@@ -12,14 +12,11 @@ export default defineConfig({
   plugins: [
     cloudflare({
       experimental: { headersAndRedirectsDevModeSupport: true },
-      configPath: '../wrangler.jsonc',
     }),
     publicIndexPlugin(),
     preact(),
     htmlInputsPlugin(),
   ],
-  publicDir: resolve(__dirname, 'public'),
-  root: resolve(__dirname, 'src'),
   build: {
     emptyOutDir: true,
     outDir: resolve(__dirname, 'dist'),

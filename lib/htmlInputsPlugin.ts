@@ -12,7 +12,7 @@ export function htmlInputsPlugin(): Plugin {
       if (command !== 'build') return;
       const root = config.root || process.cwd();
       // Find all HTML files in src recursively
-      const allHtmlFiles = glob.sync('**/*.html', {
+      const allHtmlFiles = glob.sync('src/**/*.html', {
         cwd: resolve(root),
         absolute: true,
       });
