@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs';
-import { Plugin } from 'vite';
+import type { Plugin } from 'vite';
 import { glob } from 'glob';
 import dedent from 'dedent';
 
