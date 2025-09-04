@@ -6,9 +6,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "random-stuff",
   "compatibility_date": "2025-07-08",
-  "main": "worker-src/index.ts",
+  "main": "./dist/random_stuff/index.js",
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist/client"
   },
   "observability": {
     "enabled": true

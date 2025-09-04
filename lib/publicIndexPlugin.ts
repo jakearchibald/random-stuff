@@ -22,14 +22,14 @@ export function publicIndexPlugin(): Plugin {
   async function generateIndex() {
     const paths = [
       ...(await glob('public/*/index.html')),
-      ...(await glob('src/routes/*/index.ts')),
+      ...(await glob('worker-src/routes/*/index.ts')),
     ];
 
     const entries = (
       await Promise.all(
         paths.map(async (path) => {
           const dirName =
-            /^(public|src\/routes)\/([^/]*)\/index\.(html|ts)$/.exec(
+            /^(public|worker-src\/routes)\/([^/]*)\/index\.(html|ts)$/.exec(
               path
             )?.[2]!;
 
