@@ -1,23 +1,37 @@
-import type { Plugin } from 'vite';
-import bcd from '@mdn/browser-compat-data' with { type: 'json' };
 import type {
   Identifier,
   CompatStatement,
   BrowserName,
+  CompatData,
 } from '@mdn/browser-compat-data';
 
-import type {
-  BCDFeaturePart,
-  BCDSimpleData,
-  BCDSupportData,
-  BCDBrowser,
-} from '../shared-types.js';
+export interface BCDSimpleData {
+  subfeatures: BCDFeaturePart[];
+}
 
-const moduleId = 'simple-bcd:';
+export type BCDBrowser = 'chrome' | 'firefox' | 'safari';
+
+export type BCDSupportData = Record<
+  BCDBrowser,
+  {
+    desktop: string;
+    mobile: string;
+  }
+>;
+
+export interface BCDFeaturePart {
+  subfeatures: BCDFeaturePart[];
+  id: string;
+  details?: {
+    name: string;
+    mdnURL: string;
+    support: BCDSupportData;
+  };
+}
 
 type IdentifierKeys = {
-  [K in keyof typeof bcd]: (typeof bcd)[K] extends Identifier ? K : never;
-}[keyof typeof bcd];
+  [K in keyof CompatData]: CompatData[K] extends Identifier ? K : never;
+}[keyof CompatData];
 
 const topLevelKeys: IdentifierKeys[] = [
   'api',
@@ -37,7 +51,7 @@ const browserMobilePairs: [BrowserName, BrowserName][] = [
   ['safari', 'safari_ios'],
 ] as const;
 
-function createSimpleBCDData(): BCDSimpleData {
+export function createSimpleBCDData(bcd: CompatData): BCDSimpleData {
   return {
     subfeatures: topLevelKeys.map((key) =>
       createFeaturePart(bcd as unknown as Identifier, key)
@@ -65,8 +79,12 @@ function createSupportData(data: CompatStatement): BCDSupportData {
       : undefined;
 
     supportData[browser as BCDBrowser] = {
-      desktop: desktopSupportEntry?.version_removed ? '' : desktopSupportEntry?.version_added || '',
-      mobile: mobileSupportEntry?.version_removed ? '' : mobileSupportEntry?.version_added || '',
+      desktop: desktopSupportEntry?.version_removed
+        ? ''
+        : desktopSupportEntry?.version_added || '',
+      mobile: mobileSupportEntry?.version_removed
+        ? ''
+        : mobileSupportEntry?.version_added || '',
     };
   }
 
@@ -81,7 +99,9 @@ function createFeaturePart(data: Identifier, key: string): BCDFeaturePart {
   const { __compat, ...subfeatures } = feature;
 
   return {
-    subfeatures: Object.keys(subfeatures).map((key) => createFeaturePart(feature, key)),
+    subfeatures: Object.keys(subfeatures).map((key) =>
+      createFeaturePart(feature, key)
+    ),
     id: key,
     details:
       __compat && !__compat.status?.deprecated
@@ -91,19 +111,5 @@ function createFeaturePart(data: Identifier, key: string): BCDFeaturePart {
             support: createSupportData(__compat),
           }
         : undefined,
-  };
-}
-
-export function simpleBCDDataPlugin(): Plugin {
-  return {
-    name: 'simple-bcd-data-plugin',
-    resolveId(id) {
-      if (moduleId === id) return id;
-    },
-    load(id) {
-      if (id === moduleId) {
-        return `export default ${JSON.stringify(createSimpleBCDData())}`;
-      }
-    },
   };
 }
