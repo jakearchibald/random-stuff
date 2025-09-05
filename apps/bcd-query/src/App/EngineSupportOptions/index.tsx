@@ -38,7 +38,7 @@ const EngineSupportOptions: FunctionalComponent<Props> = ({
     <form class="engine-filter" ref={formRef} onInput={onInput}>
       {browserOrder.map((browser) => (
         <div class="engine-filter-row">
-          {browserData[browser].name}:
+          <div class="engine-filter-name">{browserData[browser].name}:</div>
           <label>
             <input
               type="radio"

@@ -24,9 +24,9 @@ const App: FunctionalComponent = () => {
     return createSimpleBCDData(bcdData.value);
   });
   const engineSupportValues = useSignal<SupportOptions>({
-    chrome: 'either',
+    chrome: 'supported',
     firefox: 'unsupported',
-    safari: 'either',
+    safari: 'supported',
   });
 
   const filter = useComputed<(data: BCDSupportData) => boolean>(() =>
