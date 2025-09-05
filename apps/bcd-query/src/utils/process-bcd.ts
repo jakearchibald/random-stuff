@@ -3,6 +3,7 @@ import type {
   CompatStatement,
   BrowserName,
   CompatData,
+  SimpleSupportStatement,
 } from '@mdn/browser-compat-data';
 
 export interface BCDSimpleData {
@@ -22,6 +23,7 @@ export type BCDSupportData = Record<
 export interface BCDFeaturePart {
   subfeatures: BCDFeaturePart[];
   id: string;
+  bcdData: Identifier;
   details?: {
     name: string;
     mdnURL: string;
@@ -59,6 +61,11 @@ export function createSimpleBCDData(bcd: CompatData): BCDSimpleData {
   };
 }
 
+function getSupportValue(entry: SimpleSupportStatement | undefined): string {
+  if (!entry || entry.version_removed || entry.flags?.[0]) return '';
+  return entry.version_added || '';
+}
+
 function createSupportData(data: CompatStatement): BCDSupportData {
   const supportData: Partial<BCDSupportData> = {};
 
@@ -79,12 +86,8 @@ function createSupportData(data: CompatStatement): BCDSupportData {
       : undefined;
 
     supportData[browser as BCDBrowser] = {
-      desktop: desktopSupportEntry?.version_removed
-        ? ''
-        : desktopSupportEntry?.version_added || '',
-      mobile: mobileSupportEntry?.version_removed
-        ? ''
-        : mobileSupportEntry?.version_added || '',
+      desktop: getSupportValue(desktopSupportEntry),
+      mobile: getSupportValue(mobileSupportEntry),
     };
   }
 
@@ -103,6 +106,7 @@ function createFeaturePart(data: Identifier, key: string): BCDFeaturePart {
       createFeaturePart(feature, key)
     ),
     id: key,
+    bcdData: feature,
     details:
       __compat && !__compat.status?.deprecated
         ? {

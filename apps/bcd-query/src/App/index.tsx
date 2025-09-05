@@ -14,6 +14,7 @@ import DataHeader from './DataHeader';
 
 import './styles.css';
 import { globalEvents } from '../utils/globalEvents';
+import { debugMode } from './global-state';
 
 const bcdURL = 'https://unpkg.com/@mdn/browser-compat-data';
 
@@ -55,11 +56,23 @@ const App: FunctionalComponent = () => {
     globalEvents.dispatchEvent(new Event('collapseall'));
   };
 
+  const debugModeToggle = () => {
+    debugMode.value = !debugMode.value;
+  };
+
   return (
     <>
       <div>
         <button onClick={expandAllClick}>Expand all</button>{' '}
-        <button onClick={collapseAllClick}>Collapse all</button>
+        <button onClick={collapseAllClick}>Collapse all</button>{' '}
+        <label>
+          <input
+            type="checkbox"
+            checked={debugMode}
+            onInput={debugModeToggle}
+          />{' '}
+          Debug
+        </label>
       </div>
       <table class="data">
         <DataHeader browserData={bcdData.value!.browsers} />

@@ -13,6 +13,7 @@ import { asSignal } from '../../../utils/asSignal';
 import { browserOrder } from '../../../utils/meta';
 import { useEffect } from 'preact/hooks';
 import { globalEvents } from '../../../utils/globalEvents';
+import { debugMode } from '../../global-state';
 
 const DataRowName: FunctionalComponent<{ data: BCDFeaturePart }> = ({
   data,
@@ -90,6 +91,10 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
     expand.value = !expand.value;
   };
 
+  const onLogClick = () => {
+    console.log(data.bcdData);
+  };
+
   return (
     <>
       <tr class="data-row" onClick={onRowClick} style={{ '--level': level }}>
@@ -99,6 +104,11 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
           ) : (
             <button class="data-row-toggle" onClick={onToggleClick}>
               {toggleChar}
+            </button>
+          )}
+          {debugMode.value && (
+            <button class="data-row-debug" onClick={onLogClick}>
+              🪵
             </button>
           )}
           <p class="data-row-title">

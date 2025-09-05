@@ -21,17 +21,16 @@
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
-  gap: 1px;
 }
 
 .data-header-types {
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
-  gap: 1px;
   font-size: 9px;
 }
 
 .data-header-type {
+  padding: 0;
   width: var(--support-item-width);
 }
