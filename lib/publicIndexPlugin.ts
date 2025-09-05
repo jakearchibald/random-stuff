@@ -22,16 +22,27 @@ export function publicIndexPlugin(): Plugin {
   async function generateIndex() {
     const paths = [
       ...(await glob('public/*/index.html')),
+      ...(await glob('apps/*/index.html')),
       ...(await glob('worker-src/routes/*/index.ts')),
     ];
 
     const entries = (
       await Promise.all(
         paths.map(async (path) => {
-          const dirName =
-            /^(public|worker-src\/routes)\/([^/]*)\/index\.(html|ts)$/.exec(
-              path
-            )?.[2]!;
+          const dirName = (() => {
+            if (path.endsWith('.ts')) {
+              return path
+                .replace(/\/index\.ts$/, '')
+                .replace(/^worker-src\/routes\//, '');
+            } else if (path.startsWith('public/')) {
+              return path
+                .replace(/\/index\.html$/, '')
+                .replace(/^public\//, '');
+            } else if (path.startsWith('apps/')) {
+              return path.replace(/\/index\.html$/, '');
+            }
+            throw Error('Unknown path');
+          })();
 
           const fileContent = await fs.readFile(
             new URL('../' + path, import.meta.url),

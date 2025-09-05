@@ -1,0 +1,37 @@
+.data-header {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 10px 0;
+
+  th {
+    font-weight: normal;
+    text-align: center;
+
+    &[colspan='2'] {
+      grid-column: auto / span 2;
+    }
+  }
+}
+
+.data-header-browsers {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  gap: 1px;
+}
+
+.data-header-types {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  gap: 1px;
+  font-size: 9px;
+}
+
+.data-header-type {
+  width: var(--support-item-width);
+}

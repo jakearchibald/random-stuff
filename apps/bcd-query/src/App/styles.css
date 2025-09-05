@@ -1,0 +1,6 @@
+.data {
+  --support-item-width: 50px;
+  display: grid;
+  gap: 1px 0;
+  grid-template-columns: 1fr repeat(6, min-content);
+}

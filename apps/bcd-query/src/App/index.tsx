@@ -61,14 +61,14 @@ const App: FunctionalComponent = () => {
         <button onClick={expandAllClick}>Expand all</button>{' '}
         <button onClick={collapseAllClick}>Collapse all</button>
       </div>
-      <div class="data">
+      <table class="data">
         <DataHeader browserData={bcdData.value!.browsers} />
         <DataRows
           data={filteredData.value.subfeatures}
           level={0}
           filter={filter}
         />
-      </div>
+      </table>
     </>
   );
 };

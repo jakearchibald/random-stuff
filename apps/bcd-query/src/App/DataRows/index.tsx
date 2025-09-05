@@ -12,13 +12,9 @@ export interface Props {
 }
 
 const DataRows: FunctionalComponent<Props> = ({ data, level, filter }) => {
-  return (
-    <div class="data-rows" style={{ '--level': level }}>
-      {data.map((item) => (
-        <DataRow key={item.id} data={item} level={level} filter={filter} />
-      ))}
-    </div>
-  );
+  return data.map((item) => (
+    <DataRow key={item.id} data={item} level={level} filter={filter} />
+  ));
 };
 
 export default DataRows;

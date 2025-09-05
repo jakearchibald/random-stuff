@@ -12,7 +12,7 @@ export function htmlInputsPlugin(): Plugin {
       if (command !== 'build') return;
       const root = config.root || process.cwd();
       // Find all HTML files in src recursively
-      const allHtmlFiles = glob.sync('src/**/*.html', {
+      const allHtmlFiles = glob.sync('apps/**/*.html', {
         cwd: resolve(root),
         absolute: true,
       });
@@ -23,7 +23,7 @@ export function htmlInputsPlugin(): Plugin {
 
       for (const file of allHtmlFiles) {
         // Use the directory name (relative to root) as the key
-        const rel = file.replace(resolve(root) + '/', '');
+        const rel = file.replace(resolve(root) + '/apps/', '');
         const key = rel.replace(/\/.*\.html$/, '');
         config.build.rollupOptions.input[key] = file;
       }

@@ -92,42 +92,41 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
 
   return (
     <>
-      <div class="data-row" onClick={onRowClick}>
-        {data.subfeatures.length === 0 ? (
-          <span />
-        ) : (
-          <button class="data-row-toggle" onClick={onToggleClick}>
-            {toggleChar}
-          </button>
-        )}
-        <p class="data-row-title">
-          <DataRowName data={data} />
-        </p>
-        {detailsAreInteresting.value && (
-          <div class="data-row-support">
-            {browserOrder.map((browser) => (
-              <>
-                <div
-                  class={classes({
-                    'data-row-support-item': true,
-                    supported: Boolean(data.details!.support[browser].desktop),
-                  })}
-                >
-                  {data.details!.support[browser].desktop}
-                </div>
-                <div
-                  class={classes({
-                    'data-row-support-item': true,
-                    supported: Boolean(data.details!.support[browser].mobile),
-                  })}
-                >
-                  {data.details!.support[browser].mobile}
-                </div>
-              </>
-            ))}
-          </div>
-        )}
-      </div>
+      <tr class="data-row" onClick={onRowClick} style={{ '--level': level }}>
+        <td class="data-row-feature">
+          {data.subfeatures.length === 0 ? (
+            <span />
+          ) : (
+            <button class="data-row-toggle" onClick={onToggleClick}>
+              {toggleChar}
+            </button>
+          )}
+          <p class="data-row-title">
+            <DataRowName data={data} />
+          </p>
+        </td>
+        {detailsAreInteresting.value &&
+          browserOrder.map((browser) => (
+            <>
+              <td
+                class={classes({
+                  'data-row-support-item': true,
+                  supported: Boolean(data.details!.support[browser].desktop),
+                })}
+              >
+                {data.details!.support[browser].desktop}
+              </td>
+              <td
+                class={classes({
+                  'data-row-support-item': true,
+                  supported: Boolean(data.details!.support[browser].mobile),
+                })}
+              >
+                {data.details!.support[browser].mobile}
+              </td>
+            </>
+          ))}
+      </tr>
       {expand.value && (
         <DataRows data={data.subfeatures} level={level + 1} filter={filter} />
       )}
