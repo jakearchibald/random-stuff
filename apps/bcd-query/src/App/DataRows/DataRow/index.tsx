@@ -14,23 +14,20 @@ import { browserOrder } from '../../../utils/meta';
 import { useEffect } from 'preact/hooks';
 import { globalEvents } from '../../../utils/globalEvents';
 import { debugMode } from '../../global-state';
+import ButtonWithPopover from './ButtonWithPopover';
 
 const DataRowName: FunctionalComponent<{ data: BCDFeaturePart }> = ({
   data,
 }) => {
   const htmlName = data.details?.name;
-  const mdnURL = data.details?.mdnURL;
   const name = htmlName ? (
     <span dangerouslySetInnerHTML={{ __html: htmlName }} />
   ) : (
     <span>{data.id}</span>
   );
 
-  if (mdnURL) {
-    return <a href={mdnURL}>{name}</a>;
-  }
-
-  return name;
+  const url = data.details?.mdnURL || data.details?.specURLs[0];
+  return url ? <a href={url}>{name}</a> : name;
 };
 
 export interface Props {
@@ -86,7 +83,7 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
     expand.value = !expand.value;
   };
 
-  const onRowClick = (event: MouseEvent) => {
+  const onFeatureClick = (event: MouseEvent) => {
     if ((event.target as HTMLElement).closest('a, button')) return;
     expand.value = !expand.value;
   };
@@ -97,8 +94,8 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
 
   return (
     <>
-      <tr class="data-row" onClick={onRowClick} style={{ '--level': level }}>
-        <td class="data-row-feature">
+      <tr class="data-row" style={{ '--level': level }}>
+        <td class="data-row-feature" onClick={onFeatureClick}>
           {data.subfeatures.length === 0 ? (
             <span />
           ) : (
@@ -107,7 +104,11 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
             </button>
           )}
           {debugMode.value && (
-            <button class="data-row-debug" onClick={onLogClick}>
+            <button
+              class="data-row-debug"
+              onClick={onLogClick}
+              title="Log BCD data"
+            >
               🪵
             </button>
           )}
@@ -115,27 +116,63 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
             <DataRowName data={data} />
           </p>
         </td>
-        {detailsAreInteresting.value &&
-          browserOrder.map((browser) => (
-            <>
-              <td
-                class={classes({
-                  'data-row-support-item': true,
-                  supported: Boolean(data.details!.support[browser].desktop),
-                })}
-              >
-                {data.details!.support[browser].desktop}
-              </td>
-              <td
-                class={classes({
-                  'data-row-support-item': true,
-                  supported: Boolean(data.details!.support[browser].mobile),
-                })}
-              >
-                {data.details!.support[browser].mobile}
-              </td>
-            </>
-          ))}
+        {detailsAreInteresting.value
+          ? browserOrder.map((browser) => (
+              <>
+                {(['desktop', 'mobile'] as const).map((device) => (
+                  <td
+                    class={classes({
+                      'data-row-support-item': true,
+                      supported: Boolean(
+                        data.details!.support[browser][device].supported
+                      ),
+                      flagged: Boolean(
+                        data.details!.support[browser][device].flagged
+                      ),
+                      partial: Boolean(
+                        data.details!.support[browser][device].partial
+                      ),
+                    })}
+                  >
+                    <div>
+                      {data.details!.support[browser][device].supported}
+                      {data.details!.support[browser][device].flagged && (
+                        <>
+                          {' '}
+                          <span title="Behind a flag">🚩</span>
+                        </>
+                      )}
+                      {data.details!.support[browser][device].partial && (
+                        <>
+                          {' '}
+                          <span title="Partial implementation">🌓</span>
+                        </>
+                      )}
+                      {data.details!.support[browser][device].notes.length >
+                        0 && (
+                        <ButtonWithPopover
+                          buttonChildren={'📝'}
+                          buttonClass="data-row-notes-button"
+                        >
+                          <div class="data-row-notes">
+                            {data.details!.support[browser][device].notes.map(
+                              (note) => (
+                                <div
+                                  dangerouslySetInnerHTML={{ __html: note }}
+                                />
+                              )
+                            )}
+                          </div>
+                        </ButtonWithPopover>
+                      )}
+                    </div>
+                  </td>
+                ))}
+              </>
+            ))
+          : Array.from({ length: 6 }, () => (
+              <td class="data-row-support-item" />
+            ))}
       </tr>
       {expand.value && (
         <DataRows data={data.subfeatures} level={level + 1} filter={filter} />

@@ -1,4 +1,5 @@
-import type { BCDFeaturePart, BCDSupportData } from './process-bcd';
+import type { SupportOptions } from '../App/EngineSupportOptions';
+import type { BCDBrowser, BCDFeaturePart, BCDSupportData } from './process-bcd';
 
 export function filterData(
   data: {
@@ -26,22 +27,23 @@ export function filterData(
   return interestingSubfeatures.length > 0;
 }
 
-export const onlyMissingInFirefox = (support: BCDSupportData) =>
-  Boolean(
-    (support.chrome.desktop || support.chrome.mobile) &&
-      (support.safari.desktop || support.safari.mobile) &&
-      !support.firefox.desktop &&
-      !support.firefox.mobile
-  );
+export function createBrowserSupportFilter(
+  options: SupportOptions
+): (support: BCDSupportData) => boolean {
+  return (support: BCDSupportData) => {
+    return Object.entries(options).every(([browser, status]) => {
+      if (status === 'either') return true;
+      if (status === 'unsupported') {
+        return (
+          !support[browser as BCDBrowser].desktop.supported &&
+          !support[browser as BCDBrowser].mobile.supported
+        );
+      }
 
-export const missingInFirefox = (support: BCDSupportData) =>
-  Boolean(!support.firefox.desktop && !support.firefox.mobile);
-
-export const onlyInFirefox = (support: BCDSupportData) =>
-  Boolean(
-    !support.chrome.desktop &&
-      !support.chrome.mobile &&
-      !support.safari.desktop &&
-      !support.safari.mobile &&
-      (support.firefox.desktop || support.firefox.mobile)
-  );
+      return (
+        support[browser as BCDBrowser].desktop.supported !== '' ||
+        support[browser as BCDBrowser].mobile.supported !== ''
+      );
+    });
+  };
+}

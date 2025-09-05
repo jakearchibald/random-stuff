@@ -4,17 +4,16 @@ import { useComputed, useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
 
 import { createSimpleBCDData, type BCDSupportData } from '../utils/process-bcd';
-import {
-  filterData,
-  onlyMissingInFirefox,
-  missingInFirefox,
-} from '../utils/filter-data';
+import { filterData, createBrowserSupportFilter } from '../utils/filter-data';
 import DataRows from './DataRows';
 import DataHeader from './DataHeader';
 
 import './styles.css';
 import { globalEvents } from '../utils/globalEvents';
 import { debugMode } from './global-state';
+import EngineSupportOptions, {
+  type SupportOptions,
+} from './EngineSupportOptions';
 
 const bcdURL = 'https://unpkg.com/@mdn/browser-compat-data';
 
@@ -24,8 +23,16 @@ const App: FunctionalComponent = () => {
     if (!bcdData.value) return null;
     return createSimpleBCDData(bcdData.value);
   });
-  const filter =
-    useSignal<(data: BCDSupportData) => boolean>(onlyMissingInFirefox);
+  const engineSupportValues = useSignal<SupportOptions>({
+    chrome: 'either',
+    firefox: 'unsupported',
+    safari: 'either',
+  });
+
+  const filter = useComputed<(data: BCDSupportData) => boolean>(() =>
+    createBrowserSupportFilter(engineSupportValues.value)
+  );
+
   const filteredData = useComputed(() => {
     if (!simplifiedData.value) return null;
     const dataCopy = structuredClone(simplifiedData.value);
@@ -39,6 +46,8 @@ const App: FunctionalComponent = () => {
       .then((response) => response.json())
       .then((bcd: CompatData) => {
         bcdData.value = bcd;
+        // console.log(bcd.browsers);
+        // console.log(bcd.__meta);
       })
       .catch((error) => {
         dataError.value = error.message;
@@ -62,6 +71,10 @@ const App: FunctionalComponent = () => {
 
   return (
     <>
+      <EngineSupportOptions
+        browserData={bcdData.value!.browsers}
+        value={engineSupportValues}
+      />
       <div>
         <button onClick={expandAllClick}>Expand all</button>{' '}
         <button onClick={collapseAllClick}>Collapse all</button>{' '}

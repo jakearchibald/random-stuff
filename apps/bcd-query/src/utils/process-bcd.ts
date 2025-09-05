@@ -12,11 +12,18 @@ export interface BCDSimpleData {
 
 export type BCDBrowser = 'chrome' | 'firefox' | 'safari';
 
+export interface BCDSupportStatement {
+  supported: string;
+  flagged: boolean;
+  partial: boolean;
+  notes: string[];
+}
+
 export type BCDSupportData = Record<
   BCDBrowser,
   {
-    desktop: string;
-    mobile: string;
+    desktop: BCDSupportStatement;
+    mobile: BCDSupportStatement;
   }
 >;
 
@@ -27,6 +34,7 @@ export interface BCDFeaturePart {
   details?: {
     name: string;
     mdnURL: string;
+    specURLs: string[];
     support: BCDSupportData;
   };
 }
@@ -61,9 +69,31 @@ export function createSimpleBCDData(bcd: CompatData): BCDSimpleData {
   };
 }
 
-function getSupportValue(entry: SimpleSupportStatement | undefined): string {
-  if (!entry || entry.version_removed || entry.flags?.[0]) return '';
+function getSupportedValue(entry: SimpleSupportStatement | undefined): string {
+  if (!entry || entry.version_removed) return '';
   return entry.version_added || '';
+}
+
+function getSupportStatement(
+  entry: SimpleSupportStatement | undefined
+): BCDSupportStatement {
+  const notes = (() => {
+    if (!entry || !entry.notes) return [];
+    if (Array.isArray(entry.notes)) return entry.notes;
+    return [entry.notes];
+  })();
+
+  const partial = (() => {
+    if (!entry) return false;
+    return Boolean(entry.partial_implementation);
+  })();
+
+  return {
+    supported: getSupportedValue(entry),
+    flagged: Boolean(entry?.flags?.length),
+    notes,
+    partial,
+  };
 }
 
 function createSupportData(data: CompatStatement): BCDSupportData {
@@ -86,8 +116,8 @@ function createSupportData(data: CompatStatement): BCDSupportData {
       : undefined;
 
     supportData[browser as BCDBrowser] = {
-      desktop: getSupportValue(desktopSupportEntry),
-      mobile: getSupportValue(mobileSupportEntry),
+      desktop: getSupportStatement(desktopSupportEntry),
+      mobile: getSupportStatement(mobileSupportEntry),
     };
   }
 
@@ -112,6 +142,11 @@ function createFeaturePart(data: Identifier, key: string): BCDFeaturePart {
         ? {
             name: __compat.description || '',
             mdnURL: __compat.mdn_url || '',
+            specURLs: __compat.spec_url
+              ? Array.isArray(__compat.spec_url)
+                ? __compat.spec_url
+                : [__compat.spec_url]
+              : [],
             support: createSupportData(__compat),
           }
         : undefined,

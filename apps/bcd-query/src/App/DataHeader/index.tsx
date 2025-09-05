@@ -1,8 +1,8 @@
 import type { Browsers } from '@mdn/browser-compat-data';
 import type { FunctionalComponent } from 'preact';
 
-import './styles.css';
 import { browserOrder } from '../../utils/meta';
+import './styles.css';
 
 interface Props {
   browserData: Browsers;
@@ -21,7 +21,7 @@ const DataHeader: FunctionalComponent<Props> = ({ browserData }) => {
       </tr>
       <tr class="data-header-types">
         <td />
-        {browserOrder.map((browser) => (
+        {browserOrder.map(() => (
           <>
             {['Desktop', 'Mobile'].map((type) => (
               <th class="data-header-type">{type}</th>

@@ -1,23 +1,24 @@
 .data-row {
-  padding-left: calc(var(--level) * 10px + 10px);
   background: #e6e6e6;
   display: grid;
   grid-template-columns: subgrid;
   grid-column: 1 / -1;
   gap: 0 1px;
-
-  &:hover {
-    background: #d5d5d5;
-  }
 }
 
 .data-row-feature {
   display: grid;
+  grid-template-columns: 15px;
   grid-auto-columns: auto;
   grid-auto-flow: column;
   align-items: center;
   gap: 1em;
   justify-content: start;
+  padding-left: calc(var(--level) * 10px + 10px);
+
+  &:hover {
+    background: #d2d2d2;
+  }
 }
 
 .data-row-title {
@@ -32,14 +33,26 @@
   padding: 0.25em 0;
   display: grid;
   align-items: center;
+  justify-items: center;
+
+  &:empty {
+    background: #d2d2d2;
+  }
 
   &.supported {
     background: #006800;
   }
+
+  &.flagged,
+  &.partial {
+    background: #caca30;
+    color: black;
+  }
 }
 
 .data-row-toggle,
-.data-row-debug {
+.data-row-debug,
+.data-row-notes-button {
   width: 15px;
   background: transparent;
   border: none;
@@ -51,4 +64,12 @@
 
 .data-row-debug {
   font-size: 20px;
+}
+
+.data-row-notes {
+  color: black;
+  text-align: left;
+  display: grid;
+  grid-auto-flow: row;
+  gap: 1em;
 }
