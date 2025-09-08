@@ -17,6 +17,7 @@ export interface BCDSupportStatement {
   flagged: boolean;
   partial: boolean;
   notes: string[];
+  links: string[];
 }
 
 export type BCDSupportData = Record<
@@ -74,14 +75,16 @@ function getSupportedValue(entry: SimpleSupportStatement | undefined): string {
   return entry.version_added || '';
 }
 
+function getValueAsArray<T>(value: T | T[] | undefined): T[] {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
 function getSupportStatement(
   entry: SimpleSupportStatement | undefined
 ): BCDSupportStatement {
-  const notes = (() => {
-    if (!entry || !entry.notes) return [];
-    if (Array.isArray(entry.notes)) return entry.notes;
-    return [entry.notes];
-  })();
+  const notes = getValueAsArray(entry?.notes);
+  const links = getValueAsArray(entry?.impl_url);
 
   const partial = (() => {
     if (!entry) return false;
@@ -93,6 +96,7 @@ function getSupportStatement(
     flagged: Boolean(entry?.flags?.length),
     notes,
     partial,
+    links,
   };
 }
 
@@ -142,11 +146,7 @@ function createFeaturePart(data: Identifier, key: string): BCDFeaturePart {
         ? {
             name: __compat.description || '',
             mdnURL: __compat.mdn_url || '',
-            specURLs: __compat.spec_url
-              ? Array.isArray(__compat.spec_url)
-                ? __compat.spec_url
-                : [__compat.spec_url]
-              : [],
+            specURLs: getValueAsArray(__compat.spec_url),
             support: createSupportData(__compat),
           }
         : undefined,

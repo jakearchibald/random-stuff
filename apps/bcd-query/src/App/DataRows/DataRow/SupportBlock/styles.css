@@ -1,0 +1,64 @@
+.data-row-support-item {
+  color: white;
+  background: #9f1d1d;
+  width: var(--support-item-width);
+  text-align: center;
+  display: grid;
+  align-items: stretch;
+  justify-items: stretch;
+
+  &:empty {
+    background: #d2d2d2;
+  }
+
+  &.supported {
+    background: #006800;
+  }
+
+  &.flagged,
+  &.partial {
+    background: #caca30;
+    color: black;
+  }
+
+  & > :first-child {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    padding: 0.25em 0;
+  }
+}
+
+.data-row-popover {
+  display: flow-root;
+  color: black;
+  text-align: left;
+
+  & > :first-child {
+    margin-top: 0;
+  }
+
+  h2 {
+    margin-top: 1em;
+    font-size: 1em;
+  }
+
+  li {
+    margin-top: 0.5em;
+  }
+
+  * {
+    margin-bottom: 0;
+  }
+}
+
+.data-row-details-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}

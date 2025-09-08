@@ -1,20 +1,18 @@
 import type { FunctionalComponent } from 'preact';
 import type {
   BCDFeaturePart,
-  BCDBrowser,
   BCDSupportData,
 } from '../../../utils/process-bcd';
 import { Signal, useComputed, useSignal } from '@preact/signals';
 import DataRows from '..';
 
 import './styles.css';
-import { classes } from '../../../utils/classes';
 import { asSignal } from '../../../utils/asSignal';
 import { browserOrder } from '../../../utils/meta';
 import { useEffect } from 'preact/hooks';
 import { globalEvents } from '../../../utils/globalEvents';
 import { debugMode } from '../../global-state';
-import ButtonWithPopover from './ButtonWithPopover';
+import SupportBlock from './SupportBlock';
 
 const DataRowName: FunctionalComponent<{ data: BCDFeaturePart }> = ({
   data,
@@ -120,53 +118,7 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
           ? browserOrder.map((browser) => (
               <>
                 {(['desktop', 'mobile'] as const).map((device) => (
-                  <td
-                    class={classes({
-                      'data-row-support-item': true,
-                      supported: Boolean(
-                        data.details!.support[browser][device].supported
-                      ),
-                      flagged: Boolean(
-                        data.details!.support[browser][device].flagged
-                      ),
-                      partial: Boolean(
-                        data.details!.support[browser][device].partial
-                      ),
-                    })}
-                  >
-                    <div>
-                      {data.details!.support[browser][device].supported}
-                      {data.details!.support[browser][device].flagged && (
-                        <>
-                          {' '}
-                          <span title="Behind a flag">🚩</span>
-                        </>
-                      )}
-                      {data.details!.support[browser][device].partial && (
-                        <>
-                          {' '}
-                          <span title="Partial implementation">🌓</span>
-                        </>
-                      )}
-                      {data.details!.support[browser][device].notes.length >
-                        0 && (
-                        <ButtonWithPopover
-                          buttonChildren={'📝'}
-                          buttonClass="data-row-notes-button"
-                        >
-                          <div class="data-row-notes">
-                            {data.details!.support[browser][device].notes.map(
-                              (note) => (
-                                <div
-                                  dangerouslySetInnerHTML={{ __html: note }}
-                                />
-                              )
-                            )}
-                          </div>
-                        </ButtonWithPopover>
-                      )}
-                    </div>
-                  </td>
+                  <SupportBlock data={data.details!.support[browser][device]} />
                 ))}
               </>
             ))

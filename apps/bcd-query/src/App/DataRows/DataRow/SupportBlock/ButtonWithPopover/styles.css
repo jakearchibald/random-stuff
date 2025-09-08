@@ -21,7 +21,7 @@
     .popover-button-popover-content {
       position: fixed;
       background: #fff;
-      padding: 0.9em 1.1em;
+      padding: 1.3em 1.6em;
       max-width: min(476px, calc(100vw - 60px));
       border-radius: var(--border-radius);
       animation: popover-in 0.2s ease;

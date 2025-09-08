@@ -25,34 +25,8 @@
   margin: 0.4em 0;
 }
 
-.data-row-support-item {
-  color: white;
-  background: #9f1d1d;
-  width: var(--support-item-width);
-  text-align: center;
-  padding: 0.25em 0;
-  display: grid;
-  align-items: center;
-  justify-items: center;
-
-  &:empty {
-    background: #d2d2d2;
-  }
-
-  &.supported {
-    background: #006800;
-  }
-
-  &.flagged,
-  &.partial {
-    background: #caca30;
-    color: black;
-  }
-}
-
 .data-row-toggle,
-.data-row-debug,
-.data-row-notes-button {
+.data-row-debug {
   width: 15px;
   background: transparent;
   border: none;
@@ -64,12 +38,4 @@
 
 .data-row-debug {
   font-size: 20px;
-}
-
-.data-row-notes {
-  color: black;
-  text-align: left;
-  display: grid;
-  grid-auto-flow: row;
-  gap: 1em;
 }

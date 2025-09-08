@@ -16,6 +16,7 @@ import EngineSupportOptions, {
 } from './EngineSupportOptions';
 
 const bcdURL = 'https://unpkg.com/@mdn/browser-compat-data';
+// const bcdURL = new URL('./bcd.json', import.meta.url);
 
 const App: FunctionalComponent = () => {
   const bcdData = useSignal<CompatData | null>(null);
@@ -46,8 +47,6 @@ const App: FunctionalComponent = () => {
       .then((response) => response.json())
       .then((bcd: CompatData) => {
         bcdData.value = bcd;
-        // console.log(bcd.browsers);
-        // console.log(bcd.__meta);
       })
       .catch((error) => {
         dataError.value = error.message;
