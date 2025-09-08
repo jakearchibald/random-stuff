@@ -65,7 +65,12 @@ const SupportBlock: FunctionalComponent<Props> = ({ data }) => {
           <div class="data-row-popover">
             {(data.partial || data.flagged) && (
               <p class="data-row-details-meta">
-                {['🌓 partial implementation', '🚩 behind a flag'].join(', ')}
+                {[
+                  data.partial && '🌓 partial implementation',
+                  data.flagged && '🚩 behind a flag',
+                ]
+                  .filter(Boolean)
+                  .join(', ')}
               </p>
             )}
             {data.notes.length > 0 && (
