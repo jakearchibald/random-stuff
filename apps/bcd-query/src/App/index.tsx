@@ -4,16 +4,15 @@ import { useComputed, useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
 
 import { createSimpleBCDData, type BCDSupportData } from '../utils/process-bcd';
-import { filterData, createBrowserSupportFilter } from '../utils/filter-data';
+import { filterData, createFilter } from '../utils/filter-data';
 import DataRows from './DataRows';
 import DataHeader from './DataHeader';
-
-import './styles.css';
 import { globalEvents } from '../utils/globalEvents';
 import { debugMode } from './global-state';
-import EngineSupportOptions, {
-  type SupportOptions,
-} from './EngineSupportOptions';
+import type { Filter } from './FilterOptions';
+import FilterOptions, { filterDefaults } from './FilterOptions';
+
+import './styles.css';
 
 const bcdURL = 'https://unpkg.com/@mdn/browser-compat-data';
 // const bcdURL = new URL('./bcd.json', import.meta.url);
@@ -24,14 +23,10 @@ const App: FunctionalComponent = () => {
     if (!bcdData.value) return null;
     return createSimpleBCDData(bcdData.value);
   });
-  const engineSupportValues = useSignal<SupportOptions>({
-    chrome: 'supported',
-    firefox: 'unsupported',
-    safari: 'supported',
-  });
+  const filterDef = useSignal<Filter>(filterDefaults['engine-support']);
 
   const filter = useComputed<(data: BCDSupportData) => boolean>(() =>
-    createBrowserSupportFilter(engineSupportValues.value)
+    createFilter(filterDef.value)
   );
 
   const filteredData = useComputed(() => {
@@ -68,11 +63,16 @@ const App: FunctionalComponent = () => {
     debugMode.value = !debugMode.value;
   };
 
+  const onFilterOptionsChange = (newValue: Filter) => {
+    filterDef.value = newValue;
+  };
+
   return (
     <>
-      <EngineSupportOptions
+      <FilterOptions
         browserData={bcdData.value!.browsers}
-        value={engineSupportValues}
+        filter={filterDef.value}
+        onChange={onFilterOptionsChange}
       />
       <div>
         <button onClick={expandAllClick}>Expand all</button>{' '}

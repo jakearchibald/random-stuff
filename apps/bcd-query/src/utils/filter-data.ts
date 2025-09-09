@@ -1,4 +1,6 @@
-import type { SupportOptions } from '../App/EngineSupportOptions';
+import type { Filter } from '../App/FilterOptions';
+import type { SupportOptions } from '../App/FilterOptions/EngineSupportOptions';
+import type { VersionOptions } from '../App/FilterOptions/VersionSupportOptions';
 import type { BCDBrowser, BCDFeaturePart, BCDSupportData } from './process-bcd';
 
 export function filterData(
@@ -27,7 +29,32 @@ export function filterData(
   return interestingSubfeatures.length > 0;
 }
 
-export function createBrowserSupportFilter(
+export function createFilter(
+  filter: Filter
+): (support: BCDSupportData) => boolean {
+  if (filter.type === 'engine-support') {
+    return createBrowserSupportFilter(filter.options);
+  }
+  if (filter.type === 'version-support') {
+    return createVersionSupportFilter(filter.options);
+  }
+  throw Error('Unknown filter type');
+}
+
+function createVersionSupportFilter(
+  options: VersionOptions
+): (support: BCDSupportData) => boolean {
+  return (support: BCDSupportData) => {
+    const browserSupport = support[options.browser];
+
+    return (
+      browserSupport.desktop.supported === options.version ||
+      browserSupport.mobile.supported === options.version
+    );
+  };
+}
+
+function createBrowserSupportFilter(
   options: SupportOptions
 ): (support: BCDSupportData) => boolean {
   return (support: BCDSupportData) => {

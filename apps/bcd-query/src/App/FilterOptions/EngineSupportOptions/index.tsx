@@ -1,16 +1,16 @@
 import type { FunctionalComponent } from 'preact';
 import type { Browsers } from '@mdn/browser-compat-data/types';
-import type { Signal } from '@preact/signals';
 import { useRef } from 'preact/hooks';
 
-import { browserOrder } from '../../utils/meta';
-import type { BCDBrowser } from '../../utils/process-bcd';
+import { browserOrder } from '../../../utils/meta';
+import type { BCDBrowser } from '../../../utils/process-bcd';
 
 import './styles.css';
 
 interface Props {
   browserData: Browsers;
-  value: Signal<SupportOptions>;
+  value: SupportOptions;
+  onChange: (newValue: SupportOptions) => void;
 }
 
 export type SupportOptions = Record<
@@ -21,6 +21,7 @@ export type SupportOptions = Record<
 const EngineSupportOptions: FunctionalComponent<Props> = ({
   browserData,
   value,
+  onChange,
 }) => {
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -31,7 +32,7 @@ const EngineSupportOptions: FunctionalComponent<Props> = ({
     for (const [key, value] of formData.entries()) {
       newValues[key as BCDBrowser] = value as SupportOptions[BCDBrowser];
     }
-    value.value = newValues;
+    onChange(newValues);
   };
 
   return (
@@ -44,7 +45,7 @@ const EngineSupportOptions: FunctionalComponent<Props> = ({
               type="radio"
               name={browser}
               value="supported"
-              checked={value.value[browser] === 'supported'}
+              checked={value[browser] === 'supported'}
             />{' '}
             Supported
           </label>
@@ -53,7 +54,7 @@ const EngineSupportOptions: FunctionalComponent<Props> = ({
               type="radio"
               name={browser}
               value="unsupported"
-              checked={value.value[browser] === 'unsupported'}
+              checked={value[browser] === 'unsupported'}
             />{' '}
             Unsupported
           </label>
@@ -62,7 +63,7 @@ const EngineSupportOptions: FunctionalComponent<Props> = ({
               type="radio"
               name={browser}
               value="either"
-              checked={value.value[browser] === 'either'}
+              checked={value[browser] === 'either'}
             />{' '}
             Either
           </label>
