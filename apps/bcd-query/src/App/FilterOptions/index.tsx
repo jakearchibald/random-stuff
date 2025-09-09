@@ -12,7 +12,8 @@ export type Filter =
       type: 'engine-support';
       options: SupportOptions;
     }
-  | { type: 'version-support'; options: VersionOptions };
+  | { type: 'version-support'; options: VersionOptions }
+  | { type: 'approaching-baseline' };
 
 export const filterDefaults: Record<Filter['type'], Filter> = {
   'engine-support': {
@@ -30,6 +31,7 @@ export const filterDefaults: Record<Filter['type'], Filter> = {
       version: '142',
     },
   },
+  'approaching-baseline': { type: 'approaching-baseline' },
 };
 
 interface Props {
@@ -44,13 +46,10 @@ const FilterOptions: FunctionalComponent<Props> = ({
   onChange,
 }) => {
   const onFilterTypeChange = (e: Event) => {
-    const newType = (e.currentTarget as HTMLSelectElement).value as
-      | 'engine-support'
-      | 'version-support';
-    onChange({
-      type: newType,
-      options: filterDefaults[newType].options,
-    } as Filter);
+    const newType = (e.currentTarget as HTMLSelectElement)
+      .value as Filter['type'];
+
+    onChange(filterDefaults[newType]);
   };
 
   return (
@@ -59,6 +58,7 @@ const FilterOptions: FunctionalComponent<Props> = ({
         <select value={filter.type} onInput={onFilterTypeChange}>
           <option value="engine-support">Engine Support</option>
           <option value="version-support">Supported in version…</option>
+          <option value="approaching-baseline">Approaching baseline?</option>
         </select>
       </p>
       {filter.type === 'version-support' && (

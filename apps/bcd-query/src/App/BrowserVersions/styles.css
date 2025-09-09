@@ -1,0 +1,17 @@
+.browser-version-table {
+  border-spacing: 1px;
+
+  td,
+  th {
+    background: #e6e6e6;
+    padding: 0.4em 0.7em;
+  }
+
+  th {
+    font-weight: normal;
+  }
+
+  tbody th {
+    text-align: left;
+  }
+}

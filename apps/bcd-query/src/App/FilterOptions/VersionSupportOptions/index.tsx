@@ -80,6 +80,7 @@ const VersionSupportOptions: FunctionalComponent<Props> = ({
                 </option>
               )
             )}
+            <option value="preview">Preview</option>
           </select>
         </label>
       </p>

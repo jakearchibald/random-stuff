@@ -13,6 +13,7 @@ import type { Filter } from './FilterOptions';
 import FilterOptions, { filterDefaults } from './FilterOptions';
 
 import './styles.css';
+import BrowserVersions from './BrowserVersions';
 
 const bcdURL = 'https://unpkg.com/@mdn/browser-compat-data';
 // const bcdURL = new URL('./bcd.json', import.meta.url);
@@ -25,9 +26,10 @@ const App: FunctionalComponent = () => {
   });
   const filterDef = useSignal<Filter>(filterDefaults['engine-support']);
 
-  const filter = useComputed<(data: BCDSupportData) => boolean>(() =>
-    createFilter(filterDef.value)
-  );
+  const filter = useComputed<(data: BCDSupportData) => boolean>(() => {
+    if (!bcdData.value) return () => false;
+    return createFilter(filterDef.value, bcdData.value.browsers);
+  });
 
   const filteredData = useComputed(() => {
     if (!simplifiedData.value) return null;
@@ -69,6 +71,10 @@ const App: FunctionalComponent = () => {
 
   return (
     <>
+      <h1>Browser Compat Data Queries</h1>
+      <h2>Browser versions</h2>
+      <BrowserVersions browserData={bcdData.value!.browsers} />
+      <h2>Data filters</h2>
       <FilterOptions
         browserData={bcdData.value!.browsers}
         filter={filterDef.value}
@@ -86,6 +92,7 @@ const App: FunctionalComponent = () => {
           Debug
         </label>
       </div>
+      <h2>Results</h2>
       <table class="data">
         <DataHeader browserData={bcdData.value!.browsers} />
         <DataRows
