@@ -30,6 +30,7 @@ export type BCDSupportData = Record<
 
 export interface BCDFeatureDetails {
   name: string;
+  nameIsHTML: boolean;
   mdnURL: string;
   specURLs: string[];
   support: BCDSupportData;
@@ -145,7 +146,8 @@ function createFeaturePart(data: Identifier, key: string): BCDFeaturePart {
     details:
       __compat && !__compat.status?.deprecated
         ? {
-            name: __compat.description || '',
+            name: __compat.description || key,
+            nameIsHTML: Boolean(__compat.description),
             mdnURL: __compat.mdn_url || '',
             specURLs: getValueAsArray(__compat.spec_url),
             support: createSupportData(__compat),

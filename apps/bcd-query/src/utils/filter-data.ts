@@ -139,6 +139,7 @@ export function createTitleFilter(
   return (details: BCDFeatureDetails) => {
     if (lowerTerm.length === 0) return true;
     const lowerName = details.name.toLowerCase();
+    console.log(lowerName);
     return lowerTerm.every((word) => lowerName.includes(word));
   };
 }

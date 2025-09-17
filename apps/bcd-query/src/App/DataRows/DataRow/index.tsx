@@ -17,15 +17,17 @@ import SupportBlock from './SupportBlock';
 const DataRowName: FunctionalComponent<{ data: BCDFeaturePart }> = ({
   data,
 }) => {
-  const htmlName = data.details?.name;
-  const name = htmlName ? (
-    <span dangerouslySetInnerHTML={{ __html: htmlName }} />
+  const name = data.details?.name || data.id;
+  const nameIsHTML = data.details?.nameIsHTML;
+
+  const nameEl = nameIsHTML ? (
+    <span dangerouslySetInnerHTML={{ __html: name }} />
   ) : (
-    <span>{data.id}</span>
+    <span>{name}</span>
   );
 
   const url = data.details?.mdnURL || data.details?.specURLs[0];
-  return url ? <a href={url}>{name}</a> : name;
+  return url ? <a href={url}>{nameEl}</a> : name;
 };
 
 export interface Props {
