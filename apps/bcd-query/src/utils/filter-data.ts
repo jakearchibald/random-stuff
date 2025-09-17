@@ -1,4 +1,4 @@
-import type { Browsers } from '@mdn/browser-compat-data';
+import type { Browsers, BrowserStatus } from '@mdn/browser-compat-data';
 import type { Filter } from '../App/FilterOptions';
 import type { SupportOptions } from '../App/FilterOptions/EngineSupportOptions';
 import type { VersionOptions } from '../App/FilterOptions/VersionSupportOptions';
@@ -47,6 +47,9 @@ export function createFilter(
   if (filter.type === 'approaching-baseline') {
     return createApproachingBaselineFilter(browserData);
   }
+  if (filter.type === 'newly-baseline') {
+    return createNewlyBaselineFilter(browserData);
+  }
   throw Error('Unknown filter type');
 }
 
@@ -88,6 +91,45 @@ function createApproachingBaselineFilter(
       return (
         prereleaseVersions.has(browserSupport.desktop.supported) ||
         prereleaseVersions.has(browserSupport.mobile.supported)
+      );
+    });
+  };
+}
+
+function createNewlyBaselineFilter(
+  browserData: Browsers
+): (details: BCDFeatureDetails) => boolean {
+  const acceptableStableStatuses = new Set<BrowserStatus>([
+    'current',
+    'esr',
+    'retired',
+  ]);
+
+  return (details: BCDFeatureDetails) => {
+    const oneLatest = browserOrder.some((browserName) => {
+      const browser = browserData[browserName];
+      const browserSupport = details.support[browserName];
+      const desktopValue = browser.releases[browserSupport.desktop.supported];
+      const mobileValue = browser.releases[browserSupport.mobile.supported];
+
+      return (
+        desktopValue?.status === 'current' || mobileValue?.status === 'current'
+      );
+    });
+
+    if (!oneLatest) return false;
+
+    return browserOrder.every((browserName) => {
+      const browser = browserData[browserName];
+      const browserSupport = details.support[browserName];
+      const desktopValue = browser.releases[browserSupport.desktop.supported];
+      const mobileValue = browser.releases[browserSupport.mobile.supported];
+
+      return (
+        (acceptableStableStatuses.has(desktopValue?.status) &&
+          !browserSupport.desktop.flagged) ||
+        (acceptableStableStatuses.has(mobileValue?.status) &&
+          !browserSupport.mobile.flagged)
       );
     });
   };

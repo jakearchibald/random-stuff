@@ -13,7 +13,8 @@ export type Filter =
       options: SupportOptions;
     }
   | { type: 'version-support'; options: VersionOptions }
-  | { type: 'approaching-baseline' };
+  | { type: 'approaching-baseline' }
+  | { type: 'newly-baseline' };
 
 export const filterDefaults: Record<Filter['type'], Filter> = {
   'engine-support': {
@@ -32,6 +33,7 @@ export const filterDefaults: Record<Filter['type'], Filter> = {
     },
   },
   'approaching-baseline': { type: 'approaching-baseline' },
+  'newly-baseline': { type: 'newly-baseline' },
 };
 
 interface Props {
@@ -59,6 +61,7 @@ const FilterOptions: FunctionalComponent<Props> = ({
           <option value="engine-support">Engine Support</option>
           <option value="version-support">Supported in version…</option>
           <option value="approaching-baseline">Approaching baseline?</option>
+          <option value="newly-baseline">Newly baseline</option>
         </select>
       </p>
       {filter.type === 'version-support' && (
