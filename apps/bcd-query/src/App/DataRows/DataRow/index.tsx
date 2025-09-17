@@ -27,7 +27,7 @@ const DataRowName: FunctionalComponent<{ data: BCDFeaturePart }> = ({
   );
 
   const url = data.details?.mdnURL || data.details?.specURLs[0];
-  return url ? <a href={url}>{nameEl}</a> : name;
+  return url ? <a href={url}>{nameEl}</a> : nameEl;
 };
 
 export interface Props {
@@ -88,7 +88,7 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
   };
 
   const onLogClick = () => {
-    console.log(data.bcdData);
+    console.log(data);
   };
 
   return (
@@ -106,7 +106,7 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
             <button
               class="data-row-debug"
               onClick={onLogClick}
-              title="Log BCD data"
+              title="Log data"
             >
               🪵
             </button>
