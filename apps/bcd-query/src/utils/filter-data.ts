@@ -2,19 +2,22 @@ import type { Browsers } from '@mdn/browser-compat-data';
 import type { Filter } from '../App/FilterOptions';
 import type { SupportOptions } from '../App/FilterOptions/EngineSupportOptions';
 import type { VersionOptions } from '../App/FilterOptions/VersionSupportOptions';
-import type { BCDBrowser, BCDFeaturePart, BCDSupportData } from './process-bcd';
+import type {
+  BCDBrowser,
+  BCDFeatureDetails,
+  BCDFeaturePart,
+} from './process-bcd';
 import { browserOrder } from './meta';
 
 export function filterData(
   data: {
     subfeatures: BCDFeaturePart[];
-    details?: { support: BCDSupportData };
+    details?: BCDFeaturePart['details'];
   },
-  compatTest: (data: BCDSupportData) => boolean
+  test: (data: BCDFeatureDetails) => boolean
 ): boolean {
   if (data.details) {
-    const support = data.details.support;
-    const ofInterest = compatTest(support);
+    const ofInterest = test(data.details);
 
     if (ofInterest) {
       data.subfeatures = [];
@@ -23,7 +26,7 @@ export function filterData(
   }
 
   const interestingSubfeatures = data.subfeatures.filter((subfeature) =>
-    filterData(subfeature, compatTest)
+    filterData(subfeature, test)
   );
 
   data.subfeatures = interestingSubfeatures;
@@ -34,7 +37,7 @@ export function filterData(
 export function createFilter(
   filter: Filter,
   browserData: Browsers
-): (support: BCDSupportData) => boolean {
+): (details: BCDFeatureDetails) => boolean {
   if (filter.type === 'engine-support') {
     return createBrowserSupportFilter(filter.options);
   }
@@ -49,7 +52,7 @@ export function createFilter(
 
 function createApproachingBaselineFilter(
   browserData: Browsers
-): (support: BCDSupportData) => boolean {
+): (details: BCDFeatureDetails) => boolean {
   const preReleaseBrowserVersions = {} as Record<BCDBrowser, Set<string>>;
 
   for (const browser of browserOrder) {
@@ -67,9 +70,9 @@ function createApproachingBaselineFilter(
     }
   }
 
-  return (support: BCDSupportData) => {
+  return (details: BCDFeatureDetails) => {
     const allSupported = browserOrder.every((browser) => {
-      const browserSupport = support[browser];
+      const browserSupport = details.support[browser];
 
       return (
         browserSupport.desktop.supported || browserSupport.mobile.supported
@@ -80,7 +83,7 @@ function createApproachingBaselineFilter(
 
     return browserOrder.some((browser) => {
       const prereleaseVersions = preReleaseBrowserVersions[browser];
-      const browserSupport = support[browser];
+      const browserSupport = details.support[browser];
 
       return (
         prereleaseVersions.has(browserSupport.desktop.supported) ||
@@ -92,9 +95,9 @@ function createApproachingBaselineFilter(
 
 function createVersionSupportFilter(
   options: VersionOptions
-): (support: BCDSupportData) => boolean {
-  return (support: BCDSupportData) => {
-    const browserSupport = support[options.browser];
+): (details: BCDFeatureDetails) => boolean {
+  return (details: BCDFeatureDetails) => {
+    const browserSupport = details.support[options.browser];
 
     return (
       browserSupport.desktop.supported === options.version ||
@@ -105,21 +108,37 @@ function createVersionSupportFilter(
 
 function createBrowserSupportFilter(
   options: SupportOptions
-): (support: BCDSupportData) => boolean {
-  return (support: BCDSupportData) => {
+): (details: BCDFeatureDetails) => boolean {
+  return (details: BCDFeatureDetails) => {
     return Object.entries(options).every(([browser, status]) => {
       if (status === 'either') return true;
       if (status === 'unsupported') {
         return (
-          !support[browser as BCDBrowser].desktop.supported &&
-          !support[browser as BCDBrowser].mobile.supported
+          !details.support[browser as BCDBrowser].desktop.supported &&
+          !details.support[browser as BCDBrowser].mobile.supported
         );
       }
 
       return (
-        support[browser as BCDBrowser].desktop.supported ||
-        support[browser as BCDBrowser].mobile.supported
+        details.support[browser as BCDBrowser].desktop.supported ||
+        details.support[browser as BCDBrowser].mobile.supported
       );
     });
+  };
+}
+
+export function createTitleFilter(
+  term: string
+): (details: BCDFeatureDetails) => boolean {
+  const lowerTerm = term
+    .toLowerCase()
+    .split(' ')
+    .map((word) => word.trim())
+    .filter(Boolean);
+
+  return (details: BCDFeatureDetails) => {
+    if (lowerTerm.length === 0) return true;
+    const lowerName = details.name.toLowerCase();
+    return lowerTerm.every((word) => lowerName.includes(word));
   };
 }

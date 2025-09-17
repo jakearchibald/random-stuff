@@ -3,8 +3,16 @@ import { type FunctionalComponent } from 'preact';
 import { useComputed, useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
 
-import { createSimpleBCDData, type BCDSupportData } from '../utils/process-bcd';
-import { filterData, createFilter } from '../utils/filter-data';
+import {
+  createSimpleBCDData,
+  type BCDFeatureDetails,
+  type BCDSupportData,
+} from '../utils/process-bcd';
+import {
+  filterData,
+  createFilter,
+  createTitleFilter,
+} from '../utils/filter-data';
 import DataRows from './DataRows';
 import DataHeader from './DataHeader';
 import { globalEvents } from '../utils/globalEvents';
@@ -14,6 +22,7 @@ import FilterOptions, { filterDefaults } from './FilterOptions';
 
 import './styles.css';
 import BrowserVersions from './BrowserVersions';
+import TitleFilter from './TitleFilter';
 
 const bcdURL = 'https://unpkg.com/@mdn/browser-compat-data';
 // const bcdURL = new URL('./bcd.json', import.meta.url);
@@ -25,8 +34,9 @@ const App: FunctionalComponent = () => {
     return createSimpleBCDData(bcdData.value);
   });
   const filterDef = useSignal<Filter>(filterDefaults['engine-support']);
+  const titleFilter = useSignal<string>('');
 
-  const filter = useComputed<(data: BCDSupportData) => boolean>(() => {
+  const filter = useComputed<(data: BCDFeatureDetails) => boolean>(() => {
     if (!bcdData.value) return () => false;
     return createFilter(filterDef.value, bcdData.value.browsers);
   });
@@ -37,6 +47,24 @@ const App: FunctionalComponent = () => {
     filterData(dataCopy, filter.value);
     return dataCopy;
   });
+
+  const titleFilterFunc = useComputed<(data: BCDFeatureDetails) => boolean>(
+    () => {
+      if (!bcdData.value) return () => false;
+      if (!titleFilter.value.trim()) return () => true;
+      return createTitleFilter(titleFilter.value);
+    }
+  );
+
+  const titleFilteredData = useComputed(() => {
+    if (!filteredData.value) return null;
+    if (!titleFilter.value.trim()) return filteredData.value;
+
+    const dataCopy = structuredClone(filteredData.value);
+    filterData(dataCopy, titleFilterFunc.value);
+    return dataCopy;
+  });
+
   const dataError = useSignal<string | null>(null);
 
   useEffect(() => {
@@ -51,7 +79,7 @@ const App: FunctionalComponent = () => {
   }, []);
 
   if (dataError.value) return <p>Error: {dataError.value}</p>;
-  if (!filteredData.value) return <p>Loading…</p>;
+  if (!titleFilteredData.value) return <p>Loading…</p>;
 
   const expandAllClick = () => {
     globalEvents.dispatchEvent(new Event('expandall'));
@@ -69,6 +97,10 @@ const App: FunctionalComponent = () => {
     filterDef.value = newValue;
   };
 
+  const onTitleFilterChange = (newValue: string) => {
+    titleFilter.value = newValue;
+  };
+
   return (
     <>
       <h1>Browser Compat Data Queries</h1>
@@ -80,6 +112,7 @@ const App: FunctionalComponent = () => {
         filter={filterDef.value}
         onChange={onFilterOptionsChange}
       />
+      <TitleFilter value={titleFilter.value} onChange={onTitleFilterChange} />
       <div>
         <button onClick={expandAllClick}>Expand all</button>{' '}
         <button onClick={collapseAllClick}>Collapse all</button>{' '}
@@ -96,7 +129,7 @@ const App: FunctionalComponent = () => {
       <table class="data">
         <DataHeader browserData={bcdData.value!.browsers} />
         <DataRows
-          data={filteredData.value.subfeatures}
+          data={titleFilteredData.value.subfeatures}
           level={0}
           filter={filter}
         />

@@ -1,7 +1,7 @@
 import type { FunctionalComponent } from 'preact';
 import type {
+  BCDFeatureDetails,
   BCDFeaturePart,
-  BCDSupportData,
 } from '../../../utils/process-bcd';
 import { Signal, useComputed, useSignal } from '@preact/signals';
 import DataRows from '..';
@@ -31,7 +31,7 @@ const DataRowName: FunctionalComponent<{ data: BCDFeaturePart }> = ({
 export interface Props {
   data: BCDFeaturePart;
   level: number;
-  filter: Signal<(data: BCDSupportData) => boolean>;
+  filter: Signal<(data: BCDFeatureDetails) => boolean>;
 }
 
 let pendingExpandAll = false;
@@ -40,8 +40,7 @@ const DataRow: FunctionalComponent<Props> = ({ data, level, filter }) => {
   const expand = useSignal(pendingExpandAll);
   const dataSignal = asSignal(data);
   const detailsAreInteresting = useComputed(
-    () =>
-      dataSignal.value.details && filter.value(dataSignal.value.details.support)
+    () => dataSignal.value.details && filter.value(dataSignal.value.details)
   );
   const toggleChar = useComputed(() => (expand.value ? '➖' : '➕'));
 

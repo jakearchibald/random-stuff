@@ -28,16 +28,17 @@ export type BCDSupportData = Record<
   }
 >;
 
+export interface BCDFeatureDetails {
+  name: string;
+  mdnURL: string;
+  specURLs: string[];
+  support: BCDSupportData;
+}
 export interface BCDFeaturePart {
   subfeatures: BCDFeaturePart[];
   id: string;
   bcdData: Identifier;
-  details?: {
-    name: string;
-    mdnURL: string;
-    specURLs: string[];
-    support: BCDSupportData;
-  };
+  details?: BCDFeatureDetails;
 }
 
 type IdentifierKeys = {
