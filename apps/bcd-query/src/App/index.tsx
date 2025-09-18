@@ -6,7 +6,6 @@ import { useEffect } from 'preact/hooks';
 import {
   createSimpleBCDData,
   type BCDFeatureDetails,
-  type BCDSupportData,
 } from '../utils/process-bcd';
 import {
   filterData,
@@ -33,6 +32,7 @@ const App: FunctionalComponent = () => {
     if (!bcdData.value) return null;
     return createSimpleBCDData(bcdData.value);
   });
+
   const filterDef = useSignal<Filter>(filterDefaults['engine-support']);
   const titleFilter = useSignal<string>('');
 

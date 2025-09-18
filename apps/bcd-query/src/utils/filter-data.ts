@@ -16,22 +16,16 @@ export function filterData(
   },
   test: (data: BCDFeatureDetails) => boolean
 ): boolean {
-  if (data.details) {
-    const ofInterest = test(data.details);
-
-    if (ofInterest) {
-      data.subfeatures = [];
-      return true;
-    }
-  }
-
-  const interestingSubfeatures = data.subfeatures.filter((subfeature) =>
-    filterData(subfeature, test)
-  );
+  const interestingSubfeatures = data.subfeatures.filter((subfeature) => {
+    return filterData(subfeature, test);
+  });
 
   data.subfeatures = interestingSubfeatures;
 
-  return interestingSubfeatures.length > 0;
+  return (
+    interestingSubfeatures.length > 0 ||
+    Boolean(data.details && test(data.details))
+  );
 }
 
 export function createFilter(
@@ -181,7 +175,6 @@ export function createTitleFilter(
   return (details: BCDFeatureDetails) => {
     if (lowerTerm.length === 0) return true;
     const lowerName = details.name.toLowerCase();
-    console.log(lowerName);
     return lowerTerm.every((word) => lowerName.includes(word));
   };
 }
