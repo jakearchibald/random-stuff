@@ -59,7 +59,7 @@ const FilterOptions: FunctionalComponent<Props> = ({
       <p>
         <select value={filter.type} onInput={onFilterTypeChange}>
           <option value="engine-support">Engine Support</option>
-          <option value="version-support">Supported in version…</option>
+          <option value="version-support">Added in version…</option>
           <option value="approaching-baseline">Approaching baseline?</option>
           <option value="newly-baseline">Newly baseline</option>
         </select>

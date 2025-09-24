@@ -17,7 +17,8 @@ import DataHeader from './DataHeader';
 import { globalEvents } from '../utils/globalEvents';
 import { debugMode } from './global-state';
 import type { Filter } from './FilterOptions';
-import FilterOptions, { filterDefaults } from './FilterOptions';
+import FilterOptions from './FilterOptions';
+import { useFilterURLState } from './FilterOptions/url-state';
 
 import './styles.css';
 import BrowserVersions from './BrowserVersions';
@@ -33,8 +34,7 @@ const App: FunctionalComponent = () => {
     return createSimpleBCDData(bcdData.value);
   });
 
-  const filterDef = useSignal<Filter>(filterDefaults['engine-support']);
-  const titleFilter = useSignal<string>('');
+  const { filterDef, titleFilter } = useFilterURLState();
 
   const filter = useComputed<(data: BCDFeatureDetails) => boolean>(() => {
     if (!bcdData.value) return () => false;
