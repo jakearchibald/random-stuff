@@ -17,15 +17,26 @@ export function htmlInputsPlugin(): Plugin {
         absolute: true,
       });
 
-      if (!config.build) config.build = {};
-      if (!config.build.rollupOptions) config.build.rollupOptions = {};
-      config.build.rollupOptions.input = {};
+      const objPath = [
+        'environments',
+        'client',
+        'build',
+        'rollupOptions',
+        'input',
+      ];
+
+      let obj = config;
+      for (const segment of objPath) {
+        if (!(segment in obj)) (obj as any)[segment] = {};
+        obj = (obj as any)[segment];
+      }
 
       for (const file of allHtmlFiles) {
         // Use the directory name (relative to root) as the key
         const rel = file.replace(resolve(root) + '/apps/', '');
         const key = rel.replace(/\/.*\.html$/, '');
-        config.build.rollupOptions.input[key] = file;
+        // @ts-ignore fuck it
+        config.environments.client.build.rollupOptions.input[key] = file;
       }
     },
   };
