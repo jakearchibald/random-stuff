@@ -21,7 +21,7 @@ async function writeIfChanged(filePath: string | URL, content: string) {
 export function publicIndexPlugin(): Plugin {
   async function generateIndex() {
     const paths = [
-      ...(await glob('public/*/index.html')),
+      ...(await glob('public/**/index.html')),
       ...(await glob('apps/*/index.html')),
       ...(await glob('worker-src/routes/*/index.ts')),
     ];
@@ -58,16 +58,69 @@ export function publicIndexPlugin(): Plugin {
       )
     ).sort((a, b) => a[0].localeCompare(b[0]));
 
-    const links = entries
-      .map(
-        ([dirName, title]) => dedent`
-          <li>
-            <a href="/${dirName}/">${dirName}</a>
-            ${title && `- ${title}`}
-          </li>
-        `
-      )
-      .join('\n');
+    // Build nested structure
+    interface TreeNode {
+      children: Map<string, TreeNode>;
+      entry?: [string, string];
+    }
+
+    const root: TreeNode = { children: new Map() };
+
+    for (const entry of entries) {
+      const [dirName] = entry;
+      const parts = dirName.split('/');
+      let current = root;
+
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        if (!current.children.has(part)) {
+          current.children.set(part, { children: new Map() });
+        }
+        current = current.children.get(part)!;
+
+        // Store the entry at the final node
+        if (i === parts.length - 1) {
+          current.entry = entry as [string, string];
+        }
+      }
+    }
+
+    // Render nested lists
+    function renderTree(node: TreeNode, indent: string = ''): string {
+      const items: string[] = [];
+
+      for (const [name, child] of node.children) {
+        if (child.entry) {
+          const [dirName, title] = child.entry;
+          items.push(
+            indent +
+              dedent`
+                <li>
+                  <a href="/${dirName}/">${name}</a>
+                  ${title && `- ${title}`}
+                </li>
+              `
+          );
+        } else {
+          // Directory with children
+          items.push(
+            indent +
+              `<li>${name}\n` +
+              indent +
+              `  <ul>\n` +
+              renderTree(child, indent + '    ') +
+              indent +
+              `  </ul>\n` +
+              indent +
+              `</li>`
+          );
+        }
+      }
+
+      return items.join('\n');
+    }
+
+    const links = renderTree(root);
 
     const html = dedent`
       <!DOCTYPE html>
