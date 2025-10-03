@@ -1,0 +1,9 @@
+.slider-container {
+  display: grid;
+  margin: 1rem;
+}
+
+.partial-img {
+  max-width: 100%;
+  height: auto;
+}
