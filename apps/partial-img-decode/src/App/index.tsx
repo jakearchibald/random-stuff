@@ -99,19 +99,29 @@ const App: FunctionalComponent = () => {
 
   if (!img.value) {
     return (
-      <label>
-        Pick image file:{' '}
-        <input
-          type="file"
-          onInput={(event) => {
-            const fileInput = event.currentTarget as HTMLInputElement;
-            if (fileInput.files && fileInput.files.length > 0) {
-              img.value = fileInput.files[0];
-              imgId.value = crypto.randomUUID();
-            }
-          }}
-        />
-      </label>
+      <div>
+        <label>
+          Pick image file:{' '}
+          <input
+            type="file"
+            onInput={(event) => {
+              const fileInput = event.currentTarget as HTMLInputElement;
+              if (fileInput.files && fileInput.files.length > 0) {
+                img.value = fileInput.files[0];
+                imgId.value = crypto.randomUUID();
+              }
+            }}
+          />
+        </label>
+        <p>Or try one of these demos:</p>
+        <ul>
+          {Object.keys(demos).map((demoName) => (
+            <li key={demoName}>
+              <a href={`?demo=${demoName}`}>{demoName}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
     );
   }
 
