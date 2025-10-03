@@ -7,3 +7,7 @@
   max-width: 100%;
   height: auto;
 }
+
+.progress {
+  font-variant-numeric: tabular-nums;
+}

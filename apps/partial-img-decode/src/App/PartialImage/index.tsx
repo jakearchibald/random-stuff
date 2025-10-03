@@ -10,6 +10,7 @@ interface Props {
 
 const PartialImage: FunctionalComponent<Props> = ({ imageId, maxSize }) => {
   const bytes = useSignal(1);
+  const percent = useComputed(() => Math.round((bytes.value / maxSize) * 100));
   const debouncedBytes = useSignal(1);
   const timeoutRef = useRef(0);
 
@@ -32,8 +33,8 @@ const PartialImage: FunctionalComponent<Props> = ({ imageId, maxSize }) => {
 
   return (
     <div>
-      <p>
-        Bytes: {bytes} / {maxSize}
+      <p class="progress">
+        Bytes: {bytes} / {maxSize} ({percent}%)
       </p>
       <div class="slider-container">
         <input
