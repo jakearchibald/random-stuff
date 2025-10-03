@@ -83,11 +83,10 @@ onmessage = (event) => {
  */
 function neverEndingResponse(blob) {
   const body = new ReadableStream({
-    start(controller) {
-      blob.arrayBuffer().then((ab) => {
-        const bytes = new Uint8Array(ab);
-        controller.enqueue(bytes);
-      });
+    async start(controller) {
+      const ab = await blob.arrayBuffer();
+      const bytes = new Uint8Array(ab);
+      controller.enqueue(bytes);
     },
   });
 
