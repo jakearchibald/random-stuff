@@ -60,6 +60,9 @@ async function partialImgFetch(event) {
   if (!length) {
     return new Response('Missing length', { status: 400 });
   }
+
+  if (length === blob.size) return new Response(blob);
+
   return neverEndingResponse(blob.slice(0, length, blob.type));
 }
 
