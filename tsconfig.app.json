@@ -26,5 +26,5 @@
 
     "types": ["vite/client"]
   },
-  "include": ["apps"]
+  "include": ["apps", "public/apps/partial-img-decode/service-worker.ts"]
 }
