@@ -6,9 +6,14 @@ import './styles.css';
 interface Props {
   imageId: string;
   maxSize: number;
+  density: number;
 }
 
-const PartialImage: FunctionalComponent<Props> = ({ imageId, maxSize }) => {
+const PartialImage: FunctionalComponent<Props> = ({
+  imageId,
+  maxSize,
+  density,
+}) => {
   const bytes = useSignal(1);
   const percent = useComputed(() => Math.round((bytes.value / maxSize) * 100));
   const debouncedBytes = useSignal(1);
@@ -49,7 +54,7 @@ const PartialImage: FunctionalComponent<Props> = ({ imageId, maxSize }) => {
       </div>
       <img
         class="partial-img"
-        src={imgURL}
+        srcset={`${imgURL} ${density}x`}
         alt="Partial image"
         key={debouncedBytes.value}
       />

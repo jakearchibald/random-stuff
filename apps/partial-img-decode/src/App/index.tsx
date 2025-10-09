@@ -20,6 +20,7 @@ for (const path in demoModules) {
 navigator.serviceWorker.register('/apps/partial-img-decode/sw.js');
 
 const url = new URL(location.href);
+const densityParam = Number(url.searchParams.get('density')) || 1;
 const demoParam = url.searchParams.get('demo');
 
 const App: FunctionalComponent = () => {
@@ -117,7 +118,7 @@ const App: FunctionalComponent = () => {
         <ul>
           {Object.keys(demos).map((demoName) => (
             <li key={demoName}>
-              <a href={`?demo=${demoName}`}>{demoName}</a>
+              <a href={`?demo=${demoName}&density=2`}>{demoName}</a>
             </li>
           ))}
         </ul>
@@ -129,7 +130,13 @@ const App: FunctionalComponent = () => {
     return <p>Waiting for service worker…</p>;
   }
 
-  return <PartialImage imageId={imgId.value} maxSize={img.value.size} />;
+  return (
+    <PartialImage
+      imageId={imgId.value}
+      maxSize={img.value.size}
+      density={densityParam}
+    />
+  );
 };
 
 export default App;
