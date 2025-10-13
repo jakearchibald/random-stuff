@@ -7,7 +7,8 @@ interface Props {
   onAgain: () => void;
 }
 
-const iterations = 50;
+const minIterations = 50;
+const minDuration = 2000; // 2 seconds in milliseconds
 
 interface BenchResults {
   mean: number;
@@ -16,6 +17,7 @@ interface BenchResults {
   min: number;
   max: number;
   totalTime: number;
+  iterations: number;
 }
 
 const BenchDecode: FunctionalComponent<Props> = ({ img, onAgain }) => {
@@ -29,16 +31,20 @@ const BenchDecode: FunctionalComponent<Props> = ({ img, onAgain }) => {
       const overallStart = performance.now();
 
       try {
-        for (
-          let i = 0;
-          i < iterations && !abortController.signal.aborted;
-          i++
-        ) {
+        let i = 0;
+        while (!abortController.signal.aborted) {
           const start = performance.now();
           const imageBitmap = await createImageBitmap(img);
           imageBitmap.close();
           const end = performance.now();
           times.push(end - start);
+          i++;
+
+          // Check if we've met both conditions: at least minIterations AND at least minDuration
+          const elapsed = end - overallStart;
+          if (i >= minIterations && elapsed >= minDuration) {
+            break;
+          }
         }
       } catch (error) {
         results.value = error as Error;
@@ -76,6 +82,7 @@ const BenchDecode: FunctionalComponent<Props> = ({ img, onAgain }) => {
         min,
         max,
         totalTime,
+        iterations: times.length,
       };
     })();
 
@@ -90,6 +97,7 @@ const BenchDecode: FunctionalComponent<Props> = ({ img, onAgain }) => {
   }
   return (
     <div>
+      <p>Iterations: {results.value.iterations}</p>
       <p>Mean: {results.value.mean.toFixed(2)}ms</p>
       <p>Median: {results.value.median.toFixed(2)}ms</p>
       <p>Std Dev: {results.value.stdDev.toFixed(2)}ms</p>
