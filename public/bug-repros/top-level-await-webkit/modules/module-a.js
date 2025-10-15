@@ -3,9 +3,9 @@ const moduleABPromise = import('./module-c.js');
 
 moduleBPromise.then(
   () => {
-    document.body.textContent = 'It worked';
+    document.querySelector('.result').textContent = 'It worked';
   },
   (e) => {
-    document.body.textContent = e;
+    document.querySelector('.result').textContent = e;
   }
 );
