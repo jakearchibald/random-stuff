@@ -1,0 +1,77 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background: linear-gradient(to bottom, #c33764, #1d2671);
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+}
+
+#looping-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  perspective: 1000px;
+}
+
+.zoomer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.positioner {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.positioner circle {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 20px;
+}
+
+.positioner rect {
+  fill: rgba(255, 255, 255, 0.2);
+}
+
+.scaler {
+  will-change: transform;
+  animation: scale 3s ease-out both;
+}
+
+.rotator {
+  will-change: transform;
+  display: block;
+  animation: rotate 5s infinite linear;
+}
+
+@keyframes scale {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
