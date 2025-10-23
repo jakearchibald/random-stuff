@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JSON import test</title>
+<h1>JSON import test</h1>
+<script type="module">
+  import data from './data.json' with { type: 'json' };
+
+  console.log(data);
+
+  import('./data.json', { with: { type: 'json' } }).then(({default: data}) => {
+    console.log(data);
+  });
+</script>
