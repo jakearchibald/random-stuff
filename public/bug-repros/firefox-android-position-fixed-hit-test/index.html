@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<meta
+  name="viewport"
+  content="width=device-width,minimum-scale=1,initial-scale=1"
+/>
+<title>Fixed position hit test issue</title>
+<style>
+  html {
+    overflow-y: scroll;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: sans-serif;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern';
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures;
+  }
+
+  .top-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: lightgray;
+    padding: 1em;
+  }
+
+  .bottom-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: lightgray;
+    padding: 1em;
+    text-align: end;
+    overflow: auto;
+    top: auto;
+    max-height: 90vh;
+  }
+
+  .random-button {
+    padding: 0.5em 1em;
+    font-size: 1em;
+  }
+</style>
+<div class="top-banner">Random number: <span id="random-number"></span></div>
+<div class="bottom-banner">
+  <button class="random-button">Change random number</button>
+</div>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<p>Content</p>
+<script>
+  const randomNumberEl = document.getElementById('random-number');
+  const button = document.querySelector('.random-button');
+
+  function updateRandomNumber() {
+    randomNumberEl.textContent = Math.random();
+  }
+
+  button.addEventListener('click', () => {
+    updateRandomNumber();
+  });
+
+  updateRandomNumber();
+</script>
