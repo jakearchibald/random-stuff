@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Order of script execution with createContextualFragment</title>
+<h1>Order of script execution with createContextualFragment</h1>
+<script>
+  const fragment = document.createRange().createContextualFragment(`
+    <script src="/slow-redirect/?to=./script-1.js"><\/script>
+    <script src="./script-2.js"><\/script>
+  `);
+
+  document.body.append(fragment);
+</script>
