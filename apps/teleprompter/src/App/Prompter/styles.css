@@ -1,0 +1,23 @@
+.prompter {
+  overflow: auto;
+  position: absolute;
+  inset: 0;
+  background: black;
+  color: white;
+  font-size: 48px;
+  line-height: 1.5;
+
+  &::after {
+    content: '';
+    display: block;
+    height: 50vh;
+  }
+}
+
+.prompter-line {
+  padding: 20px 30px;
+
+  &:nth-child(odd) {
+    background: rgb(255 255 255 / 15%);
+  }
+}
