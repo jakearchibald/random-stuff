@@ -4,7 +4,7 @@
   inset: 0;
   background: black;
   color: white;
-  font-size: 48px;
+  font-size: 68px;
   line-height: 1.5;
 
   &::after {
