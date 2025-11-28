@@ -14,6 +14,25 @@ const App: FunctionalComponent = () => {
       .filter((line) => line.trim() !== '');
   });
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          prompterMode.value = 'edit';
+        }
+      },
+      { signal: controller.signal }
+    );
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
   return (
     <div>
       {prompterMode.value === 'edit' ? (
