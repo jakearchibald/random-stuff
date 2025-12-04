@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>createImageBitmap error message tests</title>
+<script type="module">
+  const [avif, invalidSVG] = await Promise.all([
+    fetch('firefox.avif').then((r) => r.blob()),
+    fetch('invalid.svg').then((r) => r.blob()),
+  ]);
+
+  const invalidSVGImg = new Image();
+  const invalidSVGLoadPromise = new Promise((resolve) => {
+    invalidSVGImg.onload = () => resolve();
+    invalidSVGImg.onerror = () => resolve();
+  });
+  invalidSVGImg.src = 'invalid.svg';
+  await invalidSVGLoadPromise;
+
+  const throwingMethods = {
+    // If either sw or sh is given and is 0, then return a promise rejected with a RangeError.
+    async 'sw cannot be zero'() {
+      await createImageBitmap(avif, 1, 1, 0, 1);
+    },
+    async 'sh cannot be zero'() {
+      await createImageBitmap(avif, 1, 1, 1, 0);
+    },
+    // If either options's resizeWidth or options's resizeHeight is present and is 0, then return a promise rejected with an "InvalidStateError" DOMException.
+    async 'resizeWidth cannot be zero'() {
+      await createImageBitmap(avif, { resizeWidth: 0, resizeHeight: 100 });
+    },
+    async 'resizeHeight cannot be zero'() {
+      await createImageBitmap(avif, { resizeWidth: 100, resizeHeight: 0 });
+    },
+    async 'resizeWidth & resizeHeight cannot be zero'() {
+      await createImageBitmap(avif, { resizeWidth: 0, resizeHeight: 0 });
+    },
+    // If image's current request's state is broken, then throw an "InvalidStateError" DOMException.
+    async 'Invalid SVG <img>'() {
+      await createImageBitmap(invalidSVGImg);
+    },
+    // If image is not fully decodable, then return bad.
+    async 'Invalid SVG blob'() {
+      await createImageBitmap(invalidSVG, { type: 'image/svg+xml' });
+    },
+    // If image has a natural width or natural height (or both) equal to zero, then return bad.
+    async 'Zero width SVG blob'() {
+      const zeroWidthSVG = new Blob(
+        [
+          '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="100"></svg>',
+        ],
+        { type: 'image/svg+xml' }
+      );
+      await createImageBitmap(zeroWidthSVG);
+    },
+    async 'Zero height SVG blob'() {
+      const zeroHeightSVG = new Blob(
+        [
+          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="0"></svg>',
+        ],
+        { type: 'image/svg+xml' }
+      );
+      await createImageBitmap(zeroHeightSVG);
+    },
+    async 'Zero width and height SVG blob'() {
+      const zeroSizeSVG = new Blob(
+        ['<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0"></svg>'],
+        { type: 'image/svg+xml' }
+      );
+      await createImageBitmap(zeroSizeSVG);
+    },
+    // If image's readyState attribute is either HAVE_NOTHING or HAVE_METADATA, then return bad.
+    async [`Image hasn't loaded yet`]() {
+      const img = new Image();
+      img.src = '/slow-redirect/?wait=500&to=firefox.avif';
+      await createImageBitmap(img);
+    },
+    // If image has either a horizontal dimension or a vertical dimension equal to zero, then throw an "InvalidStateError" DOMException.
+    async [`<canvas> with zero width`]() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 0;
+      canvas.height = 100;
+      await createImageBitmap(canvas);
+    },
+    async [`<canvas> with zero height`]() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 100;
+      canvas.height = 0;
+      await createImageBitmap(canvas);
+    },
+    async [`<canvas> with zero width and height`]() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 0;
+      canvas.height = 0;
+      await createImageBitmap(canvas);
+    },
+    // If image's [[Detached]] internal slot value is set to true, then throw an "InvalidStateError" DOMException.
+    async [`Detached ImageBitmap`]() {
+      const imgBitmap = await createImageBitmap(avif);
+      imgBitmap.close();
+      await createImageBitmap(imgBitmap);
+    },
+    // If image's media data has no natural dimensions (e.g., it's a vector graphic with no specified content size) and either options's resizeWidth or options's resizeHeight is not present, then return a promise rejected with an "InvalidStateError" DOMException.
+    async 'SVG blob without natural dimensions and no resizeWidth/resizeHeight'() {
+      await createImageBitmap(
+        new Blob(['<svg xmlns="http://www.w3.org/2000/svg"><g></g></svg>'], {
+          type: 'image/svg+xml',
+        })
+      );
+    },
+  };
+
+  for (const [name, method] of Object.entries(throwingMethods)) {
+    console.log(`Running test: ${name}`);
+    try {
+      await method();
+      console.error(`❌ did not throw`);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+</script>
