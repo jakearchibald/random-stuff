@@ -1,7 +1,7 @@
 import { useSignal } from '@preact/signals';
 import { type FunctionalComponent } from 'preact';
 import { useEffect } from 'preact/hooks';
-import BenchDecode from './PartialImage';
+import BenchDecode from './BenchDecode';
 
 const demoModules = import.meta.glob(
   '../../../partial-img-decode/src/App/demos/*.*',
