@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Performance of iterators/generators</title>
+<script type="module">
+  function test() {
+    const input = `5542145-5582046,243-401,884211-917063,1174-1665,767028-791710,308275-370459,285243789-285316649,3303028-3361832,793080-871112,82187-123398,7788-14096,21-34,33187450-33443224,2750031-2956556,19974-42168,37655953-37738891,1759-2640,55544-75026,9938140738-9938223673,965895186-966026269,502675-625082,11041548-11204207,1-20,3679-7591,8642243-8776142,40-88,2872703083-2872760877,532-998,211488-230593,3088932-3236371,442734-459620,8484829519-8484873271,5859767462-5859911897,9987328-10008767,656641-673714,262248430-262271846`;
+    function segmentString(str, segSize) {
+      const segs = str.length / segSize;
+      return makeRange(0, segs).map((i) =>
+        str.slice(i * segSize, (i + 1) * segSize)
+      );
+    }
+    function hasRepetition(str, segSize) {
+      // If seg doesn't divide into the string, it can't repeat
+      if (str.length % segSize) return false;
+      const segments = segmentString(str, segSize);
+      const initialSeg = segments.next().value;
+      return segments.every((seg) => seg === initialSeg);
+    }
+    function hasAnyRepetition(num) {
+      const numStr = String(num);
+      return makeRange(1, (numStr.length + 1) / 2).some((segSize) =>
+        hasRepetition(numStr, segSize)
+      );
+    }
+    function* makeRange(from, to) {
+      if (to < from) {
+        for (let i = from; i > to; i--) yield i;
+      } else {
+        for (let i = from; i < to; i++) yield i;
+      }
+    }
+    const repeatingNumbers = input
+      .split(',')
+      .values()
+      .flatMap((range) => {
+        const [from, toInclusive] = range.split('-').map((n) => Number(n));
+        return makeRange(from, toInclusive + 1);
+      })
+      .filter((n) => hasAnyRepetition(n));
+    const sum = repeatingNumbers.reduce((a, b) => a + b);
+  }
+
+  document.querySelector('button').onclick = async () => {
+    const output = document.querySelector('.output');
+    output.textContent = '';
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const start = performance.now();
+    test();
+    const end = performance.now();
+    output.textContent = `Time taken: ${(end - start).toFixed(2)}ms`;
+  };
+</script>
+<button>Run test</button>
+<div class="output"></div>
