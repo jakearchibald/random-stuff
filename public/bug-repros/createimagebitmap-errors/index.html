@@ -107,6 +107,10 @@
         })
       );
     },
+    async "Invalid image data"() {
+      const invalidBlob = new Blob(['not an image'], { type: 'image/png' });
+      await createImageBitmap(invalidBlob);
+    }
   };
 
   for (const [name, method] of Object.entries(throwingMethods)) {
