@@ -29,7 +29,7 @@ const Prompter: FunctionalComponent<PrompterProps> = ({ lines }) => {
         if (event.key === 'Enter') {
           event.preventDefault();
           container.value!.scrollBy({
-            top: container.value!.clientHeight / 1.5,
+            top: container.value!.clientHeight * 0.6,
             behavior: 'smooth',
           });
         }

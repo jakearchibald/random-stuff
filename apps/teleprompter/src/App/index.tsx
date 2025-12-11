@@ -10,6 +10,7 @@ const App: FunctionalComponent = () => {
   const prompterLines = useComputed(() => {
     return prompterText.value
       .trim()
+      .replaceAll(/```[\s\S]*?```/g, '')
       .split('\n')
       .filter((line) => line.trim() !== '');
   });
