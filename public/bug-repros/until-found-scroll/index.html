@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>until-found scroll test</title>
+<h1>Highlight this and search for b</h1>
+<p>It should scroll down to the match.</p>
+<p>
+  The first match is in the h1, the second in a hidden="until-found" div, the
+  third in a details element.
+</p>
+<div hidden="until-found">
+  <p style="height: 200vh">a</p>
+  <p>b</p>
+</div>
+<details>
+  <p style="height: 200vh">a</p>
+  <p>b</p>
+</details>
