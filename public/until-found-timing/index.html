@@ -16,6 +16,7 @@
   `;
   const containerTypes = ['details', 'until-found'];
   const delays = {
+    'no-change': null,
     immediate: (cb) => cb(),
     'next-microtask': (cb) => queueMicrotask(cb),
     'before-next-frame': (cb) => requestAnimationFrame(() => cb()),
@@ -33,7 +34,7 @@
     for (const [delayName, delayFn] of Object.entries(delays)) {
       testContainer.insertAdjacentHTML(
         'beforeend',
-        html`<h2>Delay: ${delayName}</h2>
+        html`<h2>Change delay: ${delayName}</h2>
           <p>Some initial text</p>`
       );
 
@@ -45,24 +46,28 @@
         summary.textContent = 'Click to expand';
         container.append(summary);
         const innerContent = document.createElement('div');
-        innerContent.innerHTML = initialContent;
+        innerContent.innerHTML = delayFn === null ? complexContent : initialContent;
         container.append(innerContent);
-        container.addEventListener('toggle', () => {
-          if (container.open) {
-            delayFn(() => {
-              innerContent.innerHTML = complexContent;
-            });
-          }
-        });
+        if (delayFn) {
+          container.addEventListener('toggle', () => {
+            if (container.open) {
+              delayFn(() => {
+                innerContent.innerHTML = complexContent;
+              });
+            }
+          });
+        }
       } else {
         container = document.createElement('div');
         container.setAttribute('hidden', 'until-found');
-        container.innerHTML = initialContent;
-        container.addEventListener('beforematch', () => {
-          delayFn(() => {
-            container.innerHTML = complexContent;
+        container.innerHTML = delayFn === null ? complexContent : initialContent;
+        if (delayFn) {
+          container.addEventListener('beforematch', () => {
+            delayFn(() => {
+              container.innerHTML = complexContent;
+            });
           });
-        });
+        }
       }
 
       testContainer.append(container);
