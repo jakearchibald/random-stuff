@@ -1,4 +1,4 @@
-import('./html.js').then(({ html }) => {
+import('../../utils/html.js').then(({ html }) => {
   const data = document.documentElement;
   const htmlEl = document.createElementNS(
     'http://www.w3.org/1999/xhtml',

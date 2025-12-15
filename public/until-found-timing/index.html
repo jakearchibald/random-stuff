@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>until-found timing</title>
+<div class="test"></div>
+<script type="module">
+  import { html } from '../utils/html.js';
+
+  const initialContent = html` Some content then the word 'world'. `;
+  const complexContent = html`
+    <ul>
+      <li>Some content</li>
+      <li>then the word</li>
+      <li>'world'</li>
+    </ul>
+  `;
+  const containerTypes = ['details', 'until-found'];
+  const delays = {
+    immediate: (cb) => cb(),
+    'next-microtask': (cb) => Promise.resolve().then(cb),
+    'before-next-frame': (cb) => requestAnimationFrame(() => cb()),
+    'next-task': (cb) => setTimeout(cb, 0),
+  };
+
+  const testContainer = document.querySelector('.test');
+
+  for (const containerType of containerTypes) {
+    testContainer.insertAdjacentHTML(
+      'beforeend',
+      html`<h1>${containerType} tests</h1>`
+    );
+
+    for (const [delayName, delayFn] of Object.entries(delays)) {
+      testContainer.insertAdjacentHTML(
+        'beforeend',
+        html`<h2>Delay: ${delayName}</h2>
+          <p>Some initial text</p>`
+      );
+
+      let container;
+
+      if (containerType === 'details') {
+        container = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = 'Click to expand';
+        container.append(summary);
+        const innerContent = document.createElement('div');
+        innerContent.innerHTML = initialContent;
+        container.append(innerContent);
+        container.addEventListener('toggle', () => {
+          if (container.open) {
+            delayFn(() => {
+              innerContent.innerHTML = complexContent;
+            });
+          }
+        });
+      } else {
+        container = document.createElement('div');
+        container.setAttribute('hidden', 'until-found');
+        container.innerHTML = initialContent;
+        container.addEventListener('beforematch', () => {
+          delayFn(() => {
+            container.innerHTML = complexContent;
+          });
+        });
+      }
+
+      testContainer.append(container);
+    }
+  }
+</script>
