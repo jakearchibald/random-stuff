@@ -17,7 +17,7 @@
   const containerTypes = ['details', 'until-found'];
   const delays = {
     immediate: (cb) => cb(),
-    'next-microtask': (cb) => Promise.resolve().then(cb),
+    'next-microtask': (cb) => queueMicrotask(cb),
     'before-next-frame': (cb) => requestAnimationFrame(() => cb()),
     'next-task': (cb) => setTimeout(cb, 0),
   };
