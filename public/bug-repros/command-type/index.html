@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Commands and popovers</title>
+
+<div id="a"></div>
+<div id="b" popover></div>
+<button command="show-modal" commandfor="a">show-modal on #a</button>
+<button command="show-modal" commandfor="b">show-modal on #b</button>
+<button command="--custom" commandfor="a">--custom on #a</button>
+<button command="does-not-exist" commandfor="a">does-not-exist on #a</button>
+
+<script>
+  document.body.addEventListener(
+    'command',
+    (event) => {
+      console.log('command event:', event);
+    },
+    { capture: true }
+  );
+</script>
