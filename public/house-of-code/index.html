@@ -81,7 +81,7 @@
   const message = urlParams.get('message') || `Message goes here`;
   const container = document.querySelector('.question-container');
 
-  for (const [i, word] of message.split(' ').entries()) {
+  for (const word of message.split(' ')) {
     const wordDiv = document.createElement('div');
     wordDiv.className = 'word';
     container.append(wordDiv);
