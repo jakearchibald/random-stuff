@@ -148,15 +148,6 @@
   background: #1a1a1a;
 }
 
-.eliminated-badge {
-  background: #e74c3c;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
 .btn-end-game {
   background: #555;
   color: white;

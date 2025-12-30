@@ -20,8 +20,12 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
   onEndGame,
 }) => {
   const currentPlayer = players.find((p) => p.id === currentPlayerId);
-  const activePlayers = players.filter((p) => p.lives > 0);
-  const eliminatedPlayers = players.filter((p) => p.lives === 0);
+  const activePlayers = players.filter(
+    (p) => p.lives > 0 || p.id === currentPlayerId
+  );
+  const eliminatedPlayers = players.filter(
+    (p) => p.lives === 0 && p.id !== currentPlayerId
+  );
 
   const handleEndGame = () => {
     if (confirm('Are you sure you want to end the game early?')) {
@@ -84,7 +88,6 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
                   style={{ viewTransitionName: player.id }}
                 >
                   <span class="player-name">{player.name}</span>
-                  <span class="eliminated-badge">Eliminated</span>
                 </li>
               ))}
             </ul>
