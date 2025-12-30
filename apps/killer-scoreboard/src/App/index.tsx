@@ -2,7 +2,6 @@ import type { FunctionalComponent } from 'preact';
 import { useSignal } from '@preact/signals';
 import { useEffect, useMemo } from 'preact/hooks';
 import type { GameMode, GameState, Player } from '../types';
-import { createInitialState } from '../types';
 import { loadGameState, saveGameState, clearGameState } from '../storage';
 import {
   generateTurnOrder,
@@ -139,32 +138,14 @@ const App: FunctionalComponent = () => {
       types: ['regular'],
       update: async () => {
         clearGameState();
-        gameState.value = createInitialState();
-        await 0;
-      },
-    });
-  };
-
-  const handleSamePlayers = () => {
-    const state = gameState.value;
-    const resetPlayers = state.players.map((p) => ({
-      ...p,
-      lives: state.startingLives,
-    }));
-    const turnOrder = generateTurnOrder(resetPlayers, state.gameMode);
-
-    document.startViewTransition({
-      types: ['regular'],
-      update: async () => {
         gameState.value = {
-          ...state,
-          screen: 'active',
-          players: resetPlayers,
-          turnOrder,
+          ...gameState.value,
+          screen: 'setup',
+          currentPlayerIndex: 0,
+          turnOrder: [],
           turnOrderIndex: 0,
           winner: null,
         };
-
         await 0;
       },
     });
@@ -184,7 +165,12 @@ const App: FunctionalComponent = () => {
   return (
     <div class="app">
       {gameState.value.screen === 'setup' && (
-        <SetupScreen onStartGame={handleStartGame} />
+        <SetupScreen
+          initialPlayers={gameState.value.players}
+          initialStartingLives={gameState.value.startingLives}
+          initialGameMode={gameState.value.gameMode}
+          onStartGame={handleStartGame}
+        />
       )}
       {gameState.value.screen === 'active' && (
         <GameScreen
@@ -197,11 +183,7 @@ const App: FunctionalComponent = () => {
         />
       )}
       {gameState.value.screen === 'ended' && (
-        <EndScreen
-          winner={getWinnerPlayer()}
-          onNewGame={handleNewGame}
-          onSamePlayers={handleSamePlayers}
-        />
+        <EndScreen winner={getWinnerPlayer()} onNewGame={handleNewGame} />
       )}
     </div>
   );

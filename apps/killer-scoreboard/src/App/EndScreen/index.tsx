@@ -5,13 +5,11 @@ import './styles.css';
 interface EndScreenProps {
   winner: Player | null;
   onNewGame: () => void;
-  onSamePlayers: () => void;
 }
 
 const EndScreen: FunctionalComponent<EndScreenProps> = ({
   winner,
   onNewGame,
-  onSamePlayers,
 }) => {
   return (
     <div class="end-screen">
@@ -31,9 +29,6 @@ const EndScreen: FunctionalComponent<EndScreenProps> = ({
       </div>
 
       <div class="end-actions">
-        <button onClick={onSamePlayers} class="btn-same-players">
-          Play Again (Same Players)
-        </button>
         <button onClick={onNewGame} class="btn-new-game">
           New Game
         </button>

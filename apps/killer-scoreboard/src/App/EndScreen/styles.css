@@ -77,17 +77,6 @@
   width: 100%;
 }
 
-.btn-same-players {
-  background: #4a90e2;
-  color: white;
-  font-size: 18px;
-  padding: 16px;
-}
-
-.btn-same-players:hover {
-  background: #3a7bc8;
-}
-
 .btn-new-game {
   background: #2ecc71;
   color: white;

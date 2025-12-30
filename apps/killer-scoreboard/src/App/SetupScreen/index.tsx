@@ -4,6 +4,9 @@ import type { GameMode, Player } from '../../types';
 import './styles.css';
 
 interface SetupScreenProps {
+  initialPlayers?: Player[];
+  initialStartingLives?: number;
+  initialGameMode?: GameMode;
   onStartGame: (
     players: Player[],
     startingLives: number,
@@ -12,12 +15,15 @@ interface SetupScreenProps {
 }
 
 const SetupScreen: FunctionalComponent<SetupScreenProps> = ({
+  initialPlayers = [],
+  initialStartingLives = 3,
+  initialGameMode = 'cards-killer',
   onStartGame,
 }) => {
   const playerName = useSignal('');
-  const players = useSignal<Player[]>([]);
-  const startingLives = useSignal(3);
-  const gameMode = useSignal<GameMode>('cards-killer');
+  const players = useSignal<Player[]>(initialPlayers);
+  const startingLives = useSignal(initialStartingLives);
+  const gameMode = useSignal<GameMode>(initialGameMode);
 
   const addPlayer = () => {
     const name = playerName.value.trim();
