@@ -2,7 +2,7 @@
   "name": "Killer Pool Scoreboard",
   "short_name": "Killer Pool",
   "description": "Score tracking app for Killer Pool games",
-  "start_url": "./apps/killer-scoreboard/",
+  "start_url": "/apps/killer-scoreboard/",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#4a90e2",
