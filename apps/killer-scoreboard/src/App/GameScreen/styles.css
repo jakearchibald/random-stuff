@@ -1,0 +1,191 @@
+.game-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.current-turn {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.current-turn h2 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+
+.current-player {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.current-player-name {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.current-player-lives {
+  font-size: 20px;
+  opacity: 0.9;
+}
+
+.turn-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-life {
+  flex: 1;
+  min-width: 120px;
+  font-size: 18px;
+  padding: 14px;
+}
+
+.btn-add-life {
+  background: #2ecc71;
+  color: white;
+}
+
+.btn-add-life:hover {
+  background: #27ae60;
+}
+
+.btn-remove-life {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-remove-life:hover {
+  background: #c0392b;
+}
+
+.btn-end-turn {
+  flex: 1;
+  min-width: 120px;
+  background: white;
+  color: #4a90e2;
+  font-size: 18px;
+  padding: 14px;
+  font-weight: 700;
+}
+
+.btn-end-turn:hover {
+  background: #f0f0f0;
+}
+
+.players-section {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  flex: 1;
+}
+
+.players-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  color: #e0e0e0;
+}
+
+.players-section h3:not(:first-child) {
+  margin-top: 24px;
+}
+
+.player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.player-item:last-child {
+  margin-bottom: 0;
+}
+
+.player-item.current {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
+  transform: scale(1.02);
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.player-lives {
+  font-weight: 600;
+  font-size: 16px;
+  color: #2ecc71;
+}
+
+.player-list.eliminated .player-item {
+  opacity: 0.6;
+  background: #1a1a1a;
+}
+
+.eliminated-badge {
+  background: #e74c3c;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-end-game {
+  background: #555;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+}
+
+.btn-end-game:hover {
+  background: #666;
+}
+
+html:not(:active-view-transition-type(player-switch)) {
+  .player-item {
+    view-transition-name: none !important;
+  }
+}
+
+html:active-view-transition-type(player-switch) {
+  .current-turn {
+    view-transition-name: current-turn;
+  }
+
+  &::view-transition-old(current-turn) {
+    animation: 90ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+      300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+  }
+
+  &::view-transition-new(current-turn) {
+    animation: 210ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+      300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+  }
+}

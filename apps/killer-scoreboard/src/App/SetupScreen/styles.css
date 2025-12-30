@@ -1,0 +1,129 @@
+.setup-screen {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.setup-screen h1 {
+  text-align: center;
+  font-size: 36px;
+  margin-bottom: 40px;
+  color: #4a90e2;
+}
+
+.setup-section {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.setup-section h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #e0e0e0;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.setting:last-child {
+  margin-bottom: 0;
+}
+
+.setting label {
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.setting input,
+.setting select {
+  flex: 1;
+}
+
+.add-player {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.add-player input {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-add {
+  background: #4a90e2;
+  color: white;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-add:hover {
+  background: #3a7bc8;
+}
+
+.player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.player-item:last-child {
+  margin-bottom: 0;
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.btn-remove {
+  background: #e74c3c;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.btn-remove:hover {
+  background: #c0392b;
+}
+
+.btn-start {
+  background: #2ecc71;
+  color: white;
+  font-size: 20px;
+  width: 100%;
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.btn-start:hover:not(:disabled) {
+  background: #27ae60;
+}
+
+.btn-start:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-start:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
