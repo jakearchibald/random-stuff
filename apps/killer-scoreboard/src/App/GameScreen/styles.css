@@ -154,6 +154,17 @@
   font-size: 18px;
 }
 
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-cards {
+  font-size: 16px;
+  line-height: 1;
+}
+
 .player-lives {
   font-weight: 600;
   font-size: 16px;

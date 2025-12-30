@@ -1,10 +1,13 @@
 import type { FunctionalComponent } from 'preact';
-import type { Player } from '../../types';
+import type { GameMode, Player } from '../../types';
 import './styles.css';
 
 interface GameScreenProps {
   players: Player[];
   currentPlayerId: string;
+  gameMode: GameMode;
+  turnOrder: string[];
+  turnOrderIndex: number;
   onAddLife: () => void;
   onRemoveLife: () => void;
   onEndTurn: () => void;
@@ -14,6 +17,9 @@ interface GameScreenProps {
 const GameScreen: FunctionalComponent<GameScreenProps> = ({
   players,
   currentPlayerId,
+  gameMode,
+  turnOrder,
+  turnOrderIndex,
   onAddLife,
   onRemoveLife,
   onEndTurn,
@@ -27,6 +33,15 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
     (p) => p.lives === 0 && p.id !== currentPlayerId
   );
 
+  // Calculate remaining cards for each player in cards-killer mode
+  const getRemainingCards = (playerId: string): number => {
+    if (gameMode !== 'cards-killer') return 0;
+
+    // Count occurrences of this player in the remaining turn order (including current turn)
+    const remainingTurns = turnOrder.slice(turnOrderIndex + 1);
+    return remainingTurns.filter((id) => id === playerId).length;
+  };
+
   const handleEndGame = () => {
     if (confirm('Are you sure you want to end the game early?')) {
       onEndGame();
@@ -38,7 +53,7 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
       <div class="current-turn">
         <h2>Current Turn</h2>
         <div class="current-player">
-          <div class="current-player-name">{currentPlayer?.name}</div>
+          <div class="current-player-name">{currentPlayer.name}</div>
           <div
             class={`current-player-lives ${
               currentPlayer.lives <= 1 ? 'danger' : ''
@@ -73,8 +88,15 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
               style={{ viewTransitionName: player.id }}
             >
               <span class="player-name">{player.name}</span>
-              <span class={`player-lives ${player.lives <= 1 ? 'danger' : ''}`}>
-                {player.lives} {player.lives === 1 ? 'life' : 'lives'}
+              <span class="player-info">
+                <span class="player-cards">
+                  {'♦️'.repeat(getRemainingCards(player.id))}
+                </span>
+                <span
+                  class={`player-lives ${player.lives <= 1 ? 'danger' : ''}`}
+                >
+                  {player.lives} {player.lives === 1 ? 'life' : 'lives'}
+                </span>
               </span>
             </li>
           ))}

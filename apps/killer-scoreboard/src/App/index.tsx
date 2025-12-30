@@ -176,6 +176,9 @@ const App: FunctionalComponent = () => {
         <GameScreen
           players={gameState.value.players}
           currentPlayerId={getCurrentPlayerId()}
+          gameMode={gameState.value.gameMode}
+          turnOrder={gameState.value.turnOrder}
+          turnOrderIndex={gameState.value.turnOrderIndex}
           onAddLife={handleAddLife}
           onRemoveLife={handleRemoveLife}
           onEndTurn={handleEndTurn}
