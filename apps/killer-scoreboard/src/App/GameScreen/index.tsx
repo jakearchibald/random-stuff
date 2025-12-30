@@ -19,7 +19,7 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
   onEndTurn,
   onEndGame,
 }) => {
-  const currentPlayer = players.find((p) => p.id === currentPlayerId);
+  const currentPlayer = players.find((p) => p.id === currentPlayerId)!;
   const activePlayers = players.filter(
     (p) => p.lives > 0 || p.id === currentPlayerId
   );
@@ -39,9 +39,12 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
         <h2>Current Turn</h2>
         <div class="current-player">
           <div class="current-player-name">{currentPlayer?.name}</div>
-          <div class="current-player-lives">
-            {currentPlayer?.lives}{' '}
-            {currentPlayer?.lives === 1 ? 'life' : 'lives'}
+          <div
+            class={`current-player-lives ${
+              currentPlayer.lives <= 1 ? 'danger' : ''
+            }`}
+          >
+            {currentPlayer.lives} {currentPlayer.lives === 1 ? 'life' : 'lives'}
           </div>
         </div>
 
@@ -70,7 +73,7 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
               style={{ viewTransitionName: player.id }}
             >
               <span class="player-name">{player.name}</span>
-              <span class="player-lives">
+              <span class={`player-lives ${player.lives <= 1 ? 'danger' : ''}`}>
                 {player.lives} {player.lives === 1 ? 'life' : 'lives'}
               </span>
             </li>

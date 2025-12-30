@@ -32,7 +32,8 @@ const SetupScreen: FunctionalComponent<SetupScreenProps> = ({
     const newPlayer: Player = {
       id: `player-${Date.now()}`,
       name,
-      lives: startingLives.value,
+      // The lives will be set when the game starts
+      lives: 0,
     };
 
     players.value = [...players.value, newPlayer];
@@ -48,7 +49,11 @@ const SetupScreen: FunctionalComponent<SetupScreenProps> = ({
       alert('You need at least 2 players to start the game');
       return;
     }
-    onStartGame(players.value, startingLives.value, gameMode.value);
+    onStartGame(
+      players.value.map((p) => ({ ...p, lives: startingLives.value })),
+      startingLives.value,
+      gameMode.value
+    );
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {

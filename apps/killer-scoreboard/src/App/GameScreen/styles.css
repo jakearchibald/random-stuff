@@ -1,3 +1,15 @@
+@keyframes pulse-danger {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
 .game-screen {
   display: flex;
   flex-direction: column;
@@ -40,6 +52,11 @@
 .current-player-lives {
   font-size: 20px;
   opacity: 0.9;
+}
+
+.current-player-lives.danger {
+  color: #e7d73c;
+  animation: pulse-danger 1.5s ease-in-out infinite;
 }
 
 .turn-controls {
@@ -141,6 +158,11 @@
   font-weight: 600;
   font-size: 16px;
   color: #2ecc71;
+}
+
+.player-lives.danger {
+  color: #e7d73c;
+  animation: pulse-danger 1.5s ease-in-out infinite;
 }
 
 .player-list.eliminated .player-item {
