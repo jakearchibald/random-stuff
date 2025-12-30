@@ -27,14 +27,6 @@
   box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
 }
 
-.current-turn h2 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.9;
-}
-
 .current-player {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
@@ -129,14 +121,17 @@
 }
 
 .player-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 60px;
+  gap: 12px;
   padding: 14px 18px;
   background: #1a1a1a;
   border-radius: 8px;
   margin-bottom: 8px;
-  transition: all 0.2s;
+
+  &.setup-player-item {
+    grid-template-columns: 1fr auto;
+  }
 }
 
 .player-item:last-child {
@@ -146,18 +141,11 @@
 .player-item.current {
   background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
   box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
-  transform: scale(1.02);
 }
 
 .player-name {
   font-weight: 600;
   font-size: 18px;
-}
-
-.player-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .player-cards {
@@ -169,6 +157,7 @@
   font-weight: 600;
   font-size: 16px;
   color: #2ecc71;
+  text-align: right;
 }
 
 .player-lives.danger {

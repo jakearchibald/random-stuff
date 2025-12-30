@@ -68,3 +68,10 @@ select {
 select:focus {
   border-color: #4a90e2;
 }
+
+/* Prevent tap highlight on mobile */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+

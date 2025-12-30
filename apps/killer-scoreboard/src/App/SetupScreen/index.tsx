@@ -124,7 +124,7 @@ const SetupScreen: FunctionalComponent<SetupScreenProps> = ({
         {players.value.length > 0 && (
           <ul class="player-list">
             {players.value.map((player) => (
-              <li key={player.id} class="player-item">
+              <li key={player.id} class="player-item setup-player-item">
                 <span class="player-name">{player.name}</span>
                 <button
                   onClick={() => removePlayer(player.id)}

@@ -51,7 +51,6 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
   return (
     <div class="game-screen">
       <div class="current-turn">
-        <h2>Current Turn</h2>
         <div class="current-player">
           <div class="current-player-name">{currentPlayer.name}</div>
           <div
@@ -88,15 +87,11 @@ const GameScreen: FunctionalComponent<GameScreenProps> = ({
               style={{ viewTransitionName: player.id }}
             >
               <span class="player-name">{player.name}</span>
-              <span class="player-info">
-                <span class="player-cards">
-                  {'♦️'.repeat(getRemainingCards(player.id))}
-                </span>
-                <span
-                  class={`player-lives ${player.lives <= 1 ? 'danger' : ''}`}
-                >
-                  {player.lives} {player.lives === 1 ? 'life' : 'lives'}
-                </span>
+              <span class="player-cards">
+                {'♦️'.repeat(getRemainingCards(player.id))}
+              </span>
+              <span class={`player-lives ${player.lives <= 1 ? 'danger' : ''}`}>
+                {player.lives} {player.lives === 1 ? 'life' : 'lives'}
               </span>
             </li>
           ))}
