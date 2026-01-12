@@ -2,7 +2,7 @@ import { type FunctionalComponent } from 'preact';
 import { useSignalRef } from '@preact/signals/utils';
 import './styles.css';
 import { useSignalEffect } from '@preact/signals';
-import { useLayoutEffect } from 'preact/hooks';
+import { useLayoutEffect, useRef } from 'preact/hooks';
 
 interface PrompterProps {
   lines: string[];
@@ -10,6 +10,7 @@ interface PrompterProps {
 
 const Prompter: FunctionalComponent<PrompterProps> = ({ lines }) => {
   const container = useSignalRef<HTMLDivElement | null>(null);
+  const lastEnterTime = useRef(0);
 
   useLayoutEffect(() => {
     if (container.value) {
@@ -28,10 +29,25 @@ const Prompter: FunctionalComponent<PrompterProps> = ({ lines }) => {
       (event) => {
         if (event.key === 'Enter') {
           event.preventDefault();
-          container.value!.scrollBy({
-            top: container.value!.clientHeight * 0.6,
-            behavior: 'smooth',
-          });
+
+          const now = Date.now();
+          const timeSinceLastEnter = now - lastEnterTime.current;
+
+          // If Enter was pressed within 300ms, jump to top
+          if (timeSinceLastEnter < 300) {
+            container.value!.scrollTo({
+              top: 0,
+              behavior: 'smooth',
+            });
+            lastEnterTime.current = 0; // Reset to prevent triple-press from scrolling
+          } else {
+            // Single press: scroll down
+            container.value!.scrollBy({
+              top: container.value!.clientHeight * 0.6,
+              behavior: 'smooth',
+            });
+            lastEnterTime.current = now;
+          }
         }
       },
       { signal }
