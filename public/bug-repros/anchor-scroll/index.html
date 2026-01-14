@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CSS anchor positioning ::before & scrolling bugs</title>
+<style>
+  html {
+    font-family: system-ui;
+  }
+
+  body {
+    height: 400vh;
+  }
+
+  .anchor {
+    anchor-name: --anchor;
+    margin-top: 40vh;
+    margin-left: 30vw;
+  }
+
+  .positioned {
+    background: #333;
+    color: white;
+    padding: 1em;
+    border-radius: 10px;
+    position-area: top;
+  }
+</style>
+<button class="anchor" commandfor="target" command="toggle-popover">
+  Toggle popover
+</button>
+<div class="positioned" id="target" popover>This is anchor positioned</div>
