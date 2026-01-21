@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>View transition into a dialog</title>
+<style>
+  .small,
+  .big {
+    aspect-ratio: 1/1;
+    width: 100px;
+    background: linear-gradient(to bottom right, black, white);
+  }
+  .big {
+    width: 100vmin;
+  }
+  .dialog {
+    border: none;
+    padding: 0;
+    inset: 0;
+    place-items: center;
+    max-width: none;
+    max-height: none;
+    overflow: clip;
+
+    &:open {
+      display: grid;
+    }
+  }
+
+  :has(.dialog[open]) .small {
+    visibility: hidden;
+  }
+</style>
+<div class="small"></div>
+<button class="open-btn">Open Dialog</button>
+<dialog class="dialog">
+  <div class="big"></div>
+</dialog>
+<script>
+  const small = document.querySelector('.small');
+  const big = document.querySelector('.big');
+  const dialog = document.querySelector('dialog');
+
+  document.querySelector('.open-btn').onclick = () => {
+    small.style.viewTransitionName = 'item';
+
+    const transition = document.startViewTransition(() => {
+      small.style.viewTransitionName = '';
+      big.style.viewTransitionName = 'item';
+      dialog.showModal();
+    });
+
+    transition.finished.finally(() => {
+      big.style.viewTransitionName = '';
+    });
+  };
+</script>
