@@ -3,7 +3,7 @@ import { useSignal, useComputed } from '@preact/signals';
 import { useEffect, useMemo } from 'preact/hooks';
 import { recipes } from './recipes';
 import { loadAppState, saveAppState, clearAppState } from './storage';
-import type { AppState } from './types';
+import type { StoredAppState } from './types';
 
 const App: FunctionalComponent = () => {
   const initialState = useMemo(() => loadAppState(), []);
@@ -12,7 +12,7 @@ const App: FunctionalComponent = () => {
 
   // Save to localStorage whenever selectedRecipes changes
   useEffect(() => {
-    const state: AppState = {
+    const state: StoredAppState = {
       selectedRecipes: selectedRecipes.value,
     };
     saveAppState(state);
@@ -33,9 +33,9 @@ const App: FunctionalComponent = () => {
   const shoppingList = useComputed(() => {
     const ingredients: Record<string, number | boolean> = {};
 
-    selectedRecipes.value.forEach((count, recipeName) => {
+    for (const [recipeName, count] of selectedRecipes.value) {
       const recipe = recipes[recipeName];
-      if (!recipe) return;
+      if (!recipe) continue;
 
       Object.entries(recipe).forEach(([ingredient, value]) => {
         if (typeof value === 'number') {
@@ -49,7 +49,7 @@ const App: FunctionalComponent = () => {
           ingredients[ingredient] = true;
         }
       });
-    });
+    }
 
     return Object.entries(ingredients).sort(([a], [b]) => a.localeCompare(b));
   });
@@ -97,7 +97,7 @@ const App: FunctionalComponent = () => {
         <input
           type="text"
           class="filter-input"
-          placeholder="Filter recipes..."
+          placeholder="Filter recipes…"
           value={filterText.value}
           onInput={handleFilterChange}
         />
@@ -182,7 +182,7 @@ const App: FunctionalComponent = () => {
         </>
       )}
 
-      <div style={{ marginTop: '2rem' }}>
+      <div class="reset-section">
         <button class="reset-button" onClick={handleReset}>
           Reset All
         </button>

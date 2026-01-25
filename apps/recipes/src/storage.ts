@@ -1,9 +1,9 @@
-import type { AppState } from './types';
-import { createInitialState } from './types';
+import type { StoredAppState } from './types';
+import { createInitialStoredState } from './types';
 
 const STORAGE_KEY = 'recipes-app-state';
 
-export const loadAppState = (): AppState => {
+export const loadAppState = (): StoredAppState => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -15,10 +15,10 @@ export const loadAppState = (): AppState => {
   } catch (error) {
     console.error('Failed to load app state:', error);
   }
-  return createInitialState();
+  return createInitialStoredState();
 };
 
-export const saveAppState = (state: AppState): void => {
+export const saveAppState = (state: StoredAppState): void => {
   try {
     const toStore = {
       selectedRecipes: Array.from(state.selectedRecipes),

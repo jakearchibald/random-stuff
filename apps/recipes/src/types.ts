@@ -1,7 +1,7 @@
-export interface AppState {
+export interface StoredAppState {
   selectedRecipes: Map<string, number>;
 }
 
-export const createInitialState = (): AppState => ({
+export const createInitialStoredState = (): StoredAppState => ({
   selectedRecipes: new Map(),
 });
