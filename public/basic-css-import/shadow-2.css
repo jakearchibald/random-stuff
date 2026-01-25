@@ -1,0 +1,7 @@
+:host {
+  --size: 100px;
+  width: var(--size);
+  height: var(--size);
+  background: yellow;
+  display: block;
+}

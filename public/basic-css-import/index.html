@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Basic CSS import</title>
+<demo-element></demo-element>
+<demo-element-2></demo-element-2>
+<script type="module">
+  import styles from './styles.css' with { type: 'css' };
+  import shadowStyles from './shadow.css' with { type: 'css' };
+
+  document.adoptedStyleSheets.push(styles);
+
+  class DemoElement extends HTMLElement {
+    #shadow = this.attachShadow({ mode: 'closed' });
+
+    constructor() {
+      super();
+      this.#shadow.adoptedStyleSheets.push(shadowStyles);
+    }
+  }
+
+  customElements.define('demo-element', DemoElement);
+
+  const response = await fetch('./shadow-2.css');
+  const cssText = await response.text();
+  const shadowStyles2 = await new CSSStyleSheet().replace(cssText);
+
+  class DemoElement2 extends HTMLElement {
+    #shadow = this.attachShadow({ mode: 'closed' });
+
+    constructor() {
+      super();
+      this.#shadow.adoptedStyleSheets.push(shadowStyles2);
+    }
+  }
+
+  customElements.define('demo-element-2', DemoElement2);
+</script>
