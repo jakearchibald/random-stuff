@@ -27,6 +27,7 @@ interface Recipe {
   'Double cream (ml)'?: number;
   'Milk (ml)'?: number;
   'Coconut milk (ml)'?: number;
+  'Mozzarella (ball)'?: number;
 
   // Processed meats
   'Chorizo ring (unit)'?: number;
@@ -43,6 +44,7 @@ interface Recipe {
   'Mixed herbs (tsp)'?: number;
   'Thai basil (pack)'?: number;
   'Fresh basil (pack)'?: number;
+  'Rocket (pack)'?: number;
   'Coriander (sprig)'?: number;
   'Roasting herbs (pack)'?: number;
   'Curry powder'?: boolean;
@@ -71,6 +73,7 @@ interface Recipe {
   // Pasta & Noodles
   'Dry egg noodles (g)'?: number;
   'Pasta (g)'?: number;
+  'Tortellini (pack)'?: number;
 
   // Rice & Grains
   'Jasmine rice (serving)'?: number;
@@ -346,5 +349,12 @@ export const recipes: Record<string, Recipe> = {
     'Whiskey (ml)': 60,
     'Amaretto (ml)': 20,
     Bitters: true,
+  },
+  'Chicken & bacon pasta': {
+    'Bacon (pack)': 1,
+    'Chicken breast (unit)': 2,
+    'Rocket (pack)': 1,
+    'Mozzarella (ball)': 1,
+    'Tortellini (pack)': 1,
   },
 };
