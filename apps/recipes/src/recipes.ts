@@ -9,7 +9,7 @@ interface Recipe {
   'Celery (stalk)'?: number;
   'Tomato (unit)'?: number;
   'Grape tomatoes (g)'?: number;
-  'Chopped tomatoes (400g)'?: number;
+  'Chopped tomatoes (400g can)'?: number;
 
   // Meat & Protein
   'Chicken (g)'?: number;
@@ -213,7 +213,7 @@ export const recipes: Record<string, Recipe> = {
     'Onion (unit)': 1,
     'Carrot (g)': 60,
     'Kidney beans (400g)': 1,
-    'Chopped tomatoes (400g)': 1,
+    'Chopped tomatoes (400g can)': 1,
     'Tomato puree (tbsp)': 1,
     'Chilli powder (tsp)': 1,
     'Vegetable stock (unit)': 2,
