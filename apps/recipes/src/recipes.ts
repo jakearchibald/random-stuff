@@ -97,6 +97,22 @@ interface Recipe {
   // Other
   'Eggs (unit)'?: number;
   'Chinese curry blocks (serving)'?: number;
+
+  // Spirits & Liqueurs
+  'Amaretto (ml)'?: number;
+  'Bourbon (ml)'?: number;
+  'Whiskey (ml)'?: number;
+  'Aperol (ml)'?: number;
+
+  // Wine & Champagne
+  'Prosecco (ml)'?: number;
+
+  // Mixers & Garnishes
+  'Lemonade (ml)'?: number;
+  'Lemon juice (ml)'?: number;
+  'Simple syrup (tsp)'?: number;
+  'Egg white (ml)'?: number;
+  Bitters?: boolean;
 }
 
 export const recipes: Record<string, Recipe> = {
@@ -313,5 +329,22 @@ export const recipes: Record<string, Recipe> = {
     'Lime (juice)': 1,
     'Spring onion (unit)': 1,
     'Red curry paste (g)': 50,
+  },
+  'Amaretto sour (serves 1)': {
+    'Amaretto (ml)': 150,
+    'Bourbon (ml)': 25,
+    'Lemon juice (ml)': 27,
+    'Simple syrup (tsp)': 1,
+    'Egg white (ml)': 15,
+  },
+  'Aperol spritz (serves 1)': {
+    'Prosecco (ml)': 210,
+    'Aperol (ml)': 140,
+    'Lemonade (ml)': 70,
+  },
+  'Godfather (serves 1)': {
+    'Whiskey (ml)': 60,
+    'Amaretto (ml)': 20,
+    Bitters: true,
   },
 };
