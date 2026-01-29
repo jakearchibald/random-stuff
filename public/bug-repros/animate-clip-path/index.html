@@ -1,0 +1,53 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Animated clip-path</title>
+
+<style>
+  body {
+    margin: 0;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    background: #1a1a1a;
+  }
+
+  .square {
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    animation: clip-animation 3s ease-in-out infinite;
+    margin: 0 0 20px;
+  }
+
+  @keyframes clip-animation {
+    0% {
+      clip-path: inset(0% 0% 0% 0%);
+    }
+    50% {
+      clip-path: inset(40% 40% 40% 40%);
+    }
+    100% {
+      clip-path: inset(0% 0% 0% 0%);
+    }
+  }
+</style>
+
+<div class="square"></div>
+<button id="jankButton">Create Jank (Block 1s)</button>
+
+<script>
+  document.getElementById('jankButton').addEventListener('click', () => {
+    // Block the main thread for 1 second
+    const start = Date.now();
+    while (Date.now() - start < 1000) {
+      // Busy wait - blocks main thread
+    }
+  });
+</script>
