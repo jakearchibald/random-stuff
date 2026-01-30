@@ -8,7 +8,9 @@ import type { StoredAppState } from './types';
 const App: FunctionalComponent = () => {
   const initialState = useMemo(() => loadAppState(), []);
   const filterText = useSignal<string>('');
-  const selectedRecipes = useSignal<Map<string, number>>(initialState.selectedRecipes);
+  const selectedRecipes = useSignal<Map<string, number>>(
+    initialState.selectedRecipes,
+  );
 
   // Save to localStorage whenever selectedRecipes changes
   useEffect(() => {
@@ -25,7 +27,7 @@ const App: FunctionalComponent = () => {
       return Object.keys(recipes);
     }
     return Object.keys(recipes).filter((name) =>
-      name.toLowerCase().includes(filter)
+      name.toLowerCase().includes(filter),
     );
   });
 
@@ -80,7 +82,7 @@ const App: FunctionalComponent = () => {
   const handleReset = () => {
     if (
       confirm(
-        'Are you sure you want to clear all selected recipes and start again?'
+        'Are you sure you want to clear all selected recipes and start again?',
       )
     ) {
       clearAppState();
@@ -125,13 +127,18 @@ const App: FunctionalComponent = () => {
       <h2>Available Recipes</h2>
       <div class="recipe-status">
         <span>
-          {selectedRecipes.value.size} recipe{selectedRecipes.value.size !== 1 ? 's' : ''} selected
+          {selectedRecipes.value.size} recipe
+          {selectedRecipes.value.size !== 1 ? 's' : ''} selected
         </span>
-        {selectedRecipes.value.size > 0 && (
-          <button class="action-button reset-button" onClick={handleReset}>
-            Reset All
-          </button>
-        )}
+        <button
+          class="action-button reset-button"
+          onClick={handleReset}
+          style={{
+            visibility: selectedRecipes.value.size > 0 ? 'visible' : 'hidden',
+          }}
+        >
+          Reset All
+        </button>
       </div>
       {filteredRecipes.value.length > 0 ? (
         <div class="recipe-list">
@@ -216,7 +223,10 @@ const App: FunctionalComponent = () => {
           <button class="action-button copy-button" onClick={handleCopy}>
             Copy
           </button>
-          <button class="action-button todoist-button" onClick={handleAddToTodoist}>
+          <button
+            class="action-button todoist-button"
+            onClick={handleAddToTodoist}
+          >
             Add to Todoist
           </button>
         </div>
