@@ -28,6 +28,8 @@ interface Recipe {
   'Milk (ml)'?: number;
   'Coconut milk (ml)'?: number;
   'Mozzarella (ball)'?: number;
+  'Grated parmesan'?: boolean;
+  Butter?: boolean;
 
   // Processed meats
   'Chorizo ring (unit)'?: number;
@@ -50,7 +52,9 @@ interface Recipe {
   'Curry powder'?: boolean;
   'Cumin seeds (tsp)'?: number;
   'Cajun spice (tbsp)'?: number;
+  'Cajun seasoning'?: boolean;
   'Chilli powder (tsp)'?: number;
+  'Mustard powder (tsp)'?: number;
   Pepper?: boolean;
   'MSG (tsp)'?: number;
 
@@ -356,5 +360,19 @@ export const recipes: Record<string, Recipe> = {
     'Rocket (pack)': 1,
     'Mozzarella (ball)': 1,
     'Tortellini (pack)': 1,
+  },
+  'Simple chicken & mushroom pasta': {
+    'Chicken breast (unit)': 2,
+    'Chillies (unit)': 3,
+    'Mushroom (g)': 200,
+    'Pasta (g)': 200,
+    'Mustard powder (tsp)': 0.5,
+    'Double cream (ml)': 150,
+    Butter: true,
+    'MSG (tsp)': 0.5,
+    'Onion (unit)': 1,
+    Pepper: true,
+    'Grated parmesan': true,
+    'Cajun seasoning': true,
   },
 };
