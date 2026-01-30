@@ -89,15 +89,23 @@ const App: FunctionalComponent = () => {
     }
   };
 
-  const handleAddToTodoist = () => {
+  const formatShoppingList = () => {
     const items = shoppingList.value.map(([ingredient, amount]) => {
       if (typeof amount === 'number') {
         return `${ingredient} × ${amount}`;
       }
       return ingredient;
     });
-    const content = encodeURIComponent(items.join('\n'));
+    return items.join('\n');
+  };
+
+  const handleAddToTodoist = () => {
+    const content = encodeURIComponent(formatShoppingList());
     location.href = `todoist://addtask?content=${content}`;
+  };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(formatShoppingList());
   };
 
   return (
@@ -115,6 +123,16 @@ const App: FunctionalComponent = () => {
       </div>
 
       <h2>Available Recipes</h2>
+      <div class="recipe-status">
+        <span>
+          {selectedRecipes.value.size} recipe{selectedRecipes.value.size !== 1 ? 's' : ''} selected
+        </span>
+        {selectedRecipes.value.size > 0 && (
+          <button class="action-button reset-button" onClick={handleReset}>
+            Reset All
+          </button>
+        )}
+      </div>
       {filteredRecipes.value.length > 0 ? (
         <div class="recipe-list">
           {filteredRecipes.value.map((recipeName) => {
@@ -193,16 +211,16 @@ const App: FunctionalComponent = () => {
         </>
       )}
 
-      <div class="action-buttons">
-        {selectedRecipes.value.size > 0 && (
+      {selectedRecipes.value.size > 0 && (
+        <div class="action-buttons">
+          <button class="action-button copy-button" onClick={handleCopy}>
+            Copy
+          </button>
           <button class="action-button todoist-button" onClick={handleAddToTodoist}>
             Add to Todoist
           </button>
-        )}
-        <button class="action-button reset-button" onClick={handleReset}>
-          Reset All
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 };

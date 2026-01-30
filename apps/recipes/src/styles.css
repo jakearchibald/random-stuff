@@ -41,6 +41,16 @@ h2 {
   }
 }
 
+.recipe-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 8px 0;
+  font-size: 16px;
+  color: #666;
+}
+
 .recipe-list {
   display: grid;
   gap: 8px;
@@ -128,6 +138,18 @@ h2 {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
+}
+
+.copy-button {
+  background-color: #28a745;
+
+  &:hover {
+    background-color: #218838;
+  }
+
+  &:active {
+    background-color: #1e7e34;
+  }
 }
 
 .todoist-button {
