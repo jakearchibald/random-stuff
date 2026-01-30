@@ -34,11 +34,11 @@ h2 {
   font-size: 16px;
   border: 2px solid #ddd;
   border-radius: 4px;
-}
 
-.filter-input:focus {
-  outline: none;
-  border-color: #4a90e2;
+  &:focus {
+    outline: none;
+    border-color: #4a90e2;
+  }
 }
 
 .recipe-list {
@@ -56,10 +56,10 @@ h2 {
   border: 1px solid #ddd;
   border-radius: 4px;
   transition: background-color 0.2s;
-}
 
-.recipe-item:hover {
-  background-color: #f5f5f5;
+  &:hover {
+    background-color: #f5f5f5;
+  }
 }
 
 .recipe-name {
@@ -113,14 +113,16 @@ h2 {
   margin-left: 8px;
 }
 
-.reset-section {
+.action-buttons {
   margin-top: 2rem;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.reset-button {
+.action-button {
   padding: 12px 24px;
   font-size: 16px;
-  background-color: #dc3545;
   color: white;
   border: none;
   border-radius: 4px;
@@ -128,12 +130,28 @@ h2 {
   transition: background-color 0.2s;
 }
 
-.reset-button:hover {
-  background-color: #c82333;
+.todoist-button {
+  background-color: #4a90e2;
+
+  &:hover {
+    background-color: #357abd;
+  }
+
+  &:active {
+    background-color: #2968a8;
+  }
 }
 
-.reset-button:active {
-  background-color: #bd2130;
+.reset-button {
+  background-color: #dc3545;
+
+  &:hover {
+    background-color: #c82333;
+  }
+
+  &:active {
+    background-color: #bd2130;
+  }
 }
 
 .empty-state {
@@ -166,17 +184,15 @@ h2 {
   justify-content: center;
   padding: 0;
   line-height: 1;
-}
 
-.btn-plus:hover,
-.btn-minus:hover {
-  background-color: #4a90e2;
-  color: white;
-}
+  &:hover {
+    background-color: #4a90e2;
+    color: white;
+  }
 
-.btn-plus:active,
-.btn-minus:active {
-  transform: scale(0.95);
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .recipe-count {

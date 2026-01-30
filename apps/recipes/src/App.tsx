@@ -89,6 +89,17 @@ const App: FunctionalComponent = () => {
     }
   };
 
+  const handleAddToTodoist = () => {
+    const items = shoppingList.value.map(([ingredient, amount]) => {
+      if (typeof amount === 'number') {
+        return `${ingredient} × ${amount}`;
+      }
+      return ingredient;
+    });
+    const content = encodeURIComponent(items.join('\n'));
+    location.href = `todoist://addtask?content=${content}`;
+  };
+
   return (
     <div class="app">
       <h1>Recipe Shopping List</h1>
@@ -182,8 +193,13 @@ const App: FunctionalComponent = () => {
         </>
       )}
 
-      <div class="reset-section">
-        <button class="reset-button" onClick={handleReset}>
+      <div class="action-buttons">
+        {selectedRecipes.value.size > 0 && (
+          <button class="action-button todoist-button" onClick={handleAddToTodoist}>
+            Add to Todoist
+          </button>
+        )}
+        <button class="action-button reset-button" onClick={handleReset}>
           Reset All
         </button>
       </div>
