@@ -219,15 +219,12 @@ const App: FunctionalComponent = () => {
               ))}
             </div>
           </div>
+          <div class="action-buttons">
+            <button class="action-button copy-button" onClick={handleCopy}>
+              Copy shopping list
+            </button>
+          </div>
         </>
-      )}
-
-      {selectedRecipes.value.size > 0 && (
-        <div class="action-buttons">
-          <button class="action-button copy-button" onClick={handleCopy}>
-            Copy shopping list
-          </button>
-        </div>
       )}
     </div>
   );
