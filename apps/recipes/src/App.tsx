@@ -91,23 +91,21 @@ const App: FunctionalComponent = () => {
     }
   };
 
-  const formatShoppingList = () => {
+  const handleCopyRecipes = async () => {
+    const items = Array.from(selectedRecipes.value).map(
+      ([recipeName, count]) => `${recipeName} × ${count}`,
+    );
+    await navigator.clipboard.writeText(items.join('\n'));
+  };
+
+  const handleCopy = async () => {
     const items = shoppingList.value.map(([ingredient, amount]) => {
       if (typeof amount === 'number') {
         return `${ingredient} × ${amount}`;
       }
       return ingredient;
     });
-    return items.join('\n');
-  };
-
-  const handleAddToTodoist = () => {
-    const content = encodeURIComponent(formatShoppingList());
-    location.href = `todoist://addtask?content=${content}`;
-  };
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(formatShoppingList());
+    await navigator.clipboard.writeText(items.join('\n'));
   };
 
   return (
@@ -200,6 +198,12 @@ const App: FunctionalComponent = () => {
                 </div>
               ))}
             </div>
+            <button
+              class="action-button copy-button"
+              onClick={handleCopyRecipes}
+            >
+              Copy recipes
+            </button>
           </div>
 
           <h2>Shopping List</h2>
@@ -221,13 +225,7 @@ const App: FunctionalComponent = () => {
       {selectedRecipes.value.size > 0 && (
         <div class="action-buttons">
           <button class="action-button copy-button" onClick={handleCopy}>
-            Copy
-          </button>
-          <button
-            class="action-button todoist-button"
-            onClick={handleAddToTodoist}
-          >
-            Add to Todoist
+            Copy shopping list
           </button>
         </div>
       )}

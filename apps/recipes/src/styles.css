@@ -152,17 +152,6 @@ h2 {
   }
 }
 
-.todoist-button {
-  background-color: #4a90e2;
-
-  &:hover {
-    background-color: #357abd;
-  }
-
-  &:active {
-    background-color: #2968a8;
-  }
-}
 
 .reset-button {
   background-color: #dc3545;
