@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CSS anchor positioning, top-layer, and position absolute</title>
+<style>
+  html {
+    font-family: system-ui;
+  }
+
+  .anchor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    anchor-name: --anchor;
+    margin-top: 40vh;
+    margin-left: 30vw;
+  }
+
+  .positioned {
+    background: #333;
+    color: white;
+    padding: 1em;
+    border-radius: 10px;
+    position-area: top;
+    position: absolute;
+  }
+</style>
+<button class="anchor" commandfor="target" command="toggle-popover">
+  Toggle popover
+</button>
+<div class="positioned" id="target" popover>This is anchor positioned</div>
