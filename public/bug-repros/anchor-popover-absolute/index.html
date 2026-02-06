@@ -8,23 +8,25 @@
   }
 
   .anchor {
-    position: fixed;
     top: 40vh;
     left: 30vw;
-    anchor-name: --anchor;
     padding: 1em;
     border-radius: 10px;
     border: 1px solid #333;
+
+    position: fixed;
+    anchor-name: --anchor;
   }
 
   .positioned {
-    position-anchor: --anchor;
     background: #333;
     color: white;
     padding: 1em;
     border-radius: 10px;
-    position-area: top;
+
     position: absolute;
+    position-anchor: --anchor;
+    position-area: top;
   }
 </style>
 <div class="anchor">This is the anchor</div>
