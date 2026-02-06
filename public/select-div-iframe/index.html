@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+  <head>
+    <title>IE6 Select/Iframe/Div Stacking Demo</title>
+    <style>
+      body {
+        margin: 20px;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        position: relative;
+        width: 400px;
+        height: 300px;
+        border: 2px solid #333;
+      }
+
+      .bottom-select {
+        position: absolute;
+        left: 50px;
+        top: 50px;
+        z-index: 1;
+      }
+
+      .middle-iframe {
+        position: absolute;
+        left: 75px;
+        top: 60px;
+        width: 250px;
+        height: 150px;
+        border: 2px solid blue;
+        background: white;
+        z-index: 10;
+      }
+
+      .top-div {
+        position: absolute;
+        left: 150px;
+        top: 120px;
+        width: 200px;
+        height: 100px;
+        background: #ff6666;
+        border: 2px solid red;
+        z-index: 100;
+        padding: 10px;
+      }
+
+      .explanation {
+        margin-top: 320px;
+        padding: 10px;
+        background: #ffffcc;
+        border: 1px solid #999;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>IE6 Select/Iframe/Div Stacking Issue</h1>
+
+    <div class="container">
+      <!-- Bottom layer: Select (z-index: 1) -->
+      <select class="bottom-select">
+        <option>Select Element (z-index: 1)</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+        <option>Option 4</option>
+      </select>
+
+      <!-- Middle layer: Iframe (z-index: 10) -->
+      <iframe class="middle-iframe" src="about:blank"></iframe>
+
+      <!-- Top layer: Div (z-index: 100) -->
+      <div class="top-div">
+        Red Div<br />
+        (z-index: 100)
+      </div>
+    </div>
+
+    <div class="explanation">
+      <strong>IE6 Issue:</strong> In IE6, the SELECT element would appear on top
+      regardless of z-index values because windowed controls (like SELECT)
+      always render above windowless content. The typical workaround was to use
+      an IFRAME as a "shim" layer to block the SELECT element, since iframes
+      could cover selects.
+    </div>
+  </body>
+</html>
