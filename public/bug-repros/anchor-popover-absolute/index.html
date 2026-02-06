@@ -9,14 +9,16 @@
 
   .anchor {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 40vh;
+    left: 30vw;
     anchor-name: --anchor;
-    margin-top: 40vh;
-    margin-left: 30vw;
+    padding: 1em;
+    border-radius: 10px;
+    border: 1px solid #333;
   }
 
   .positioned {
+    position-anchor: --anchor;
     background: #333;
     color: white;
     padding: 1em;
@@ -25,7 +27,5 @@
     position: absolute;
   }
 </style>
-<button class="anchor" commandfor="target" command="toggle-popover">
-  Toggle popover
-</button>
-<div class="positioned" id="target" popover>This is anchor positioned</div>
+<div class="anchor">This is the anchor</div>
+<div class="positioned">This is positioned to the anchor</div>
