@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navigation API Test</title>
+    <style>
+      html {
+        font-family: system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Navigation API Test</h1>
+
+    <div id="output"></div>
+
+    <p><a href="./foo">Navigate to ./foo</a></p>
+
+    <script>
+      function updateOutput(navEvent) {
+        const output = document.getElementById('output');
+        output.innerHTML = `
+          <p><strong>location.href:</strong> ${location.href}</p>
+          <p><strong>navigation.currentEntry.url:</strong> ${navigation.currentEntry.url}</p>
+          <p><strong>Random number:</strong> ${Math.random()}</p>
+          ${navEvent ? `<p><strong>event.destination.url:</strong> ${navEvent.destination.url}</p>` : ''}
+        `;
+      }
+
+      updateOutput();
+
+      navigation.addEventListener('navigate', (event) => {
+        if (!event.canIntercept) {
+          console.log('Cannot intercept', event);
+          return;
+        }
+
+        event.intercept({
+          handler() {
+            console.log('Navigation intercepted', event);
+            updateOutput(event);
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
