@@ -1,0 +1,37 @@
+<!doctype html>
+<title>HTML in canvas stacking issue</title>
+<style>
+  .demo {
+    width: 400px;
+    height: 400px;
+    position: relative;
+  }
+
+  .a,
+  .b {
+    width: 300px;
+    height: 300px;
+    background: green;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+  }
+
+  .b {
+    background: red;
+    top: 100px;
+    left: 100px;
+    z-index: 1;
+  }
+</style>
+<canvas layoutsubtree width="400" height="400">
+  <div class="demo">
+    <div class="a"></div>
+    <div class="b"></div>
+  </div>
+</canvas>
+<script>
+  const ctx = document.querySelector('canvas').getContext('2d');
+  ctx.drawElementImage(document.querySelector('.demo'), 0, 0);
+</script>
