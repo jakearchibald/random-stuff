@@ -84,7 +84,6 @@ html {
   .icon-mustache::before { content: "\E063"; color: #e37933; }
   .icon-nunjucks::before { content: "\E069"; color: #8dc149; }
   .icon-twig::before { content: "\E098"; color: #8dc149; }
-  .icon-jinja::before { content: "\E053"; color: #cc3e44; }
   .icon-slim::before { content: "\E08A"; color: #e37933; }
   .icon-smarty::before { content: "\E08B"; color: #cbcb41; }
 
@@ -128,14 +127,13 @@ html {
   .icon-nim::before { content: "\E065"; color: #cbcb41; }
   .icon-swift::before { content: "\E092"; color: #e37933; }
   .icon-salesforce::before { content: "\E083"; color: #519aba; }
-  .icon-solidity::before { content: "\E519"; color: #519aba; }
   .icon-wasm::before { content: "\E09E"; color: #a074c4; }
   .icon-latex::before { content: "\E094"; color: #519aba; }
 
   @supports (appearance: base-select) {
     appearance: base-select;
 
-    & legend {
+    legend {
       position: sticky;
       top: 0;
       background: #252525;
@@ -150,7 +148,15 @@ html {
       z-index: 1;
     }
 
-    & option {
+    optgroup {
+      --legend-text: attr(label);
+
+      & > legend::before {
+        content: var(--legend-text);
+      }
+    }
+
+    option {
       color: #e0e0e0;
       padding: 0.4em 0.5em;
       display: grid;
