@@ -29,20 +29,40 @@ html {
     legend {
       position: sticky;
       top: 0;
-      background: #252525;
-      color: #888;
-      padding: 8px 12px;
-      font-size: 0.85em;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid #333;
-      margin: 0;
-      z-index: 1;
+      padding: 0;
+      container-type: scroll-state;
+
+      &::before {
+        background: #252525;
+        display: block;
+        color: #888;
+        padding: 8px 12px;
+        font-size: 0.85em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #333;
+        margin: 0;
+        z-index: 1;
+
+        transition: all 500ms ease;
+        transition-property: background-color, color;
+
+        @container scroll-state(stuck: top) {
+          background-color: #404040;
+          color: #999;
+        }
+      }
+
     }
 
     optgroup {
       --legend-text: attr(label);
+
+      &:first-of-type > legend::before {
+        background-color: #404040;
+        color: #999;
+      }
 
       & > legend::before {
         content: var(--legend-text);
@@ -76,10 +96,10 @@ html {
       border: 1px solid #404040;
       border-radius: 8px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      max-height: 400px;
-      overflow-y: auto;
+      min-height: 250px;
       padding: 0;
-
+      bottom: max(20px, anchor(bottom) - 400px);
+      position-try-fallbacks: flip-block;
     }
   }
 }
