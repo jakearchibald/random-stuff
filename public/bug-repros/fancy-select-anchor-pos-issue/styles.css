@@ -11,8 +11,8 @@ html {
 .programming-lang-select {
   color-scheme: dark;
   position: absolute;
-  top: 400px;
-  left: 400px;
+  top: 100px;
+  left: 100px;
 
   .lang-icon {
     font-family: seti;
