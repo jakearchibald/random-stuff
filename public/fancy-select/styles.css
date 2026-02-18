@@ -724,6 +724,7 @@ html {
       position-try-fallbacks: flip-block;
       overflow: visible;
       clip-path: inset(0 -300px -300px);
+      container-type: anchored;
 
       opacity: 0;
       transition:
@@ -743,6 +744,10 @@ html {
 
       transition: translate 250ms ease-in;
       translate: 0 -100px;
+
+      @container anchored(fallback: flip-block) {
+        translate: 0 0;
+      }
     }
 
     &:open .box {
@@ -751,6 +756,9 @@ html {
 
       @starting-style {
         translate: 0 -100px;
+        @container anchored(fallback: flip-block) {
+          translate: 0 0;
+        }
       }
     }
 
