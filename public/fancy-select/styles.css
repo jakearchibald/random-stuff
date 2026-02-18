@@ -336,6 +336,9 @@ html {
     option[value='smarty'] {
       anchor-name: --smarty;
     }
+    option[value='jinja'] {
+      anchor-name: --jinja;
+    }
     option[value='sass'] {
       anchor-name: --sass;
     }
@@ -597,6 +600,9 @@ html {
     }
     optgroup:has(option[value='smarty']:is(:hover, :focus))::before {
       position-anchor: --smarty;
+    }
+    optgroup:has(option[value='jinja']:is(:hover, :focus))::before {
+      position-anchor: --jinja;
     }
     optgroup:has(option[value='sass']:is(:hover, :focus))::before {
       position-anchor: --sass;
