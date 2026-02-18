@@ -435,9 +435,6 @@ html {
     option[value='swift'] {
       anchor-name: --swift;
     }
-    option[value='salesforce'] {
-      anchor-name: --salesforce;
-    }
     option[value='wasm'] {
       anchor-name: --wasm;
     }
@@ -699,9 +696,6 @@ html {
     }
     optgroup:has(option[value='swift']:is(:hover, :focus))::before {
       position-anchor: --swift;
-    }
-    optgroup:has(option[value='salesforce']:is(:hover, :focus))::before {
-      position-anchor: --salesforce;
     }
     optgroup:has(option[value='wasm']:is(:hover, :focus))::before {
       position-anchor: --wasm;
