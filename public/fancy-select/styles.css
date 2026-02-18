@@ -18,6 +18,8 @@ html {
   .lang-icon {
     font-family: seti;
     font-size: 1.5em;
+    display: grid;
+    justify-content: center;
   }
 
   .lang-icon::before {
@@ -157,7 +159,7 @@ html {
     selectedcontent {
       color: #e0e0e0;
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 2.2ch 1fr;
       gap: 0.5em;
       align-items: center;
       position: relative;
