@@ -9,140 +9,752 @@
   <body>
     <select name="programming-lang" class="programming-lang-select">
       <button><selectedcontent></selectedcontent></button>
-      <optgroup label="Markup Languages">
-        <legend></legend>
-        <option value="html"><span class="lang-icon" style="color: #519aba" data-char="&#xE048;"></span> HTML</option>
-        <option value="css"><span class="lang-icon" style="color: #519aba" data-char="&#xE01D;"></span> CSS</option>
-        <option value="xml"><span class="lang-icon" style="color: #e37933" data-char="&#xE0A5;"></span> XML</option>
-        <option value="svg"><span class="lang-icon" style="color: #a074c4" data-char="&#xE091;"></span> SVG</option>
-        <option value="markdown"><span class="lang-icon" style="color: #519aba" data-char="&#xE060;"></span> Markdown</option>
-      </optgroup>
 
-      <optgroup label="Scripting Languages">
-        <legend></legend>
-        <option value="javascript"><span class="lang-icon" style="color: #cbcb41" data-char="&#xE051;"></span> JavaScript</option>
-        <option value="python"><span class="lang-icon" style="color: #519aba" data-char="&#xE07B;"></span> Python</option>
-        <option value="ruby"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE081;"></span> Ruby</option>
-        <option value="php"><span class="lang-icon" style="color: #a074c4" data-char="&#xE070;"></span> PHP</option>
-        <option value="perl"><span class="lang-icon" style="color: #519aba" data-char="&#xE06E;"></span> Perl</option>
-        <option value="lua"><span class="lang-icon" style="color: #519aba" data-char="&#xE05E;"></span> Lua</option>
-        <option value="shell"><span class="lang-icon" style="color: #8dc149" data-char="&#xE089;"></span> Shell</option>
-        <option value="powershell"><span class="lang-icon" style="color: #519aba" data-char="&#xE074;"></span> PowerShell</option>
-      </optgroup>
+      <div class="box">
+        <optgroup label="Markup Languages">
+          <legend></legend>
+          <option value="html">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE048;"
+            ></span>
+            HTML
+          </option>
+          <option value="css">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE01D;"
+            ></span>
+            CSS
+          </option>
+          <option value="xml">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE0A5;"
+            ></span>
+            XML
+          </option>
+          <option value="svg">
+            <span
+              class="lang-icon"
+              style="color: #a074c4"
+              data-char="&#xE091;"
+            ></span>
+            SVG
+          </option>
+          <option value="markdown">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE060;"
+            ></span>
+            Markdown
+          </option>
+        </optgroup>
 
-      <optgroup label="Transpiled Languages">
-        <legend></legend>
-        <option value="typescript"><span class="lang-icon" style="color: #519aba" data-char="&#xE099;"></span> TypeScript</option>
-        <option value="coffeescript"><span class="lang-icon" style="color: #cbcb41" data-char="&#xE016;"></span> CoffeeScript</option>
-        <option value="babel"><span class="lang-icon" style="color: #cbcb41" data-char="&#xE006;"></span> Babel</option>
-        <option value="elm"><span class="lang-icon" style="color: #519aba" data-char="&#xE02A;"></span> Elm</option>
-        <option value="reasonml"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE07E;"></span> ReasonML</option>
-        <option value="rescript"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE07F;"></span> ReScript</option>
-        <option value="haxe"><span class="lang-icon" style="color: #e37933" data-char="&#xE045;"></span> Haxe</option>
-        <option value="dart"><span class="lang-icon" style="color: #519aba" data-char="&#xE021;"></span> Dart</option>
-      </optgroup>
+        <optgroup label="Scripting Languages">
+          <legend></legend>
+          <option value="javascript">
+            <span
+              class="lang-icon"
+              style="color: #cbcb41"
+              data-char="&#xE051;"
+            ></span>
+            JavaScript
+          </option>
+          <option value="python">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE07B;"
+            ></span>
+            Python
+          </option>
+          <option value="ruby">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE081;"
+            ></span>
+            Ruby
+          </option>
+          <option value="php">
+            <span
+              class="lang-icon"
+              style="color: #a074c4"
+              data-char="&#xE070;"
+            ></span>
+            PHP
+          </option>
+          <option value="perl">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE06E;"
+            ></span>
+            Perl
+          </option>
+          <option value="lua">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE05E;"
+            ></span>
+            Lua
+          </option>
+          <option value="shell">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE089;"
+            ></span>
+            Shell
+          </option>
+          <option value="powershell">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE074;"
+            ></span>
+            PowerShell
+          </option>
+        </optgroup>
 
-      <optgroup label="Compiled Systems Languages">
-        <legend></legend>
-        <option value="c"><span class="lang-icon" style="color: #519aba" data-char="&#xE00C;"></span> C</option>
-        <option value="cpp"><span class="lang-icon" style="color: #519aba" data-char="&#xE01A;"></span> C++</option>
-        <option value="csharp"><span class="lang-icon" style="color: #519aba" data-char="&#xE00B;"></span> C#</option>
-        <option value="rust"><span class="lang-icon" style="color: #6d8086" data-char="&#xE082;"></span> Rust</option>
-        <option value="go"><span class="lang-icon" style="color: #519aba" data-char="&#xE039;"></span> Go</option>
-        <option value="zig"><span class="lang-icon" style="color: #e37933" data-char="&#xE0A8;"></span> Zig</option>
-        <option value="d"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE020;"></span> D</option>
-        <option value="vala"><span class="lang-icon" style="color: #6d8086" data-char="&#xE09A;"></span> Vala</option>
-      </optgroup>
+        <optgroup label="Transpiled Languages">
+          <legend></legend>
+          <option value="typescript">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE099;"
+            ></span>
+            TypeScript
+          </option>
+          <option value="coffeescript">
+            <span
+              class="lang-icon"
+              style="color: #cbcb41"
+              data-char="&#xE016;"
+            ></span>
+            CoffeeScript
+          </option>
+          <option value="babel">
+            <span
+              class="lang-icon"
+              style="color: #cbcb41"
+              data-char="&#xE006;"
+            ></span>
+            Babel
+          </option>
+          <option value="elm">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE02A;"
+            ></span>
+            Elm
+          </option>
+          <option value="reasonml">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE07E;"
+            ></span>
+            ReasonML
+          </option>
+          <option value="rescript">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE07F;"
+            ></span>
+            ReScript
+          </option>
+          <option value="haxe">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE045;"
+            ></span>
+            Haxe
+          </option>
+          <option value="dart">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE021;"
+            ></span>
+            Dart
+          </option>
+        </optgroup>
 
-      <optgroup label="JVM Languages">
-        <legend></legend>
-        <option value="java"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE050;"></span> Java</option>
-        <option value="scala"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE086;"></span> Scala</option>
-        <option value="kotlin"><span class="lang-icon" style="color: #e37933" data-char="&#xE058;"></span> Kotlin</option>
-        <option value="clojure"><span class="lang-icon" style="color: #8dc149" data-char="&#xE013;"></span> Clojure</option>
-        <option value="groovy"><span class="lang-icon" style="color: #8dc149" data-char="&#xE03D;"></span> Groovy</option>
-      </optgroup>
+        <optgroup label="Compiled Systems Languages">
+          <legend></legend>
+          <option value="c">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE00C;"
+            ></span>
+            C
+          </option>
+          <option value="cpp">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE01A;"
+            ></span>
+            C++
+          </option>
+          <option value="csharp">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE00B;"
+            ></span>
+            C#
+          </option>
+          <option value="rust">
+            <span
+              class="lang-icon"
+              style="color: #6d8086"
+              data-char="&#xE082;"
+            ></span>
+            Rust
+          </option>
+          <option value="go">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE039;"
+            ></span>
+            Go
+          </option>
+          <option value="zig">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE0A8;"
+            ></span>
+            Zig
+          </option>
+          <option value="d">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE020;"
+            ></span>
+            D
+          </option>
+          <option value="vala">
+            <span
+              class="lang-icon"
+              style="color: #6d8086"
+              data-char="&#xE09A;"
+            ></span>
+            Vala
+          </option>
+        </optgroup>
 
-      <optgroup label="Functional Languages">
-        <legend></legend>
-        <option value="haskell"><span class="lang-icon" style="color: #a074c4" data-char="&#xE044;"></span> Haskell</option>
-        <option value="ocaml"><span class="lang-icon" style="color: #e37933" data-char="&#xE06A;"></span> OCaml</option>
-        <option value="fsharp"><span class="lang-icon" style="color: #519aba" data-char="&#xE02E;"></span> F#</option>
-        <option value="elixir"><span class="lang-icon" style="color: #a074c4" data-char="&#xE028;"></span> Elixir</option>
-        <option value="purescript"><span class="lang-icon" style="color: #d4d7d6" data-char="&#xE07A;"></span> PureScript</option>
-        <option value="prolog"><span class="lang-icon" style="color: #e37933" data-char="&#xE077;"></span> Prolog</option>
-      </optgroup>
+        <optgroup label="JVM Languages">
+          <legend></legend>
+          <option value="java">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE050;"
+            ></span>
+            Java
+          </option>
+          <option value="scala">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE086;"
+            ></span>
+            Scala
+          </option>
+          <option value="kotlin">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE058;"
+            ></span>
+            Kotlin
+          </option>
+          <option value="clojure">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE013;"
+            ></span>
+            Clojure
+          </option>
+          <option value="groovy">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE03D;"
+            ></span>
+            Groovy
+          </option>
+        </optgroup>
 
-      <optgroup label="Web Frameworks & Libraries">
-        <legend></legend>
-        <option value="react"><span class="lang-icon" style="color: #519aba" data-char="&#xE07D;"></span> React</option>
-        <option value="vue"><span class="lang-icon" style="color: #8dc149" data-char="&#xE09D;"></span> Vue</option>
-        <option value="svelte"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE090;"></span> Svelte</option>
-      </optgroup>
+        <optgroup label="Functional Languages">
+          <legend></legend>
+          <option value="haskell">
+            <span
+              class="lang-icon"
+              style="color: #a074c4"
+              data-char="&#xE044;"
+            ></span>
+            Haskell
+          </option>
+          <option value="ocaml">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE06A;"
+            ></span>
+            OCaml
+          </option>
+          <option value="fsharp">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE02E;"
+            ></span>
+            F#
+          </option>
+          <option value="elixir">
+            <span
+              class="lang-icon"
+              style="color: #a074c4"
+              data-char="&#xE028;"
+            ></span>
+            Elixir
+          </option>
+          <option value="purescript">
+            <span
+              class="lang-icon"
+              style="color: #d4d7d6"
+              data-char="&#xE07A;"
+            ></span>
+            PureScript
+          </option>
+          <option value="prolog">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE077;"
+            ></span>
+            Prolog
+          </option>
+        </optgroup>
 
-      <optgroup label="Template Languages">
-        <legend></legend>
-        <option value="ejs"><span class="lang-icon" style="color: #cbcb41" data-char="&#xE027;"></span> EJS</option>
-        <option value="pug"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE078;"></span> Jade/Pug</option>
-        <option value="haml"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE042;"></span> Haml</option>
-        <option value="liquid"><span class="lang-icon" style="color: #8dc149" data-char="&#xE05B;"></span> Liquid</option>
-        <option value="mustache"><span class="lang-icon" style="color: #e37933" data-char="&#xE063;"></span> Mustache</option>
-        <option value="nunjucks"><span class="lang-icon" style="color: #8dc149" data-char="&#xE069;"></span> Nunjucks</option>
-        <option value="twig"><span class="lang-icon" style="color: #8dc149" data-char="&#xE098;"></span> Twig</option>
-        <option value="slim"><span class="lang-icon" style="color: #e37933" data-char="&#xE08A;"></span> Slim</option>
-        <option value="smarty"><span class="lang-icon" style="color: #cbcb41" data-char="&#xE08B;"></span> Smarty</option>
-      </optgroup>
+        <optgroup label="Web Frameworks & Libraries">
+          <legend></legend>
+          <option value="react">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE07D;"
+            ></span>
+            React
+          </option>
+          <option value="vue">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE09D;"
+            ></span>
+            Vue
+          </option>
+          <option value="svelte">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE090;"
+            ></span>
+            Svelte
+          </option>
+        </optgroup>
 
-      <optgroup label="CSS Preprocessors">
-        <legend></legend>
-        <option value="sass"><span class="lang-icon" style="color: #f55385" data-char="&#xE084;"></span> Sass/SCSS</option>
-        <option value="less"><span class="lang-icon" style="color: #519aba" data-char="&#xE059;"></span> Less</option>
-        <option value="stylus"><span class="lang-icon" style="color: #8dc149" data-char="&#xE08E;"></span> Stylus</option>
-      </optgroup>
+        <optgroup label="Template Languages">
+          <legend></legend>
+          <option value="ejs">
+            <span
+              class="lang-icon"
+              style="color: #cbcb41"
+              data-char="&#xE027;"
+            ></span>
+            EJS
+          </option>
+          <option value="pug">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE078;"
+            ></span>
+            Jade/Pug
+          </option>
+          <option value="haml">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE042;"
+            ></span>
+            Haml
+          </option>
+          <option value="liquid">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE05B;"
+            ></span>
+            Liquid
+          </option>
+          <option value="mustache">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE063;"
+            ></span>
+            Mustache
+          </option>
+          <option value="nunjucks">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE069;"
+            ></span>
+            Nunjucks
+          </option>
+          <option value="twig">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE098;"
+            ></span>
+            Twig
+          </option>
+          <option value="slim">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE08A;"
+            ></span>
+            Slim
+          </option>
+          <option value="smarty">
+            <span
+              class="lang-icon"
+              style="color: #cbcb41"
+              data-char="&#xE08B;"
+            ></span>
+            Smarty
+          </option>
+        </optgroup>
 
-      <optgroup label="Config Files">
-        <legend></legend>
-        <option value="json"><span class="lang-icon" style="color: #cbcb41" data-char="&#xE055;"></span> JSON</option>
-        <option value="yaml"><span class="lang-icon" style="color: #a074c4" data-char="&#xE0A7;"></span> YAML</option>
-        <option value="toml"><span class="lang-icon" style="color: #6d8086" data-char="&#xE019;"></span> TOML</option>
-        <option value="csv"><span class="lang-icon" style="color: #8dc149" data-char="&#xE01E;"></span> CSV</option>
-        <option value="tsconfig"><span class="lang-icon" style="color: #519aba" data-char="&#xE097;"></span> TSConfig</option>
-        <option value="vite"><span class="lang-icon" style="color: #cbcb41" data-char="&#xE09C;"></span> Vite</option>
-        <option value="webpack"><span class="lang-icon" style="color: #519aba" data-char="&#xE0A0;"></span> Webpack</option>
-        <option value="rollup"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE080;"></span> Rollup</option>
-        <option value="grunt"><span class="lang-icon" style="color: #e37933" data-char="&#xE03F;"></span> Grunt</option>
-        <option value="gulp"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE040;"></span> Gulp</option>
-        <option value="gradle"><span class="lang-icon" style="color: #519aba" data-char="&#xE03C;"></span> Gradle</option>
-        <option value="maven"><span class="lang-icon" style="color: #cc3e44" data-char="&#xE061;"></span> Maven</option>
-        <option value="sbt"><span class="lang-icon" style="color: #519aba" data-char="&#xE085;"></span> SBT</option>
-        <option value="bazel"><span class="lang-icon" style="color: #8dc149" data-char="&#xE007;"></span> Bazel</option>
-        <option value="eslint"><span class="lang-icon" style="color: #a074c4" data-char="&#xE02C;"></span> ESLint</option>
-        <option value="stylelint"><span class="lang-icon" style="color: #d4d7d6" data-char="&#xE08D;"></span> Stylelint</option>
-        <option value="bower"><span class="lang-icon" style="color: #e37933" data-char="&#xE009;"></span> Bower</option>
-        <option value="npm"><span class="lang-icon" style="color: #41535b" data-char="&#xE067;"></span> NPM</option>
-        <option value="yarn"><span class="lang-icon" style="color: #519aba" data-char="&#xE0A6;"></span> Yarn</option>
-        <option value="docker"><span class="lang-icon" style="color: #519aba" data-char="&#xE025;"></span> Docker</option>
-        <option value="karma"><span class="lang-icon" style="color: #8dc149" data-char="&#xE057;"></span> Karma</option>
-      </optgroup>
+        <optgroup label="CSS Preprocessors">
+          <legend></legend>
+          <option value="sass">
+            <span
+              class="lang-icon"
+              style="color: #f55385"
+              data-char="&#xE084;"
+            ></span>
+            Sass/SCSS
+          </option>
+          <option value="less">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE059;"
+            ></span>
+            Less
+          </option>
+          <option value="stylus">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE08E;"
+            ></span>
+            Stylus
+          </option>
+        </optgroup>
 
-      <optgroup label="Database & Query">
-        <legend></legend>
-        <option value="sql"><span class="lang-icon" style="color: #f55385" data-char="&#xE022;"></span> SQL</option>
-        <option value="graphql"><span class="lang-icon" style="color: #f55385" data-char="&#xE03E;"></span> GraphQL</option>
-        <option value="prisma"><span class="lang-icon" style="color: #519aba" data-char="&#xE075;"></span> Prisma</option>
-      </optgroup>
+        <optgroup label="Config Files">
+          <legend></legend>
+          <option value="json">
+            <span
+              class="lang-icon"
+              style="color: #cbcb41"
+              data-char="&#xE055;"
+            ></span>
+            JSON
+          </option>
+          <option value="yaml">
+            <span
+              class="lang-icon"
+              style="color: #a074c4"
+              data-char="&#xE0A7;"
+            ></span>
+            YAML
+          </option>
+          <option value="toml">
+            <span
+              class="lang-icon"
+              style="color: #6d8086"
+              data-char="&#xE019;"
+            ></span>
+            TOML
+          </option>
+          <option value="csv">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE01E;"
+            ></span>
+            CSV
+          </option>
+          <option value="tsconfig">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE097;"
+            ></span>
+            TSConfig
+          </option>
+          <option value="vite">
+            <span
+              class="lang-icon"
+              style="color: #cbcb41"
+              data-char="&#xE09C;"
+            ></span>
+            Vite
+          </option>
+          <option value="webpack">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE0A0;"
+            ></span>
+            Webpack
+          </option>
+          <option value="rollup">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE080;"
+            ></span>
+            Rollup
+          </option>
+          <option value="grunt">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE03F;"
+            ></span>
+            Grunt
+          </option>
+          <option value="gulp">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE040;"
+            ></span>
+            Gulp
+          </option>
+          <option value="gradle">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE03C;"
+            ></span>
+            Gradle
+          </option>
+          <option value="maven">
+            <span
+              class="lang-icon"
+              style="color: #cc3e44"
+              data-char="&#xE061;"
+            ></span>
+            Maven
+          </option>
+          <option value="sbt">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE085;"
+            ></span>
+            SBT
+          </option>
+          <option value="bazel">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE007;"
+            ></span>
+            Bazel
+          </option>
+          <option value="eslint">
+            <span
+              class="lang-icon"
+              style="color: #a074c4"
+              data-char="&#xE02C;"
+            ></span>
+            ESLint
+          </option>
+          <option value="stylelint">
+            <span
+              class="lang-icon"
+              style="color: #d4d7d6"
+              data-char="&#xE08D;"
+            ></span>
+            Stylelint
+          </option>
+          <option value="bower">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE009;"
+            ></span>
+            Bower
+          </option>
+          <option value="npm">
+            <span
+              class="lang-icon"
+              style="color: #41535b"
+              data-char="&#xE067;"
+            ></span>
+            NPM
+          </option>
+          <option value="yarn">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE0A6;"
+            ></span>
+            Yarn
+          </option>
+          <option value="docker">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE025;"
+            ></span>
+            Docker
+          </option>
+          <option value="karma">
+            <span
+              class="lang-icon"
+              style="color: #8dc149"
+              data-char="&#xE057;"
+            ></span>
+            Karma
+          </option>
+        </optgroup>
 
-      <optgroup label="Other Languages">
-        <legend></legend>
-        <option value="julia"><span class="lang-icon" style="color: #a074c4" data-char="&#xE056;"></span> Julia</option>
-        <option value="r"><span class="lang-icon" style="color: #519aba" data-char="&#xE001;"></span> R</option>
-        <option value="crystal"><span class="lang-icon" style="color: #d4d7d6" data-char="&#xE01B;"></span> Crystal</option>
-        <option value="nim"><span class="lang-icon" style="color: #cbcb41" data-char="&#xE065;"></span> Nim</option>
-        <option value="swift"><span class="lang-icon" style="color: #e37933" data-char="&#xE092;"></span> Swift</option>
-        <option value="salesforce"><span class="lang-icon" style="color: #519aba" data-char="&#xE083;"></span> Salesforce</option>
-        <option value="wasm"><span class="lang-icon" style="color: #a074c4" data-char="&#xE09E;"></span> WebAssembly</option>
-        <option value="latex"><span class="lang-icon" style="color: #519aba" data-char="&#xE094;"></span> LaTeX</option>
-      </optgroup>
+        <optgroup label="Database & Query">
+          <legend></legend>
+          <option value="sql">
+            <span
+              class="lang-icon"
+              style="color: #f55385"
+              data-char="&#xE022;"
+            ></span>
+            SQL
+          </option>
+          <option value="graphql">
+            <span
+              class="lang-icon"
+              style="color: #f55385"
+              data-char="&#xE03E;"
+            ></span>
+            GraphQL
+          </option>
+          <option value="prisma">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE075;"
+            ></span>
+            Prisma
+          </option>
+        </optgroup>
+
+        <optgroup label="Other Languages">
+          <legend></legend>
+          <option value="julia">
+            <span
+              class="lang-icon"
+              style="color: #a074c4"
+              data-char="&#xE056;"
+            ></span>
+            Julia
+          </option>
+          <option value="r">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE001;"
+            ></span>
+            R
+          </option>
+          <option value="crystal">
+            <span
+              class="lang-icon"
+              style="color: #d4d7d6"
+              data-char="&#xE01B;"
+            ></span>
+            Crystal
+          </option>
+          <option value="nim">
+            <span
+              class="lang-icon"
+              style="color: #cbcb41"
+              data-char="&#xE065;"
+            ></span>
+            Nim
+          </option>
+          <option value="swift">
+            <span
+              class="lang-icon"
+              style="color: #e37933"
+              data-char="&#xE092;"
+            ></span>
+            Swift
+          </option>
+          <option value="salesforce">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE083;"
+            ></span>
+            Salesforce
+          </option>
+          <option value="wasm">
+            <span
+              class="lang-icon"
+              style="color: #a074c4"
+              data-char="&#xE09E;"
+            ></span>
+            WebAssembly
+          </option>
+          <option value="latex">
+            <span
+              class="lang-icon"
+              style="color: #519aba"
+              data-char="&#xE094;"
+            ></span>
+            LaTeX
+          </option>
+        </optgroup>
+      </div>
     </select>
   </body>
 </html>

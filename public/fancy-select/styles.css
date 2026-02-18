@@ -1,6 +1,7 @@
 html {
   background: #222;
   font-family: system-ui;
+  interpolate-size: allow-keywords;
 }
 
 @font-face {
@@ -25,6 +26,51 @@ html {
 
   @supports (appearance: base-select) {
     appearance: base-select;
+    padding: 0.4em 0.5em;
+    padding-right: 0.8em;
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    display: grid;
+    gap: 0.7em;
+    grid-template-columns: auto auto;
+    align-items: center;
+
+    &::picker-icon {
+      display: none;
+    }
+
+    &::after {
+      display: none;
+      content: '';
+      --size: 9px;
+      width: var(--size);
+      height: calc(var(--size) * 0.8);
+      background: #e0e0e0;
+      clip-path: shape(
+        from 0% 0%,
+        line to 50% 0%,
+        line to 100% 0%,
+        line to 50% 100%,
+        close
+      );
+
+      transition: clip-path 250ms ease;
+
+      @supports (clip-path: shape(from 0% 0%, close)) {
+        display: block;
+      }
+    }
+
+    &:open::after {
+      clip-path: shape(
+        from 0% 100%,
+        line to 50% 0%,
+        line to 100% 100%,
+        line to 50% 100%,
+        close
+      );
+    }
 
     legend {
       position: sticky;
@@ -107,13 +153,18 @@ html {
       }
     }
 
-    option {
+    option,
+    selectedcontent {
       color: #e0e0e0;
-      padding: 0.4em 0.5em;
       display: grid;
       grid-template-columns: auto 1fr;
+      gap: 0.5em;
       align-items: center;
       position: relative;
+    }
+
+    option {
+      padding: 0.4em 0.5em;
 
       &:hover,
       &:focus {
@@ -657,15 +708,52 @@ html {
 
     &::picker(select) {
       appearance: base-select;
+      min-height: 250px;
+      padding: 0;
+      border: none;
+      background: none;
+      bottom: max(20px, anchor(bottom) - 400px);
+      position-try-fallbacks: flip-block;
+      overflow: visible;
+      clip-path: inset(0 -300px -300px);
+
+      opacity: 0;
+      transition:
+        opacity 250ms ease,
+        height 250ms,
+        display 250ms allow-discrete,
+        overlay 250ms allow-discrete;
+    }
+
+    .box {
       background: #1a1a1a;
       border: 1px solid #404040;
       border-radius: 8px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      min-height: 250px;
-      padding: 0;
-      bottom: max(20px, anchor(bottom) - 400px);
-      position-try-fallbacks: flip-block;
+      overflow: auto;
       scroll-padding-top: 50px;
+
+      transition: translate 250ms ease-in;
+      translate: 0 -100px;
+    }
+
+    &:open .box {
+      translate: 0 0;
+      transition-timing-function: ease;
+
+      @starting-style {
+        translate: 0 -100px;
+      }
+    }
+
+    &:open::picker(select) {
+      display: flex;
+      justify-content: start;
+
+      opacity: 1;
+      @starting-style {
+        opacity: 0;
+      }
     }
   }
 }
