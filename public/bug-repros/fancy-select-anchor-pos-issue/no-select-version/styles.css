@@ -1,0 +1,116 @@
+html {
+  background: #444;
+  font-family: system-ui;
+}
+
+.programming-lang-select {
+  color-scheme: dark;
+  position: absolute;
+  top: 100px;
+  left: 100px;
+
+  .option-group {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      background: #2a2a2a;
+      top: anchor(top);
+      left: anchor(left);
+      bottom: anchor(bottom);
+      right: anchor(right);
+      display: none;
+      transition:
+        top 150ms ease,
+        left 150ms ease,
+        bottom 150ms ease,
+        right 150ms ease,
+        display 300ms allow-discrete,
+        position-anchor 300ms allow-discrete step-end,
+        opacity 300ms ease;
+
+      opacity: 0;
+    }
+
+    &:has(.option:is(:focus, :hover))::before {
+      display: block;
+      transition:
+        top 150ms ease,
+        left 150ms ease,
+        bottom 150ms ease,
+        right 150ms ease,
+        display 300ms allow-discrete,
+        opacity 300ms ease;
+
+      opacity: 1;
+      @starting-style {
+        opacity: 0;
+      }
+    }
+  }
+
+  .option {
+    position: relative;
+
+    &:hover,
+    &:focus {
+      outline: none;
+      background: none;
+    }
+
+    &.checked {
+      background: #2d4a5c;
+    }
+  }
+
+  .option[data-value='html'] {
+    anchor-name: --html;
+  }
+  .option[data-value='css'] {
+    anchor-name: --css;
+  }
+  .option[data-value='xml'] {
+    anchor-name: --xml;
+  }
+  .option[data-value='svg'] {
+    anchor-name: --svg;
+  }
+  .option[data-value='markdown'] {
+    anchor-name: --markdown;
+  }
+  .option[data-value='javascript'] {
+    anchor-name: --javascript;
+  }
+  .option[data-value='python'] {
+    anchor-name: --python;
+  }
+  .option[data-value='ruby'] {
+    anchor-name: --ruby;
+  }
+
+  .option-group:has(.option[data-value='html']:is(:hover, :focus))::before {
+    position-anchor: --html;
+  }
+  .option-group:has(.option[data-value='css']:is(:hover, :focus))::before {
+    position-anchor: --css;
+  }
+  .option-group:has(.option[data-value='xml']:is(:hover, :focus))::before {
+    position-anchor: --xml;
+  }
+  .option-group:has(.option[data-value='svg']:is(:hover, :focus))::before {
+    position-anchor: --svg;
+  }
+  .option-group:has(.option[data-value='markdown']:is(:hover, :focus))::before {
+    position-anchor: --markdown;
+  }
+  .option-group:has(.option[data-value='javascript']:is(:hover, :focus))::before {
+    position-anchor: --javascript;
+  }
+  .option-group:has(.option[data-value='python']:is(:hover, :focus))::before {
+    position-anchor: --python;
+  }
+  .option-group:has(.option[data-value='ruby']:is(:hover, :focus))::before {
+    position-anchor: --ruby;
+  }
+}
