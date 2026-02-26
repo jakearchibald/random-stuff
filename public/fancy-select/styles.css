@@ -159,7 +159,7 @@ html {
     selectedcontent {
       color: #e0e0e0;
       display: grid;
-      grid-template-columns: 2.2ch 1fr;
+      grid-template-columns: 2.2ch 10.6ch;
       gap: 0.5em;
       align-items: center;
       position: relative;
