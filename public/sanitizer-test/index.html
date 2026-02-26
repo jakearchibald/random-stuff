@@ -1,0 +1,38 @@
+<!doctype html>
+<title>Sanitizer test</title>
+<h2>Container 1</h2>
+<div class="container-1"></div>
+<h2>Container 2</h2>
+<div class="container-2"></div>
+<h2>Container 3</h2>
+<div class="container-3"></div>
+<h2>Container 4</h2>
+<div class="container-4"></div>
+<script>
+  const container = document.querySelector('.container-1');
+  const container2 = document.querySelector('.container-2');
+  const container3 = document.querySelector('.container-3');
+  const container4 = document.querySelector('.container-4');
+
+  const sanitizer = new Sanitizer();
+  sanitizer.allowElement({
+    name: 'img',
+    attributes: ['src'],
+  });
+  const str = `<h1>Hello</h1> <p><em>my name</em> is <img src="x" onclick="alert('XSS')"></p>`;
+  container.setHTML(str, { sanitizer });
+  container2.innerHTML = str;
+  container3.setHTMLUnsafe(str);
+
+  const anotherSanitizer = new Sanitizer({
+    elements: [
+      'p',
+      {
+        name: 'img',
+        attributes: ['src', 'width', 'height', 'alt'],
+      },
+    ],
+    replaceWithChildrenElements: ['em'],
+  });
+  container4.setHTML(str, { sanitizer: anotherSanitizer });
+</script>
