@@ -138,7 +138,7 @@ html {
         opacity: 0;
       }
 
-      &:has(option:is(:focus, :hover))::before {
+      &:has(option:is(:focus-visible, :hover))::before {
         display: block;
         transition:
           top 150ms ease,
@@ -442,265 +442,265 @@ html {
       anchor-name: --latex;
     }
 
-    optgroup:has(option[value='html']:is(:hover, :focus))::before {
+    optgroup:has(option[value='html']:is(:hover, :focus-visible))::before {
       position-anchor: --html;
     }
-    optgroup:has(option[value='css']:is(:hover, :focus))::before {
+    optgroup:has(option[value='css']:is(:hover, :focus-visible))::before {
       position-anchor: --css;
     }
-    optgroup:has(option[value='xml']:is(:hover, :focus))::before {
+    optgroup:has(option[value='xml']:is(:hover, :focus-visible))::before {
       position-anchor: --xml;
     }
-    optgroup:has(option[value='svg']:is(:hover, :focus))::before {
+    optgroup:has(option[value='svg']:is(:hover, :focus-visible))::before {
       position-anchor: --svg;
     }
-    optgroup:has(option[value='markdown']:is(:hover, :focus))::before {
+    optgroup:has(option[value='markdown']:is(:hover, :focus-visible))::before {
       position-anchor: --markdown;
     }
-    optgroup:has(option[value='javascript']:is(:hover, :focus))::before {
+    optgroup:has(option[value='javascript']:is(:hover, :focus-visible))::before {
       position-anchor: --javascript;
     }
-    optgroup:has(option[value='python']:is(:hover, :focus))::before {
+    optgroup:has(option[value='python']:is(:hover, :focus-visible))::before {
       position-anchor: --python;
     }
-    optgroup:has(option[value='ruby']:is(:hover, :focus))::before {
+    optgroup:has(option[value='ruby']:is(:hover, :focus-visible))::before {
       position-anchor: --ruby;
     }
-    optgroup:has(option[value='php']:is(:hover, :focus))::before {
+    optgroup:has(option[value='php']:is(:hover, :focus-visible))::before {
       position-anchor: --php;
     }
-    optgroup:has(option[value='perl']:is(:hover, :focus))::before {
+    optgroup:has(option[value='perl']:is(:hover, :focus-visible))::before {
       position-anchor: --perl;
     }
-    optgroup:has(option[value='lua']:is(:hover, :focus))::before {
+    optgroup:has(option[value='lua']:is(:hover, :focus-visible))::before {
       position-anchor: --lua;
     }
-    optgroup:has(option[value='shell']:is(:hover, :focus))::before {
+    optgroup:has(option[value='shell']:is(:hover, :focus-visible))::before {
       position-anchor: --shell;
     }
-    optgroup:has(option[value='powershell']:is(:hover, :focus))::before {
+    optgroup:has(option[value='powershell']:is(:hover, :focus-visible))::before {
       position-anchor: --powershell;
     }
-    optgroup:has(option[value='typescript']:is(:hover, :focus))::before {
+    optgroup:has(option[value='typescript']:is(:hover, :focus-visible))::before {
       position-anchor: --typescript;
     }
-    optgroup:has(option[value='coffeescript']:is(:hover, :focus))::before {
+    optgroup:has(option[value='coffeescript']:is(:hover, :focus-visible))::before {
       position-anchor: --coffeescript;
     }
-    optgroup:has(option[value='babel']:is(:hover, :focus))::before {
+    optgroup:has(option[value='babel']:is(:hover, :focus-visible))::before {
       position-anchor: --babel;
     }
-    optgroup:has(option[value='elm']:is(:hover, :focus))::before {
+    optgroup:has(option[value='elm']:is(:hover, :focus-visible))::before {
       position-anchor: --elm;
     }
-    optgroup:has(option[value='reasonml']:is(:hover, :focus))::before {
+    optgroup:has(option[value='reasonml']:is(:hover, :focus-visible))::before {
       position-anchor: --reasonml;
     }
-    optgroup:has(option[value='rescript']:is(:hover, :focus))::before {
+    optgroup:has(option[value='rescript']:is(:hover, :focus-visible))::before {
       position-anchor: --rescript;
     }
-    optgroup:has(option[value='haxe']:is(:hover, :focus))::before {
+    optgroup:has(option[value='haxe']:is(:hover, :focus-visible))::before {
       position-anchor: --haxe;
     }
-    optgroup:has(option[value='dart']:is(:hover, :focus))::before {
+    optgroup:has(option[value='dart']:is(:hover, :focus-visible))::before {
       position-anchor: --dart;
     }
-    optgroup:has(option[value='c']:is(:hover, :focus))::before {
+    optgroup:has(option[value='c']:is(:hover, :focus-visible))::before {
       position-anchor: --c;
     }
-    optgroup:has(option[value='cpp']:is(:hover, :focus))::before {
+    optgroup:has(option[value='cpp']:is(:hover, :focus-visible))::before {
       position-anchor: --cpp;
     }
-    optgroup:has(option[value='csharp']:is(:hover, :focus))::before {
+    optgroup:has(option[value='csharp']:is(:hover, :focus-visible))::before {
       position-anchor: --csharp;
     }
-    optgroup:has(option[value='rust']:is(:hover, :focus))::before {
+    optgroup:has(option[value='rust']:is(:hover, :focus-visible))::before {
       position-anchor: --rust;
     }
-    optgroup:has(option[value='go']:is(:hover, :focus))::before {
+    optgroup:has(option[value='go']:is(:hover, :focus-visible))::before {
       position-anchor: --go;
     }
-    optgroup:has(option[value='zig']:is(:hover, :focus))::before {
+    optgroup:has(option[value='zig']:is(:hover, :focus-visible))::before {
       position-anchor: --zig;
     }
-    optgroup:has(option[value='d']:is(:hover, :focus))::before {
+    optgroup:has(option[value='d']:is(:hover, :focus-visible))::before {
       position-anchor: --d;
     }
-    optgroup:has(option[value='vala']:is(:hover, :focus))::before {
+    optgroup:has(option[value='vala']:is(:hover, :focus-visible))::before {
       position-anchor: --vala;
     }
-    optgroup:has(option[value='java']:is(:hover, :focus))::before {
+    optgroup:has(option[value='java']:is(:hover, :focus-visible))::before {
       position-anchor: --java;
     }
-    optgroup:has(option[value='scala']:is(:hover, :focus))::before {
+    optgroup:has(option[value='scala']:is(:hover, :focus-visible))::before {
       position-anchor: --scala;
     }
-    optgroup:has(option[value='kotlin']:is(:hover, :focus))::before {
+    optgroup:has(option[value='kotlin']:is(:hover, :focus-visible))::before {
       position-anchor: --kotlin;
     }
-    optgroup:has(option[value='clojure']:is(:hover, :focus))::before {
+    optgroup:has(option[value='clojure']:is(:hover, :focus-visible))::before {
       position-anchor: --clojure;
     }
-    optgroup:has(option[value='groovy']:is(:hover, :focus))::before {
+    optgroup:has(option[value='groovy']:is(:hover, :focus-visible))::before {
       position-anchor: --groovy;
     }
-    optgroup:has(option[value='haskell']:is(:hover, :focus))::before {
+    optgroup:has(option[value='haskell']:is(:hover, :focus-visible))::before {
       position-anchor: --haskell;
     }
-    optgroup:has(option[value='ocaml']:is(:hover, :focus))::before {
+    optgroup:has(option[value='ocaml']:is(:hover, :focus-visible))::before {
       position-anchor: --ocaml;
     }
-    optgroup:has(option[value='fsharp']:is(:hover, :focus))::before {
+    optgroup:has(option[value='fsharp']:is(:hover, :focus-visible))::before {
       position-anchor: --fsharp;
     }
-    optgroup:has(option[value='elixir']:is(:hover, :focus))::before {
+    optgroup:has(option[value='elixir']:is(:hover, :focus-visible))::before {
       position-anchor: --elixir;
     }
-    optgroup:has(option[value='purescript']:is(:hover, :focus))::before {
+    optgroup:has(option[value='purescript']:is(:hover, :focus-visible))::before {
       position-anchor: --purescript;
     }
-    optgroup:has(option[value='prolog']:is(:hover, :focus))::before {
+    optgroup:has(option[value='prolog']:is(:hover, :focus-visible))::before {
       position-anchor: --prolog;
     }
-    optgroup:has(option[value='react']:is(:hover, :focus))::before {
+    optgroup:has(option[value='react']:is(:hover, :focus-visible))::before {
       position-anchor: --react;
     }
-    optgroup:has(option[value='vue']:is(:hover, :focus))::before {
+    optgroup:has(option[value='vue']:is(:hover, :focus-visible))::before {
       position-anchor: --vue;
     }
-    optgroup:has(option[value='svelte']:is(:hover, :focus))::before {
+    optgroup:has(option[value='svelte']:is(:hover, :focus-visible))::before {
       position-anchor: --svelte;
     }
-    optgroup:has(option[value='ejs']:is(:hover, :focus))::before {
+    optgroup:has(option[value='ejs']:is(:hover, :focus-visible))::before {
       position-anchor: --ejs;
     }
-    optgroup:has(option[value='pug']:is(:hover, :focus))::before {
+    optgroup:has(option[value='pug']:is(:hover, :focus-visible))::before {
       position-anchor: --pug;
     }
-    optgroup:has(option[value='haml']:is(:hover, :focus))::before {
+    optgroup:has(option[value='haml']:is(:hover, :focus-visible))::before {
       position-anchor: --haml;
     }
-    optgroup:has(option[value='liquid']:is(:hover, :focus))::before {
+    optgroup:has(option[value='liquid']:is(:hover, :focus-visible))::before {
       position-anchor: --liquid;
     }
-    optgroup:has(option[value='mustache']:is(:hover, :focus))::before {
+    optgroup:has(option[value='mustache']:is(:hover, :focus-visible))::before {
       position-anchor: --mustache;
     }
-    optgroup:has(option[value='nunjucks']:is(:hover, :focus))::before {
+    optgroup:has(option[value='nunjucks']:is(:hover, :focus-visible))::before {
       position-anchor: --nunjucks;
     }
-    optgroup:has(option[value='twig']:is(:hover, :focus))::before {
+    optgroup:has(option[value='twig']:is(:hover, :focus-visible))::before {
       position-anchor: --twig;
     }
-    optgroup:has(option[value='slim']:is(:hover, :focus))::before {
+    optgroup:has(option[value='slim']:is(:hover, :focus-visible))::before {
       position-anchor: --slim;
     }
-    optgroup:has(option[value='smarty']:is(:hover, :focus))::before {
+    optgroup:has(option[value='smarty']:is(:hover, :focus-visible))::before {
       position-anchor: --smarty;
     }
-    optgroup:has(option[value='jinja']:is(:hover, :focus))::before {
+    optgroup:has(option[value='jinja']:is(:hover, :focus-visible))::before {
       position-anchor: --jinja;
     }
-    optgroup:has(option[value='sass']:is(:hover, :focus))::before {
+    optgroup:has(option[value='sass']:is(:hover, :focus-visible))::before {
       position-anchor: --sass;
     }
-    optgroup:has(option[value='less']:is(:hover, :focus))::before {
+    optgroup:has(option[value='less']:is(:hover, :focus-visible))::before {
       position-anchor: --less;
     }
-    optgroup:has(option[value='stylus']:is(:hover, :focus))::before {
+    optgroup:has(option[value='stylus']:is(:hover, :focus-visible))::before {
       position-anchor: --stylus;
     }
-    optgroup:has(option[value='json']:is(:hover, :focus))::before {
+    optgroup:has(option[value='json']:is(:hover, :focus-visible))::before {
       position-anchor: --json;
     }
-    optgroup:has(option[value='yaml']:is(:hover, :focus))::before {
+    optgroup:has(option[value='yaml']:is(:hover, :focus-visible))::before {
       position-anchor: --yaml;
     }
-    optgroup:has(option[value='toml']:is(:hover, :focus))::before {
+    optgroup:has(option[value='toml']:is(:hover, :focus-visible))::before {
       position-anchor: --toml;
     }
-    optgroup:has(option[value='csv']:is(:hover, :focus))::before {
+    optgroup:has(option[value='csv']:is(:hover, :focus-visible))::before {
       position-anchor: --csv;
     }
-    optgroup:has(option[value='tsconfig']:is(:hover, :focus))::before {
+    optgroup:has(option[value='tsconfig']:is(:hover, :focus-visible))::before {
       position-anchor: --tsconfig;
     }
-    optgroup:has(option[value='vite']:is(:hover, :focus))::before {
+    optgroup:has(option[value='vite']:is(:hover, :focus-visible))::before {
       position-anchor: --vite;
     }
-    optgroup:has(option[value='webpack']:is(:hover, :focus))::before {
+    optgroup:has(option[value='webpack']:is(:hover, :focus-visible))::before {
       position-anchor: --webpack;
     }
-    optgroup:has(option[value='rollup']:is(:hover, :focus))::before {
+    optgroup:has(option[value='rollup']:is(:hover, :focus-visible))::before {
       position-anchor: --rollup;
     }
-    optgroup:has(option[value='grunt']:is(:hover, :focus))::before {
+    optgroup:has(option[value='grunt']:is(:hover, :focus-visible))::before {
       position-anchor: --grunt;
     }
-    optgroup:has(option[value='gulp']:is(:hover, :focus))::before {
+    optgroup:has(option[value='gulp']:is(:hover, :focus-visible))::before {
       position-anchor: --gulp;
     }
-    optgroup:has(option[value='gradle']:is(:hover, :focus))::before {
+    optgroup:has(option[value='gradle']:is(:hover, :focus-visible))::before {
       position-anchor: --gradle;
     }
-    optgroup:has(option[value='maven']:is(:hover, :focus))::before {
+    optgroup:has(option[value='maven']:is(:hover, :focus-visible))::before {
       position-anchor: --maven;
     }
-    optgroup:has(option[value='sbt']:is(:hover, :focus))::before {
+    optgroup:has(option[value='sbt']:is(:hover, :focus-visible))::before {
       position-anchor: --sbt;
     }
-    optgroup:has(option[value='bazel']:is(:hover, :focus))::before {
+    optgroup:has(option[value='bazel']:is(:hover, :focus-visible))::before {
       position-anchor: --bazel;
     }
-    optgroup:has(option[value='eslint']:is(:hover, :focus))::before {
+    optgroup:has(option[value='eslint']:is(:hover, :focus-visible))::before {
       position-anchor: --eslint;
     }
-    optgroup:has(option[value='stylelint']:is(:hover, :focus))::before {
+    optgroup:has(option[value='stylelint']:is(:hover, :focus-visible))::before {
       position-anchor: --stylelint;
     }
-    optgroup:has(option[value='bower']:is(:hover, :focus))::before {
+    optgroup:has(option[value='bower']:is(:hover, :focus-visible))::before {
       position-anchor: --bower;
     }
-    optgroup:has(option[value='npm']:is(:hover, :focus))::before {
+    optgroup:has(option[value='npm']:is(:hover, :focus-visible))::before {
       position-anchor: --npm;
     }
-    optgroup:has(option[value='yarn']:is(:hover, :focus))::before {
+    optgroup:has(option[value='yarn']:is(:hover, :focus-visible))::before {
       position-anchor: --yarn;
     }
-    optgroup:has(option[value='docker']:is(:hover, :focus))::before {
+    optgroup:has(option[value='docker']:is(:hover, :focus-visible))::before {
       position-anchor: --docker;
     }
-    optgroup:has(option[value='karma']:is(:hover, :focus))::before {
+    optgroup:has(option[value='karma']:is(:hover, :focus-visible))::before {
       position-anchor: --karma;
     }
-    optgroup:has(option[value='sql']:is(:hover, :focus))::before {
+    optgroup:has(option[value='sql']:is(:hover, :focus-visible))::before {
       position-anchor: --sql;
     }
-    optgroup:has(option[value='graphql']:is(:hover, :focus))::before {
+    optgroup:has(option[value='graphql']:is(:hover, :focus-visible))::before {
       position-anchor: --graphql;
     }
-    optgroup:has(option[value='prisma']:is(:hover, :focus))::before {
+    optgroup:has(option[value='prisma']:is(:hover, :focus-visible))::before {
       position-anchor: --prisma;
     }
-    optgroup:has(option[value='julia']:is(:hover, :focus))::before {
+    optgroup:has(option[value='julia']:is(:hover, :focus-visible))::before {
       position-anchor: --julia;
     }
-    optgroup:has(option[value='r']:is(:hover, :focus))::before {
+    optgroup:has(option[value='r']:is(:hover, :focus-visible))::before {
       position-anchor: --r;
     }
-    optgroup:has(option[value='crystal']:is(:hover, :focus))::before {
+    optgroup:has(option[value='crystal']:is(:hover, :focus-visible))::before {
       position-anchor: --crystal;
     }
-    optgroup:has(option[value='nim']:is(:hover, :focus))::before {
+    optgroup:has(option[value='nim']:is(:hover, :focus-visible))::before {
       position-anchor: --nim;
     }
-    optgroup:has(option[value='swift']:is(:hover, :focus))::before {
+    optgroup:has(option[value='swift']:is(:hover, :focus-visible))::before {
       position-anchor: --swift;
     }
-    optgroup:has(option[value='wasm']:is(:hover, :focus))::before {
+    optgroup:has(option[value='wasm']:is(:hover, :focus-visible))::before {
       position-anchor: --wasm;
     }
-    optgroup:has(option[value='latex']:is(:hover, :focus))::before {
+    optgroup:has(option[value='latex']:is(:hover, :focus-visible))::before {
       position-anchor: --latex;
     }
 
@@ -767,3 +767,4 @@ html {
     }
   }
 }
+
