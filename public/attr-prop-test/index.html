@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>attr() cascade test</title>
+    <style>
+      @property --reg {
+        syntax: '<string>';
+        inherits: false;
+      }
+
+      .outer {
+        --unreg: attr(data-foo);
+        --reg: attr(data-foo);
+      }
+
+      .inner::before {
+        content: var(--unreg);
+      }
+      .inner::after {
+        content: var(--reg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="outer" data-foo="outer">
+      <div class="inner" data-foo="inner"></div>
+    </div>
+  </body>
+</html>
