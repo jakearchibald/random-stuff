@@ -40,7 +40,7 @@
     top: 50px;
     left: 50px;
 
-    &:hover .shape {
+    &:is(:hover, :focus) .shape {
       --side-x: 22%;
       --side-y: 50%;
       --top-y: 10%;
@@ -51,4 +51,4 @@
     }
   }
 </style>
-<div class="wrapper"><div class="shape"></div></div>
+<div class="wrapper" tabindex="0"><div class="shape"></div></div>
