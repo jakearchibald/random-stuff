@@ -1,0 +1,54 @@
+<!doctype html>
+<title>Heart CSS shape</title>
+<style>
+  html {
+    background: #222;
+  }
+  .shape {
+    --size: 300px;
+    width: var(--size);
+    aspect-ratio: 1;
+
+    /* Resting state: left side x/y, top y, and control point offsets (pre-scaled 0.8 around 50% center) */
+    --side-x: 17%;
+    --side-y: 58%;
+    --top-y: 21%;
+    --cp1-x: -3%;
+    --cp1-y: 38%;
+    --cp2-y: -2%;
+    --cp3-x: 26%;
+
+    clip-path: shape(
+      from 50% 90%,
+      line to var(--side-x) var(--side-y),
+      curve to 50% var(--top-y) with var(--cp1-x) var(--cp1-y) / var(--cp3-x) var(--cp2-y),
+      curve to calc(100% - var(--side-x)) var(--side-y) with calc(100% - var(--cp3-x)) var(--cp2-y) / calc(100% - var(--cp1-x)) var(--cp1-y),
+      close
+    );
+    background: linear-gradient(60deg in hsl, #d75252, #852b4f);
+
+    /* prettier-ignore */
+    transition: clip-path 1500ms linear(
+      0, 0.215 1.9%, 1.307 6.3%, 1.519 8.6%, 1.414 10.6%, 0.836 15.1%, 0.731 17.3%,
+      0.784 19.3%, 1.085 23.9%, 1.14, 1.112 28%, 0.956 32.6%, 0.927, 0.942 36.8%,
+      1.023 41.3%, 1.038 43.5%, 0.98, 1.01, 0.995, 1.003 78.1%, 1
+    );
+  }
+
+  .wrapper {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+
+    &:hover .shape {
+      --side-x: 22%;
+      --side-y: 50%;
+      --top-y: 10%;
+      --cp1-x: 31%;
+      --cp1-y: 37%;
+      --cp2-y: 23%;
+      --cp3-x: 41%;
+    }
+  }
+</style>
+<div class="wrapper"><div class="shape"></div></div>

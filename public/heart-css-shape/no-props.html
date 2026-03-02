@@ -1,0 +1,39 @@
+<!doctype html>
+<title>Heart CSS shape</title>
+<style>
+  .shape {
+    --size: 300px;
+    width: var(--size);
+    aspect-ratio: 1;
+
+    clip-path: shape(
+      from 50% 90%,
+      line to 17% 58%,
+      curve to 50% 21% with -3% 38% / 26% -2%,
+      curve to 83% 58% with 74% -2% / 103% 38%,
+      close
+    );
+    background: linear-gradient(60deg in hsl, #d75252, #852b4f);
+    position: absolute;
+    top: 50px;
+    left: 50px;
+
+    /* prettier-ignore */
+    transition: clip-path 1500ms linear(
+      0, 0.215 1.9%, 1.307 6.3%, 1.519 8.6%, 1.414 10.6%, 0.836 15.1%, 0.731 17.3%,
+      0.784 19.3%, 1.085 23.9%, 1.14, 1.112 28%, 0.956 32.6%, 0.927, 0.942 36.8%,
+      1.023 41.3%, 1.038 43.5%, 0.98, 1.01, 0.995, 1.003 78.1%, 1
+    );
+
+    &:hover {
+      clip-path: shape(
+        from 50% 90%,
+        line to 22% 50%,
+        curve to 50% 10% with 31% 37% / 41% 23%,
+        curve to 78% 50% with 59% 23% / 69% 37%,
+        close
+      );
+    }
+  }
+</style>
+<div class="shape"></div>
