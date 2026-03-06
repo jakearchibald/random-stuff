@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anchor position puzzle</title>
+    <style>
+      html {
+        height: 100%;
+        font-family: system-ui;
+      }
+      body {
+        height: 100%;
+        margin: 0;
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: auto;
+        gap: 5px;
+      }
+
+      .test {
+        position: relative;
+        background: #eee;
+        padding: 15px;
+      }
+
+      .anchor {
+        width: 100px;
+        background: green;
+        color: white;
+        text-align: center;
+      }
+
+      .select {
+        background: white;
+        position: absolute;
+        position-area: bottom span-right;
+        border: 1px solid black;
+        overflow: auto;
+        margin-bottom: 15px;
+        min-height: 100px;
+        position-try: flip-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test">
+      <p>
+        Goal: Select box does not cover the anchor, displays directly below the
+        anchor. Select box is tall enough to display its content, and not more.
+      </p>
+      <div class="anchor" style="anchor-name: --anchor-1">Anchor</div>
+      <div class="select" style="position-anchor: --anchor-1">
+        <div>Option 1</div>
+        <div>Option 2</div>
+        <div>Option 3</div>
+        <div>Option 4</div>
+        <div>Option 5</div>
+        <div>Option 6</div>
+        <div>Option 7</div>
+        <div>Option 8</div>
+        <div>Option 9</div>
+        <div>Option 10</div>
+      </div>
+    </div>
+    <div class="test">
+      <p>
+        Goal: Select box does not cover the anchor, displays directly below the
+        anchor, its bottom is 15px from the bottom of the viewport, and its
+        scrollable.
+      </p>
+      <div
+        class="anchor"
+        style="
+          anchor-name: --anchor-2;
+          position: absolute;
+          left: 0;
+          bottom: 150px;
+        "
+      >
+        Anchor
+      </div>
+      <div class="select" style="position-anchor: --anchor-2">
+        <div>Option 1</div>
+        <div>Option 2</div>
+        <div>Option 3</div>
+        <div>Option 4</div>
+        <div>Option 5</div>
+        <div>Option 6</div>
+        <div>Option 7</div>
+        <div>Option 8</div>
+        <div>Option 9</div>
+        <div>Option 10</div>
+      </div>
+    </div>
+    <div class="test">
+      <p>
+        Goal: Select box does not cover the anchor, displays directly above the
+        anchor (via position-try). Select box is tall enough to display its
+        content, and not more.
+      </p>
+      <div
+        class="anchor"
+        style="
+          anchor-name: --anchor-3;
+          position: absolute;
+          left: 0;
+          bottom: 40px;
+        "
+      >
+        Anchor
+      </div>
+      <div class="select" style="position-anchor: --anchor-3">
+        <div>Option 1</div>
+        <div>Option 2</div>
+        <div>Option 3</div>
+        <div>Option 4</div>
+        <div>Option 5</div>
+        <div>Option 6</div>
+        <div>Option 7</div>
+        <div>Option 8</div>
+        <div>Option 9</div>
+        <div>Option 10</div>
+      </div>
+    </div>
+  </body>
+</html>

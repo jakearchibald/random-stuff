@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Fancy Select – Docs Mockup</title>
+  </head>
+  <body>
+    <div class="docs-page-wrapper">
+      <div class="docs-page">
+        <h1>Getting Started</h1>
+
+        <p>
+          Install the package and import it into your project. Then call
+          <code>fancySelect()</code> on any <code>&lt;select&gt;</code> element.
+        </p>
+
+        <h2>Configuration</h2>
+
+        <p>
+          Pass an options object as the second argument to customize behavior.
+          Use the <strong>format</strong> option to control how the config file
+          is parsed.
+        </p>
+
+        <div class="demo-box">
+          <div class="demo-box-top-row">
+            <div class="demo-label">Format</div>
+            <div class="custom-select-demo-2">
+              <div class="select-button">
+                <span
+                  class="lang-icon"
+                  style="color: #cbcb41"
+                  data-char="&#xE051;"
+                ></span>
+                JavaScript
+              </div>
+
+              <div class="box">
+                <div class="option">
+                  <span
+                    class="lang-icon"
+                    style="color: #cbcb41"
+                    data-char="&#xE051;"
+                  ></span>
+                  JavaScript
+                </div>
+                <div class="option">
+                  <span
+                    class="lang-icon"
+                    style="color: #cbcb41"
+                    data-char="&#xE055;"
+                  ></span>
+                  JSON
+                </div>
+                <div class="option">
+                  <span
+                    class="lang-icon"
+                    style="color: #a074c4"
+                    data-char="&#xE0A7;"
+                  ></span>
+                  YAML
+                </div>
+                <div class="option">
+                  <span
+                    class="lang-icon"
+                    style="color: #6d8086"
+                    data-char="&#xE019;"
+                  ></span>
+                  TOML
+                </div>
+                <div class="option">
+                  <span
+                    class="lang-icon"
+                    style="color: #e37933"
+                    data-char="&#xE0A5;"
+                  ></span>
+                  XML
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pre class="code-block">
+export default {
+  output: {
+    dir: 'dist',
+  },
+}</pre
+          >
+        </div>
+
+        <h2>Options</h2>
+
+        <p>Defaults are shown below.</p>
+
+        <table class="options-table">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>format</code></td>
+              <td><code>string</code></td>
+              <td><code>"javascript"</code></td>
+              <td>The config file format to use.</td>
+            </tr>
+            <tr>
+              <td><code>placeholder</code></td>
+              <td><code>string</code></td>
+              <td><code>"Select…"</code></td>
+              <td>Text shown when no option is selected.</td>
+            </tr>
+            <tr>
+              <td><code>searchable</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Adds a search input to the dropdown.</td>
+            </tr>
+            <tr>
+              <td><code>maxHeight</code></td>
+              <td><code>string</code></td>
+              <td><code>"240px"</code></td>
+              <td>Maximum height of the open dropdown.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Events</h2>
+
+        <p>
+          The enhanced element fires a <code>change</code> event just like a
+          native <code>&lt;select&gt;</code>, so existing event listeners
+          continue to work without modification.
+        </p>
+
+        <pre class="code-block">
+const el = document.querySelector('#my-select')
+fancySelect(el, { searchable: true })
+
+el.addEventListener('change', (e) => {
+  console.log('selected:', e.target.value)
+})</pre
+        >
+
+        <h2>Styling</h2>
+
+        <p>
+          The component exposes CSS custom properties for theming. Override them
+          in your own stylesheet to match your design system.
+        </p>
+
+        <pre class="code-block">
+.fancy-select {
+  --fs-background: #1a1a1a;
+  --fs-border: #404040;
+  --fs-border-radius: 8px;
+  --fs-color: #e0e0e0;
+  --fs-highlight: #2a2a2a;
+  --fs-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}</pre
+        >
+
+        <p>
+          For full control, the internal DOM structure is documented in the
+          <a href="#">API reference</a>.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

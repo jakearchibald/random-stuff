@@ -8,3 +8,6 @@
 
 /assets/*
   Cache-Control: public, max-age=31556952, immutable
+
+#/sanitizer-test/
+#  Content-Security-Policy: require-trusted-types-for 'script'

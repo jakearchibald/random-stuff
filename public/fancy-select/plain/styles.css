@@ -1,0 +1,94 @@
+html {
+  background: #222;
+  font-family: system-ui;
+}
+
+@font-face {
+  font-family: seti;
+  src: url('./seti.woff') format('woff');
+}
+
+.custom-select-demo {
+  font-size: 16px;
+
+  .lang-icon {
+    font-family: seti;
+    font-size: 1.5em;
+    display: grid;
+    justify-content: center;
+  }
+
+  .lang-icon::before {
+    content: attr(data-char);
+  }
+
+  .select-button {
+    color: #e0e0e0;
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    padding: 0.4em 0.5em;
+    padding-right: 0.8em;
+    display: grid;
+    grid-template-columns: 2.2ch 10.6ch auto;
+    gap: 0.5em;
+    align-items: center;
+
+    &::after {
+      content: '';
+      --size: 9px;
+      width: var(--size);
+      height: calc(var(--size) * 0.8);
+      background: #e0e0e0;
+      clip-path: shape(
+        from 0% 0%,
+        line to 50% 0%,
+        line to 100% 0%,
+        line to 50% 100%,
+        close
+      );
+    }
+  }
+
+  .box {
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    overflow: auto;
+    scroll-padding-top: 50px;
+    min-height: 250px;
+  }
+
+  .group {
+    position: relative;
+  }
+
+  .group-label {
+    position: sticky;
+    top: 0;
+    background: #252525;
+    color: #888;
+    padding: 8px 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #333;
+    z-index: 1;
+  }
+
+  .group:first-of-type .group-label {
+    background-color: #404040;
+    color: #999;
+  }
+
+  .option {
+    color: #e0e0e0;
+    display: grid;
+    grid-template-columns: 2.2ch 10.6ch;
+    gap: 0.5em;
+    align-items: center;
+    padding: 0.4em 0.5em;
+  }
+}
