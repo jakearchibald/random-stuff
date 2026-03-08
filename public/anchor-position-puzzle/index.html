@@ -40,16 +40,32 @@
         text-align: center;
       }
 
-      .picker {
-        background: white;
+      .picker-wrapper {
         position: fixed;
         position-area: bottom span-right;
-        border: 1px solid black;
-        overflow: auto;
         margin-bottom: 15px;
         min-height: 100px;
+        align-self: stretch;
+        background: rgb(0 0 0 / 0.5);
+        display: grid;
+        overflow: hidden;
         position-try: flip-block;
+        container-type: anchored;
       }
+
+      .picker {
+        background: white;
+        border: 1px solid black;
+        overflow: auto;
+        max-height: 100%;
+        box-sizing: border-box;
+        align-self: start;
+
+        @container anchored(fallback: flip-block) {
+          align-self: end;
+        }
+      }
+
     </style>
   </head>
   <body>
@@ -69,17 +85,19 @@
           and not more.
         </p>
         <div class="anchor" style="anchor-name: --anchor-1">Anchor</div>
-        <div class="picker" style="position-anchor: --anchor-1">
-          <div>Option 1</div>
-          <div>Option 2</div>
-          <div>Option 3</div>
-          <div>Option 4</div>
-          <div>Option 5</div>
-          <div>Option 6</div>
-          <div>Option 7</div>
-          <div>Option 8</div>
-          <div>Option 9</div>
-          <div>Option 10</div>
+        <div class="picker-wrapper" style="position-anchor: --anchor-1">
+          <div class="picker">
+            <div>Option 1</div>
+            <div>Option 2</div>
+            <div>Option 3</div>
+            <div>Option 4</div>
+            <div>Option 5</div>
+            <div>Option 6</div>
+            <div>Option 7</div>
+            <div>Option 8</div>
+            <div>Option 9</div>
+            <div>Option 10</div>
+          </div>
         </div>
       </div>
       <div class="test">
@@ -99,17 +117,19 @@
         >
           Anchor
         </div>
-        <div class="picker" style="position-anchor: --anchor-2">
-          <div>Option 1</div>
-          <div>Option 2</div>
-          <div>Option 3</div>
-          <div>Option 4</div>
-          <div>Option 5</div>
-          <div>Option 6</div>
-          <div>Option 7</div>
-          <div>Option 8</div>
-          <div>Option 9</div>
-          <div>Option 10</div>
+        <div class="picker-wrapper" style="position-anchor: --anchor-2">
+          <div class="picker">
+            <div>Option 1</div>
+            <div>Option 2</div>
+            <div>Option 3</div>
+            <div>Option 4</div>
+            <div>Option 5</div>
+            <div>Option 6</div>
+            <div>Option 7</div>
+            <div>Option 8</div>
+            <div>Option 9</div>
+            <div>Option 10</div>
+          </div>
         </div>
       </div>
       <div class="test">
@@ -135,17 +155,19 @@
         >
           Anchor
         </div>
-        <div class="picker" style="position-anchor: --anchor-3">
-          <div>Option 1</div>
-          <div>Option 2</div>
-          <div>Option 3</div>
-          <div>Option 4</div>
-          <div>Option 5</div>
-          <div>Option 6</div>
-          <div>Option 7</div>
-          <div>Option 8</div>
-          <div>Option 9</div>
-          <div>Option 10</div>
+        <div class="picker-wrapper" style="position-anchor: --anchor-3">
+          <div class="picker">
+            <div>Option 1</div>
+            <div>Option 2</div>
+            <div>Option 3</div>
+            <div>Option 4</div>
+            <div>Option 5</div>
+            <div>Option 6</div>
+            <div>Option 7</div>
+            <div>Option 8</div>
+            <div>Option 9</div>
+            <div>Option 10</div>
+          </div>
         </div>
       </div>
     </div>
