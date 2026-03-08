@@ -58,92 +58,96 @@
       there's space. It will shrink to a minimum of 100px tall if it gets close
       to the viewport edges, and it will leave a 15px margin. If there's no
       space below (considering the min-height), it will flip above the anchor.
-      It never obscures the anchor, unless the window size is so small, there isn't 100px of space above or below the anchor.
+      It never obscures the anchor, unless the window size is so small, there
+      isn't 100px of space above or below the anchor.
     </p>
-    <div class="tests"><div class="test">
-      <p>
-        Test 1 Goal: Select box does not cover the anchor, displays directly below the
-        anchor. Select box is tall enough to display its content, and not more.
-      </p>
-      <div class="anchor" style="anchor-name: --anchor-1">Anchor</div>
-      <div class="select" style="position-anchor: --anchor-1">
-        <div>Option 1</div>
-        <div>Option 2</div>
-        <div>Option 3</div>
-        <div>Option 4</div>
-        <div>Option 5</div>
-        <div>Option 6</div>
-        <div>Option 7</div>
-        <div>Option 8</div>
-        <div>Option 9</div>
-        <div>Option 10</div>
+    <div class="tests">
+      <div class="test">
+        <p>
+          Test 1 Goal: Select box does not cover the anchor, displays directly
+          below the anchor. Select box is tall enough to display its content,
+          and not more.
+        </p>
+        <div class="anchor" style="anchor-name: --anchor-1">Anchor</div>
+        <div class="select" style="position-anchor: --anchor-1">
+          <div>Option 1</div>
+          <div>Option 2</div>
+          <div>Option 3</div>
+          <div>Option 4</div>
+          <div>Option 5</div>
+          <div>Option 6</div>
+          <div>Option 7</div>
+          <div>Option 8</div>
+          <div>Option 9</div>
+          <div>Option 10</div>
+        </div>
+      </div>
+      <div class="test">
+        <p>
+          Test 2 Goal: Select box does not cover the anchor, displays directly
+          below the anchor, its bottom is 15px from the bottom of the viewport,
+          and its scrollable.
+        </p>
+        <div
+          class="anchor"
+          style="
+            anchor-name: --anchor-2;
+            position: absolute;
+            left: 0;
+            bottom: 150px;
+          "
+        >
+          Anchor
+        </div>
+        <div class="select" style="position-anchor: --anchor-2">
+          <div>Option 1</div>
+          <div>Option 2</div>
+          <div>Option 3</div>
+          <div>Option 4</div>
+          <div>Option 5</div>
+          <div>Option 6</div>
+          <div>Option 7</div>
+          <div>Option 8</div>
+          <div>Option 9</div>
+          <div>Option 10</div>
+        </div>
+      </div>
+      <div class="test">
+        <p>
+          Test 3 Goal: Select box does not cover the anchor, displays directly
+          above the anchor (via position-try). Select box is tall enough to
+          display its content, and not more.
+        </p>
+        <p>
+          If the window is made smaller in height, the select's top must not be
+          closer than 15px to the top of the viewport, and it must shrink until
+          its min-height. Until it reaches the min-height, it must not obscure
+          the anchor.
+        </p>
+        <div
+          class="anchor"
+          style="
+            anchor-name: --anchor-3;
+            position: absolute;
+            left: 0;
+            bottom: 40px;
+          "
+        >
+          Anchor
+        </div>
+        <div class="select" style="position-anchor: --anchor-3">
+          <div>Option 1</div>
+          <div>Option 2</div>
+          <div>Option 3</div>
+          <div>Option 4</div>
+          <div>Option 5</div>
+          <div>Option 6</div>
+          <div>Option 7</div>
+          <div>Option 8</div>
+          <div>Option 9</div>
+          <div>Option 10</div>
+        </div>
       </div>
     </div>
-    <div class="test">
-      <p>
-        Test 2 Goal: Select box does not cover the anchor, displays directly below the
-        anchor, its bottom is 15px from the bottom of the viewport, and its
-        scrollable.
-      </p>
-      <div
-        class="anchor"
-        style="
-          anchor-name: --anchor-2;
-          position: absolute;
-          left: 0;
-          bottom: 150px;
-        "
-      >
-        Anchor
-      </div>
-      <div class="select" style="position-anchor: --anchor-2">
-        <div>Option 1</div>
-        <div>Option 2</div>
-        <div>Option 3</div>
-        <div>Option 4</div>
-        <div>Option 5</div>
-        <div>Option 6</div>
-        <div>Option 7</div>
-        <div>Option 8</div>
-        <div>Option 9</div>
-        <div>Option 10</div>
-      </div>
-    </div>
-    <div class="test">
-      <p>
-        Test 3 Goal: Select box does not cover the anchor, displays directly above the
-        anchor (via position-try). Select box is tall enough to display its
-        content, and not more.
-      </p>
-      <p>
-        If the window is made smaller in height, the select's top must not be
-        closer than 15px to the top of the viewport, and it must shrink until
-        its min-height. Until it reaches the min-height, it must not obscure the
-        anchor.
-      </p>
-      <div
-        class="anchor"
-        style="
-          anchor-name: --anchor-3;
-          position: absolute;
-          left: 0;
-          bottom: 40px;
-        "
-      >
-        Anchor
-      </div>
-      <div class="select" style="position-anchor: --anchor-3">
-        <div>Option 1</div>
-        <div>Option 2</div>
-        <div>Option 3</div>
-        <div>Option 4</div>
-        <div>Option 5</div>
-        <div>Option 6</div>
-        <div>Option 7</div>
-        <div>Option 8</div>
-        <div>Option 9</div>
-        <div>Option 10</div>
-      </div>
-    </div></div>
   </body>
 </html>
