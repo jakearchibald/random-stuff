@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Simple popover</title>
+<style>
+  html {
+    font-family: system-ui;
+  }
+  #popover {
+    position-area: top;
+  }
+  .anchor {
+    position: fixed;
+    top: 50vh;
+    left: 50vw;
+  }
+</style>
+<button class="anchor" commandfor="popover" command="toggle-popover">
+  Press me
+</button>
+<div id="popover" popover>Hello!</div>
