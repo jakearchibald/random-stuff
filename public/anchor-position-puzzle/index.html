@@ -30,8 +30,11 @@
         align-self: stretch;
         display: grid;
         overflow: hidden;
-        position-try: flip-block;
-        container-type: anchored;
+
+        @supports (container-type: anchored) {
+          container-type: anchored;
+          position-try: flip-block;
+        }
       }
 
       .picker {
