@@ -6,31 +6,7 @@
     <title>Anchor position puzzle</title>
     <style>
       html {
-        height: 100%;
         font-family: system-ui;
-      }
-      body {
-        height: 100%;
-        margin: 0;
-        display: grid;
-        grid-template-rows: auto 1fr;
-      }
-
-      .high-level {
-        margin: 15px;
-      }
-
-      .tests {
-        display: grid;
-        gap: 5px;
-        grid-auto-flow: column;
-        grid-auto-columns: 1fr;
-      }
-
-      .test {
-        position: relative;
-        background: #eee;
-        padding: 15px;
       }
 
       .anchor {
@@ -38,6 +14,12 @@
         background: green;
         color: white;
         text-align: center;
+        cursor: grab;
+        user-select: none;
+
+        &.dragging {
+          cursor: grabbing;
+        }
       }
 
       .picker-wrapper {
@@ -64,111 +46,106 @@
           align-self: end;
         }
       }
-
     </style>
   </head>
   <body>
-    <p class="high-level">
+    <p>
       High level goal: Create a select picker that shows its whole content if
-      there's space. It will shrink to a minimum of 100px tall if it gets close
-      to the viewport edges, and it will leave a 15px margin. If there's no
-      space below (considering the min-height), it will flip above the anchor.
-      It never obscures the anchor, unless the window size is so small, there
-      isn't 100px of space above or below the anchor.
+      there's space, up to a maximum of 300px. It will shrink to a minimum of
+      100px tall if it gets close to the viewport edges, and it will leave a
+      15px margin. If there's no space below (considering the min-height), it
+      will flip above the anchor. It never obscures the anchor, unless the
+      window size is so small, there isn't 100px of space above or below the
+      anchor.
     </p>
-    <div class="tests">
-      <div class="test">
-        <p>
-          Test 1 Goal: Select box does not cover the anchor, displays directly
-          below the anchor. Select box is tall enough to display its content,
-          and not more.
-        </p>
-        <div class="anchor" style="anchor-name: --anchor-1">Anchor</div>
-        <div class="picker-wrapper" style="position-anchor: --anchor-1">
-          <div class="picker">
-            <div>Option 1</div>
-            <div>Option 2</div>
-            <div>Option 3</div>
-            <div>Option 4</div>
-            <div>Option 5</div>
-            <div>Option 6</div>
-            <div>Option 7</div>
-            <div>Option 8</div>
-            <div>Option 9</div>
-            <div>Option 10</div>
-          </div>
-        </div>
-      </div>
-      <div class="test">
-        <p>
-          Test 2 Goal: Select box does not cover the anchor, displays directly
-          below the anchor, its bottom is 15px from the bottom of the viewport,
-          and its scrollable.
-        </p>
-        <div
-          class="anchor"
-          style="
-            anchor-name: --anchor-2;
-            position: absolute;
-            left: 0;
-            bottom: 150px;
-          "
-        >
-          Anchor
-        </div>
-        <div class="picker-wrapper" style="position-anchor: --anchor-2">
-          <div class="picker">
-            <div>Option 1</div>
-            <div>Option 2</div>
-            <div>Option 3</div>
-            <div>Option 4</div>
-            <div>Option 5</div>
-            <div>Option 6</div>
-            <div>Option 7</div>
-            <div>Option 8</div>
-            <div>Option 9</div>
-            <div>Option 10</div>
-          </div>
-        </div>
-      </div>
-      <div class="test">
-        <p>
-          Test 3 Goal: Select box does not cover the anchor, displays directly
-          above the anchor (via position-try). Select box is tall enough to
-          display its content, and not more.
-        </p>
-        <p>
-          If the window is made smaller in height, the select's top must not be
-          closer than 15px to the top of the viewport, and it must shrink until
-          its min-height. Until it reaches the min-height, it must not obscure
-          the anchor.
-        </p>
-        <div
-          class="anchor"
-          style="
-            anchor-name: --anchor-3;
-            position: absolute;
-            left: 0;
-            bottom: 40px;
-          "
-        >
-          Anchor
-        </div>
-        <div class="picker-wrapper" style="position-anchor: --anchor-3">
-          <div class="picker">
-            <div>Option 1</div>
-            <div>Option 2</div>
-            <div>Option 3</div>
-            <div>Option 4</div>
-            <div>Option 5</div>
-            <div>Option 6</div>
-            <div>Option 7</div>
-            <div>Option 8</div>
-            <div>Option 9</div>
-            <div>Option 10</div>
-          </div>
-        </div>
+    <p>The anchors are draggable.</p>
+    <div
+      class="anchor"
+      style="
+        anchor-name: --anchor-1;
+        position: absolute;
+        left: 20px;
+        top: 200px;
+      "
+    >
+      Anchor
+    </div>
+    <div class="picker-wrapper" style="position-anchor: --anchor-1">
+      <div class="picker">
+        <div>Option 1</div>
+        <div>Option 2</div>
+        <div>Option 3</div>
+        <div>Option 4</div>
+        <div>Option 5</div>
+        <div>Option 6</div>
+        <div>Option 7</div>
+        <div>Option 8</div>
+        <div>Option 9</div>
+        <div>Option 10</div>
+        <div>Option 11</div>
+        <div>Option 12</div>
+        <div>Option 13</div>
+        <div>Option 14</div>
+        <div>Option 15</div>
+        <div>Option 16</div>
+        <div>Option 17</div>
+        <div>Option 18</div>
+        <div>Option 19</div>
+        <div>Option 20</div>
       </div>
     </div>
+    <div
+      class="anchor"
+      style="
+        anchor-name: --anchor-2;
+        position: absolute;
+        left: 200px;
+        top: 200px;
+      "
+    >
+      Anchor
+    </div>
+    <div class="picker-wrapper" style="position-anchor: --anchor-2">
+      <div class="picker">
+        <div>Option 1</div>
+        <div>Option 2</div>
+        <div>Option 3</div>
+        <div>Option 4</div>
+        <div>Option 5</div>
+        <div>Option 6</div>
+        <div>Option 7</div>
+        <div>Option 8</div>
+        <div>Option 9</div>
+        <div>Option 10</div>
+      </div>
+    </div>
+    <script>
+      for (const anchor of document.querySelectorAll('.anchor')) {
+        let startX, startY, startLeft, startTop;
+
+        anchor.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          e.preventDefault();
+          anchor.setPointerCapture(e.pointerId);
+          anchor.classList.add('dragging');
+
+          startLeft = parseInt(anchor.style.left);
+          startTop = parseInt(anchor.style.top);
+
+          startX = e.clientX;
+          startY = e.clientY;
+        });
+
+        anchor.addEventListener('pointermove', (e) => {
+          if (!anchor.classList.contains('dragging')) return;
+          anchor.style.left = startLeft + (e.clientX - startX) + 'px';
+          anchor.style.top = startTop + (e.clientY - startY) + 'px';
+        });
+
+        anchor.addEventListener('pointerup', () => {
+          anchor.classList.remove('dragging');
+        });
+      }
+    </script>
   </body>
 </html>
