@@ -1,0 +1,213 @@
+html {
+  background: #222;
+  font-family: system-ui;
+  interpolate-size: allow-keywords;
+}
+
+@font-face {
+  font-family: seti;
+  src: url('./seti.woff') format('woff');
+}
+
+.programming-lang-select {
+  color-scheme: dark;
+  position: absolute;
+  top: 25em;
+  left: 25em;
+  /* leave this */
+  font-size: 16px;
+
+  .lang-icon {
+    font-family: seti;
+    font-size: 1.5em;
+    display: grid;
+    justify-content: center;
+  }
+
+  .lang-icon::before {
+    content: attr(data-char);
+  }
+
+  @supports (appearance: base-select) {
+    appearance: base-select;
+    padding: 0.4em 0.5em;
+    padding-right: 0.8em;
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 0.5em;
+    display: grid;
+    gap: 0.7em;
+    grid-template-columns: auto auto;
+    align-items: center;
+
+    &::picker-icon {
+      display: none;
+    }
+
+    &::after {
+      display: none;
+      content: '';
+      --size: 0.5625em;
+      width: var(--size);
+      height: calc(var(--size) * 0.8);
+      background: #e0e0e0;
+      clip-path: shape(
+        from 0% 0%,
+        line to 50% 0%,
+        line to 100% 0%,
+        line to 50% 100%,
+        close
+      );
+
+      transition: clip-path 250ms ease;
+
+      @supports (clip-path: shape(from 0% 0%, close)) {
+        display: block;
+      }
+    }
+
+    &:open::after {
+      clip-path: shape(
+        from 0% 100%,
+        line to 50% 0%,
+        line to 100% 100%,
+        line to 50% 100%,
+        close
+      );
+    }
+
+    legend {
+      position: sticky;
+      top: 0;
+      padding: 0;
+      container-type: scroll-state;
+      z-index: 1;
+
+      &::before {
+        background: #252525;
+        display: block;
+        color: #888;
+        padding: 0.5em 0.75em;
+        font-size: 0.85em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #333;
+        margin: 0;
+        z-index: 1;
+
+        transition: all 500ms ease;
+        transition-property: background-color, color;
+
+        @container scroll-state(stuck: top) {
+          background-color: #404040;
+          color: #999;
+        }
+      }
+    }
+
+    optgroup {
+      --legend-text: attr(label);
+      position: relative;
+
+      &:first-of-type > legend::before {
+        background-color: #404040;
+        color: #999;
+      }
+
+      & > legend::before {
+        content: var(--legend-text);
+      }
+    }
+
+    option,
+    selectedcontent {
+      color: #e0e0e0;
+      display: grid;
+      grid-template-columns: 2.2ch 10.6ch;
+      gap: 0.5em;
+      align-items: center;
+      position: relative;
+    }
+
+    option {
+      padding: 0.4em 0.5em;
+
+      &:hover,
+      &:focus {
+        outline: none;
+        background: none;
+      }
+
+      &:checked {
+        background: #2d4a5c;
+        color: #fff;
+      }
+    }
+
+    ::checkmark {
+      display: none;
+    }
+
+    &::picker(select) {
+      /* leave this */
+      font-size: 16px;
+
+      appearance: base-select;
+      min-height: 15.625em;
+      padding: 0;
+      border: none;
+      background: none;
+      bottom: max(1.25em, anchor(bottom) - 25em);
+      position-try-fallbacks: flip-block;
+      overflow: visible;
+      clip-path: inset(0 -18.75em -18.75em);
+      container-type: anchored;
+
+      opacity: 0;
+      transition:
+        opacity 250ms ease,
+        height 250ms,
+        display 250ms allow-discrete,
+        overlay 250ms allow-discrete;
+    }
+
+    .box {
+      background: #1a1a1a;
+      border: 1px solid #404040;
+      border-radius: 0.5em;
+      box-shadow: 0 0.5em 1.5em rgba(0, 0, 0, 0.5);
+      overflow: auto;
+      scroll-padding-top: 3.125em;
+
+      transition: translate 250ms ease-in;
+      translate: 0 -6.25em;
+
+      @container anchored(fallback: flip-block) {
+        translate: 0 0;
+      }
+    }
+
+    &:open .box {
+      translate: 0 0;
+      transition-timing-function: ease;
+
+      @starting-style {
+        translate: 0 -6.25em;
+        @container anchored(fallback: flip-block) {
+          translate: 0 0;
+        }
+      }
+    }
+
+    &:open::picker(select) {
+      display: flex;
+      justify-content: start;
+
+      opacity: 1;
+      @starting-style {
+        opacity: 0;
+      }
+    }
+  }
+}

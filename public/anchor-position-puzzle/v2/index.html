@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anchor position puzzle</title>
+    <style>
+      html {
+        font-family: system-ui;
+      }
+
+      .anchor {
+        width: 100px;
+        background: green;
+        color: white;
+        text-align: center;
+        cursor: grab;
+        user-select: none;
+
+        &.dragging {
+          cursor: grabbing;
+        }
+      }
+
+      .picker {
+        position: fixed;
+        position-area: bottom span-right;
+        margin-bottom: 15px;
+        min-height: 100px;
+        max-height: calc-size(stretch, min(size, 300px));
+        overflow: auto;
+        background: white;
+        border: 1px solid black;
+        box-sizing: border-box;
+        position-try: flip-block;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      High level goal: Create a select picker that shows its whole content if
+      there's space, up to a maximum of 300px. It will shrink to a minimum of
+      100px tall if it gets close to the viewport edges, and it will leave a
+      15px margin. If there's no space below (considering the min-height), it
+      will flip above the anchor. It never obscures the anchor, unless the
+      window size is so small, there isn't 100px of space above or below the
+      anchor.
+    </p>
+    <p>The anchors are draggable.</p>
+    <div
+      class="anchor"
+      style="
+        anchor-name: --anchor-1;
+        position: absolute;
+        left: 20px;
+        top: 200px;
+      "
+    >
+      Anchor
+    </div>
+    <div class="picker" style="position-anchor: --anchor-1">
+      <div>Option 1</div>
+      <div>Option 2</div>
+      <div>Option 3</div>
+      <div>Option 4</div>
+      <div>Option 5</div>
+      <div>Option 6</div>
+      <div>Option 7</div>
+      <div>Option 8</div>
+      <div>Option 9</div>
+      <div>Option 10</div>
+      <div>Option 11</div>
+      <div>Option 12</div>
+      <div>Option 13</div>
+      <div>Option 14</div>
+      <div>Option 15</div>
+      <div>Option 16</div>
+      <div>Option 17</div>
+      <div>Option 18</div>
+      <div>Option 19</div>
+      <div>Option 20</div>
+    </div>
+    <div
+      class="anchor"
+      style="
+        anchor-name: --anchor-2;
+        position: absolute;
+        left: 200px;
+        top: 200px;
+      "
+    >
+      Anchor
+    </div>
+    <div class="picker" style="position-anchor: --anchor-2">
+      <div>Option 1</div>
+      <div>Option 2</div>
+      <div>Option 3</div>
+      <div>Option 4</div>
+      <div>Option 5</div>
+      <div>Option 6</div>
+      <div>Option 7</div>
+      <div>Option 8</div>
+      <div>Option 9</div>
+      <div>Option 10</div>
+    </div>
+    <script>
+      for (const anchor of document.querySelectorAll('.anchor')) {
+        let startX, startY, startLeft, startTop;
+
+        anchor.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          e.preventDefault();
+          anchor.setPointerCapture(e.pointerId);
+          anchor.classList.add('dragging');
+
+          startLeft = parseInt(anchor.style.left);
+          startTop = parseInt(anchor.style.top);
+
+          startX = e.clientX;
+          startY = e.clientY;
+        });
+
+        anchor.addEventListener('pointermove', (e) => {
+          if (!anchor.classList.contains('dragging')) return;
+          anchor.style.left = startLeft + (e.clientX - startX) + 'px';
+          anchor.style.top = startTop + (e.clientY - startY) + 'px';
+        });
+
+        anchor.addEventListener('pointerup', () => {
+          anchor.classList.remove('dragging');
+        });
+      }
+    </script>
+  </body>
+</html>
