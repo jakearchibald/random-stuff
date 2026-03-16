@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>View transition missing element glitch</title>
+<button class="vt">Do view transition</button>
+<iframe
+  style="width: 1920px; height: 1080px; scale: 0.3; transform-origin: 0 0"
+  src="./inner.html"
+></iframe>
+
+<script>
+  document.querySelector('.vt').addEventListener('click', () => {
+    document
+      .querySelector('iframe')
+      .contentDocument.startViewTransition(() => {});
+  });
+</script>

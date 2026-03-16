@@ -33,7 +33,7 @@ html {
     padding: 0.4em 0.5em;
     padding-right: 0.8em;
     background: #1a1a1a;
-    border: 1px solid #404040;
+    border: 0.0625em solid #404040;
     border-radius: 0.5em;
     display: grid;
     gap: 0.7em;
@@ -92,7 +92,7 @@ html {
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        border-bottom: 1px solid #333;
+        border-bottom: 0.0625em solid #333;
         margin: 0;
         z-index: 1;
 
@@ -174,7 +174,7 @@ html {
 
     .box {
       background: #1a1a1a;
-      border: 1px solid #404040;
+      border: 0.0625em solid #404040;
       border-radius: 0.5em;
       box-shadow: 0 0.5em 1.5em rgba(0, 0, 0, 0.5);
       overflow: auto;

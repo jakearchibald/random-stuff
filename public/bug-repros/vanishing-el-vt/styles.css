@@ -1,0 +1,23 @@
+.inset-container {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  perspective: 1000px;
+}
+
+.deep-blue {
+  background-color: oklch(12.9% 0.042 264.695);
+}
+
+.timeline {
+  display: block;
+  position: relative;
+}
+
+.timeline-minor-tick {
+  position: absolute;
+  top: 0;
+  font-family: system-ui;
+  font-size: 32px;
+  color: white;
+}
