@@ -1,0 +1,24 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Video color issue</title>
+<style>
+  html {
+    background: #222;
+  }
+
+  video {
+    display: block;
+    width: 300px;
+    &.rotate {
+      rotate: 0.1deg;
+    }
+  }
+</style>
+<button>Toggle rotation</button>
+<video src="select.mp4" class="rotate" autoplay loop muted></video>
+<script>
+  document.querySelector('button').addEventListener('click', () => {
+    document.querySelector('video').classList.toggle('rotate');
+  });
+</script>
