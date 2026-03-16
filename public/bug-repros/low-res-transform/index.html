@@ -1,0 +1,81 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Low res transform</title>
+<style>
+  body {
+    margin: 40px;
+    background: #222;
+  }
+
+  .container {
+    width: 600px;
+    height: 600px;
+    overflow: clip;
+    perspective: 1000px;
+    background: #333;
+  }
+
+  .b {
+    transform: translateX(285px) translateY(280px) translateZ(901px);
+    transform-origin: top left;
+  }
+
+  .c {
+    width: 1920px;
+    height: 1080px;
+    transform: scale(0.1);
+    transform-origin: top left;
+    background: #444;
+  }
+
+  .d {
+    width: 300px;
+    height: 300px;
+    border-radius: 20px;
+    border: 2px solid white;
+    background: #666;
+    margin: 50px;
+
+    display: grid;
+    place-items: center;
+
+    & > * {
+      grid-area: 1/1;
+    }
+
+    img {
+      width: 250px;
+      height: 250px;
+    }
+  }
+
+  .text {
+    font-size: 50px;
+  }
+</style>
+
+<button>Invalidate styles</button>
+
+<div class="container">
+  <div class="b">
+    <div class="c">
+      <div class="d">
+        <img src="smile.avif" />
+        <div class="text">Hello</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelector('button').addEventListener('click', () => {
+    const el = document.querySelector('.b');
+    el.style.display = 'none';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.display = '';
+      });
+    });
+  });
+</script>
