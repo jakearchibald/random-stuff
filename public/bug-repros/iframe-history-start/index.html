@@ -1,0 +1,42 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Iframe history start position</title>
+
+<ol>
+  <li><button onclick="step1()">pushState navigate to ?foo</button></li>
+  <li><button onclick="step2()">Add iframe pointing to 1.html</button></li>
+  <li><button onclick="step3()">Navigate iframe to 2.html</button></li>
+  <li>
+    <button onclick="step4()">Traverse back 2 steps</button> vs
+    <button onclick="step4Alt()">Traverse back 1 step</button> twice
+  </li>
+</ol>
+
+<script>
+  function step1() {
+    history.pushState(null, '', '?foo');
+  }
+
+  function step2() {
+    const iframe = document.createElement('iframe');
+    iframe.id = 'test-frame';
+    iframe.src = '1.html';
+    document.body.appendChild(iframe);
+  }
+
+  function step3() {
+    const iframe = document.getElementById('test-frame');
+    if (iframe) {
+      iframe.src = '2.html';
+    }
+  }
+
+  function step4() {
+    history.go(-2);
+  }
+
+  function step4Alt() {
+    history.go(-1);
+  }
+</script>
