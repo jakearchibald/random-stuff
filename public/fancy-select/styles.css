@@ -156,19 +156,20 @@ html {
       &:focus {
         outline: none;
       }
+      &:active {
+        background: none;
+      }
 
+      &:is(:hover, :focus-visible) {
+        background: #2a2a2a;
+      }
       &:checked {
         background: #2d4a5c;
         color: #fff;
+        &:is(:hover, :focus-visible) {
+          background: #3d6a7c;
+        }
       }
-    }
-
-    option:is(:hover, :focus-visible) {
-      background: #2a2a2a;
-    }
-
-    option:checked:is(:hover, :focus-visible) {
-      background: #3d6a7c;
     }
 
     ::checkmark {
@@ -190,10 +191,10 @@ html {
       padding: 0;
       border: none;
       background: none;
-      overflow: visible;
-      clip-path: inset(0 -300px -300px);
+      overflow: clip;
       box-sizing: border-box;
       container-type: anchored;
+      filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
 
       display: grid;
       grid-template-rows: 1fr;
@@ -210,7 +211,6 @@ html {
       background: #1a1a1a;
       border: 1px solid #404040;
       border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       overflow: auto;
       scroll-padding-top: 50px;
 
@@ -218,20 +218,13 @@ html {
       translate: 0 -100px;
 
       @container anchored(fallback: flip-block) {
-        translate: 0 0;
+        translate: 0 100px;
       }
     }
 
     &:open .box {
       translate: 0 0;
       transition-timing-function: ease;
-
-      @starting-style {
-        translate: 0 -100px;
-        @container anchored(fallback: flip-block) {
-          translate: 0 0;
-        }
-      }
     }
 
     &:open::picker(select) {
