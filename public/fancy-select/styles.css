@@ -29,6 +29,7 @@ html {
   --size: 2em;
   width: var(--size);
   height: var(--size);
+  touch-action: none;
   svg {
     display: block;
     width: 100%;
