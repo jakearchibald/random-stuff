@@ -11,11 +11,11 @@ html {
 
 .mover {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 1.25em;
+  left: 1.25em;
   display: grid;
   grid-template-columns: auto auto;
-  gap: 10px;
+  gap: 0.625em;
   align-items: center;
 }
 
@@ -26,7 +26,7 @@ html {
   padding: 0;
   margin: 0;
   cursor: pointer;
-  --size: 32px;
+  --size: 2em;
   width: var(--size);
   height: var(--size);
   svg {
@@ -55,8 +55,8 @@ html {
     padding: 0.4em 0.5em;
     padding-right: 0.8em;
     background: #1a1a1a;
-    border: 1px solid #404040;
-    border-radius: 8px;
+    border: 0.0625em solid #404040;
+    border-radius: 0.5em;
     display: grid;
     gap: 0.7em;
     grid-template-columns: auto auto;
@@ -69,7 +69,7 @@ html {
     &::after {
       display: none;
       content: '';
-      --size: 9px;
+      --size: 0.5625em;
       width: var(--size);
       height: calc(var(--size) * 0.8);
       background: #e0e0e0;
@@ -103,18 +103,18 @@ html {
       top: 0;
       padding: 0;
       container-type: scroll-state;
-      z-index: 1;
+      z-index: 3;
 
       &::before {
         background: #252525;
         display: block;
         color: #888;
-        padding: 8px 12px;
+        padding: 0.5em 0.75em;
         font-size: 0.85em;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        border-bottom: 1px solid #333;
+        border-bottom: 0.0625em solid #333;
         margin: 0;
         transition: all 500ms ease;
         transition-property: background-color, color;
@@ -127,6 +127,7 @@ html {
     }
 
     optgroup {
+      position: relative;
       --legend-text: attr(label);
 
       &:first-of-type > legend::before {
@@ -136,6 +137,45 @@ html {
 
       & > legend::before {
         content: var(--legend-text);
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        background: rgb(100% 100% 100% / 7%);
+        position-anchor: --select-hover;
+        top: anchor(top);
+        left: anchor(left);
+        bottom: anchor(bottom);
+        right: anchor(right);
+        display: none;
+        transition:
+          top 300ms step-end allow-discrete,
+          left 300ms step-end allow-discrete,
+          bottom 300ms step-end allow-discrete,
+          right 300ms step-end allow-discrete,
+          display 300ms allow-discrete,
+          opacity 300ms ease;
+
+        opacity: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      &:has(option:is(:focus-visible, :hover))::before {
+        display: block;
+        transition:
+          top 150ms ease,
+          left 150ms ease,
+          bottom 150ms ease,
+          right 150ms ease,
+          display 300ms allow-discrete,
+          opacity 300ms ease;
+
+        opacity: 1;
+        @starting-style {
+          opacity: 0;
+        }
       }
     }
 
@@ -155,20 +195,29 @@ html {
       &:hover,
       &:focus {
         outline: none;
+        background: none;
+      }
+      &:hover {
+        anchor-name: --select-hover;
+      }
+      &:focus-visible {
+        background: #2a2a2a;
       }
       &:active {
         background: none;
       }
 
-      &:is(:hover, :focus-visible) {
-        background: #2a2a2a;
-      }
       &:checked {
         background: #2d4a5c;
         color: #fff;
-        &:is(:hover, :focus-visible) {
+        &:focus-visible {
           background: #3d6a7c;
         }
+      }
+
+      & > * {
+        position: relative;
+        z-index: 2;
       }
     }
 
@@ -178,13 +227,13 @@ html {
 
     &::picker(select) {
       appearance: base-select;
-      --min-height: 200px;
+      --min-height: 12.5em;
       min-height: var(--min-height);
       min-height: calc-size(min-content, min(size, var(--min-height)));
-      --max-height: 400px;
+      --max-height: 25em;
       max-height: var(--max-height);
       max-height: calc-size(stretch, min(size, var(--max-height)));
-      margin-bottom: 20px;
+      margin-bottom: 1.25em;
       min-width: anchor-size(width);
       position-try: flip-block;
 
@@ -194,7 +243,7 @@ html {
       overflow: clip;
       box-sizing: border-box;
       container-type: anchored;
-      filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
+      filter: drop-shadow(0 0.5em 0.875em rgba(0, 0, 0, 0.5));
 
       display: grid;
       grid-template-rows: 1fr;
@@ -209,16 +258,16 @@ html {
 
     .box {
       background: #1a1a1a;
-      border: 1px solid #404040;
-      border-radius: 8px;
+      border: 0.0625em solid #404040;
+      border-radius: 0.5em;
       overflow: auto;
-      scroll-padding-top: 50px;
+      scroll-padding-top: 3.125em;
 
       transition: translate 250ms ease-in;
-      translate: 0 -100px;
+      translate: 0 -6.25em;
 
       @container anchored(fallback: flip-block) {
-        translate: 0 100px;
+        translate: 0 6.25em;
       }
     }
 
