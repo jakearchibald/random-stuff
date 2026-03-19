@@ -245,15 +245,13 @@ html {
       box-sizing: border-box;
       container-type: anchored;
       filter: drop-shadow(0 0.5em 0.875em rgba(0, 0, 0, 0.5));
-
-      display: grid;
       grid-template-rows: 1fr;
 
       opacity: 0;
       transition:
         opacity 250ms ease,
         height 250ms,
-        display 250ms allow-discrete,
+        display 250ms step-end allow-discrete,
         overlay 250ms allow-discrete;
     }
 
@@ -266,7 +264,6 @@ html {
 
       transition: translate 250ms ease-in;
       translate: 0 -6.25em;
-
       @container anchored(fallback: flip-block) {
         translate: 0 6.25em;
       }
@@ -275,9 +272,17 @@ html {
     &:open .box {
       translate: 0 0;
       transition-timing-function: ease;
+
+      @starting-style {
+        translate: 0 -6.25em;
+        @container anchored(fallback: flip-block) {
+          translate: 0 6.25em;
+        }
+      }
     }
 
     &:open::picker(select) {
+      display: grid;
       opacity: 1;
       @starting-style {
         opacity: 0;
