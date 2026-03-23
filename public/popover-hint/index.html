@@ -1,0 +1,106 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>popover=hint</title>
+<style>
+  html {
+    font-family: system-ui;
+  }
+  .buttons {
+    display: flex;
+    gap: 1rem;
+    margin-block-end: 1rem;
+  }
+  [popover] {
+    position-area: bottom;
+  }
+</style>
+
+<!-- Top-level buttons -->
+<div class="buttons">
+  <button class="popover-btn" commandfor="top-auto" command="toggle-popover">
+    Press me (auto)
+  </button>
+  <button class="popover-btn" commandfor="top-auto-2" command="toggle-popover">
+    Press me (auto)
+  </button>
+  <button
+    class="popover-btn"
+    onmouseenter="
+      document.getElementById('top-hint').showPopover({ source: this })
+    "
+  >
+    Hover me (hint)
+  </button>
+  <button
+    class="popover-btn"
+    onmouseenter="
+      document.getElementById('top-hint-2').showPopover({ source: this })
+    "
+  >
+    Hover me (hint)
+  </button>
+</div>
+
+<div id="top-auto" popover="auto">
+  <p>Auto popover</p>
+  <div class="buttons">
+    <button commandfor="nested-auto" command="toggle-popover">
+      Press me (auto)
+    </button>
+    <button commandfor="nested-auto-1b" command="toggle-popover">
+      Press me (auto)
+    </button>
+    <button
+      onmouseenter="
+        document.getElementById('nested-hint-1').showPopover({ source: this })
+      "
+    >
+      Hover me (hint)
+    </button>
+    <button
+      onmouseenter="
+        document.getElementById('nested-hint-1b').showPopover({ source: this })
+      "
+    >
+      Hover me (hint)
+    </button>
+  </div>
+  <div id="nested-auto" popover="auto">Nested auto popover</div>
+  <div id="nested-auto-1b" popover="auto">Nested auto popover</div>
+  <div id="nested-hint-1" popover="hint">Nested hint popover</div>
+  <div id="nested-hint-1b" popover="hint">Nested hint popover</div>
+</div>
+
+<div id="top-hint" popover="hint">
+  <p>Hint popover</p>
+  <div class="buttons">
+    <button commandfor="nested-auto-2" command="toggle-popover">
+      Press me (auto)
+    </button>
+    <button commandfor="nested-auto-2b" command="toggle-popover">
+      Press me (auto)
+    </button>
+    <button
+      onmouseenter="
+        document.getElementById('nested-hint-2').showPopover({ source: this })
+      "
+    >
+      Hover me (hint)
+    </button>
+    <button
+      onmouseenter="
+        document.getElementById('nested-hint-2b').showPopover({ source: this })
+      "
+    >
+      Hover me (hint)
+    </button>
+  </div>
+  <div id="nested-auto-2" popover="auto">Nested auto popover</div>
+  <div id="nested-auto-2b" popover="auto">Nested auto popover</div>
+  <div id="nested-hint-2" popover="hint">Nested hint popover</div>
+  <div id="nested-hint-2b" popover="hint">Nested hint popover</div>
+</div>
+
+<div id="top-auto-2" popover="auto">Top-level auto popover</div>
+<div id="top-hint-2" popover="hint">Top-level hint popover</div>
