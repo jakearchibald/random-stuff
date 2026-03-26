@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloseWatcher Demo</title>
+</head>
+<body>
+  <button id="open-btn">open</button>
+  <button id="close-btn">close</button>
+  <p id="status">Closed</p>
+
+  <script>
+    let watcher = null;
+
+    document.getElementById('open-btn').addEventListener('click', () => {
+      if (watcher) return;
+      watcher = new CloseWatcher();
+      document.getElementById('status').textContent = 'Open';
+      watcher.addEventListener('close', () => {
+        document.getElementById('status').textContent = 'Closed';
+        watcher = null;
+      });
+    });
+
+    document.getElementById('close-btn').addEventListener('click', () => {
+      if (watcher) watcher.requestClose();
+    });
+  </script>
+</body>
+</html>
