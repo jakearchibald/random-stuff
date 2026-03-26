@@ -40,6 +40,16 @@
   >
     4 Hover me (hint)
   </button>
+  <button
+    class="popover-btn"
+    onclick="
+      const p = document.getElementById('top-auto-timed');
+      p.showPopover({ source: this });
+      setTimeout(() => p.hidePopover(), 5000);
+    "
+  >
+    5 Press me (auto, timed)
+  </button>
 </div>
 
 <div id="top-auto" popover="auto">
@@ -102,5 +112,6 @@
   <div id="nested-hint-2b" popover="hint">Nested hint popover</div>
 </div>
 
+<div id="top-auto-timed" popover="auto">Auto popover (closes in 5s)</div>
 <div id="top-auto-2" popover="auto">Top-level auto popover</div>
 <div id="top-hint-2" popover="hint">Top-level hint popover</div>
