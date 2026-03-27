@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dialog source & popopvers demo</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+      }
+
+      [popover] {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 1rem;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        position-area: bottom span-right;
+        margin: 0;
+
+        &.popover-level-2 {
+          position-area: right;
+        }
+
+        & > h3 {
+          margin: 0 0 0.75rem;
+          font-size: 1rem;
+        }
+
+        & > button {
+          display: block;
+          width: 100%;
+          margin-bottom: 0.5rem;
+          padding: 0.4rem 0.75rem;
+        }
+      }
+
+      dialog {
+        border: 1px solid #888;
+        border-radius: 8px;
+        padding: 1.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+        & > h3 {
+          margin: 0 0 0.75rem;
+          font-size: 1rem;
+        }
+
+        & > button {
+          margin-top: 0.5rem;
+          padding: 0.3rem 0.75rem;
+          display: block;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button commandfor="main-popover" command="toggle-popover">
+      Open Main Popover
+    </button>
+
+    <div id="main-popover" popover="auto">
+      <h3>Main Popover</h3>
+
+      <button commandfor="inner-popover" command="toggle-popover">
+        Open inner popover
+      </button>
+      <button commandfor="outer-popover" command="toggle-popover">
+        Open outer popover
+      </button>
+      <button commandfor="inner-dialog" command="show-modal">
+        Open inner dialog
+      </button>
+      <button commandfor="outer-dialog" command="show-modal">
+        Open outer dialog
+      </button>
+
+      <div id="inner-popover" class="popover-level-2" popover="auto">
+        <h3>Inner Popover</h3>
+        <p>This popover is nested inside the main popover.</p>
+      </div>
+
+      <dialog id="inner-dialog">
+        <h3>Inner Dialog</h3>
+        <p>This dialog is nested inside the main popover.</p>
+        <button commandfor="inner-dialog" command="close">Close</button>
+      </dialog>
+    </div>
+
+    <div id="outer-popover" class="popover-level-2" popover="auto">
+      <h3>Outer Popover</h3>
+      <p>This popover is outside the main popover.</p>
+    </div>
+
+    <dialog id="outer-dialog">
+      <h3>Outer Dialog</h3>
+      <p>This dialog is outside the main popover.</p>
+      <button commandfor="outer-dialog" command="close">Close</button>
+    </dialog>
+  </body>
+</html>
