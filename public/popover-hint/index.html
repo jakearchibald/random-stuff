@@ -78,7 +78,27 @@
   </div>
   <div id="nested-auto" popover="auto">Nested auto popover</div>
   <div id="nested-auto-1b" popover="auto">Nested auto popover</div>
-  <div id="nested-hint-1" popover="hint">Nested hint popover</div>
+  <div id="nested-hint-1" popover="hint">
+    <p>Nested hint popover</p>
+    <div class="buttons">
+      <button
+        onmouseenter="
+          document.getElementById('nested-hint-1-a').showPopover({ source: this })
+        "
+      >
+        1.3.1 Hover me (hint)
+      </button>
+      <button
+        onmouseenter="
+          document.getElementById('nested-hint-1-b').showPopover({ source: this })
+        "
+      >
+        1.3.2 Hover me (hint)
+      </button>
+    </div>
+    <div id="nested-hint-1-a" popover="hint">Nested hint popover</div>
+    <div id="nested-hint-1-b" popover="hint">Nested hint popover</div>
+  </div>
   <div id="nested-hint-1b" popover="hint">Nested hint popover</div>
 </div>
 
