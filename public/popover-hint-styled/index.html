@@ -42,37 +42,39 @@
 
 <!-- Top-level buttons -->
 <div class="buttons">
-  <button class="popover-btn" commandfor="top-auto" command="toggle-popover">
-    1 Press me (auto)
-  </button>
-  <button class="popover-btn" commandfor="top-auto-2" command="toggle-popover">
-    2 Press me (auto)
+  <button
+    class="popover-btn"
+    onpointerenter="document.getElementById('top-auto').showPopover({ source: this })"
+  >
+    1 Hover me (auto)
   </button>
   <button
     class="popover-btn"
-    onmouseenter="
-      document.getElementById('top-hint').showPopover({ source: this })
-    "
+    onpointerenter="document.getElementById('top-auto-2').showPopover({ source: this })"
+  >
+    2 Hover me (auto)
+  </button>
+  <button
+    class="popover-btn"
+    onpointerenter="document.getElementById('top-hint').showPopover({ source: this })"
   >
     3 Hover me (hint)
   </button>
   <button
     class="popover-btn"
-    onmouseenter="
-      document.getElementById('top-hint-2').showPopover({ source: this })
-    "
+    onpointerenter="document.getElementById('top-hint-2').showPopover({ source: this })"
   >
     4 Hover me (hint)
   </button>
   <button
     class="popover-btn"
-    onclick="
+    onpointerenter="
       const p = document.getElementById('top-auto-timed');
       p.showPopover({ source: this });
       setTimeout(() => p.hidePopover(), 5000);
     "
   >
-    5 Press me (auto, timed)
+    5 Hover me (auto, timed)
   </button>
   <div>Just some text.</div>
 </div>
@@ -80,21 +82,21 @@
 <div id="top-auto" popover="auto">
   <p>Top-level auto popover</p>
   <div class="buttons">
-    <button commandfor="nested-auto" command="toggle-popover">
-      1.1 Press me (auto)
+    <button onpointerenter="document.getElementById('nested-auto').showPopover({ source: this })">
+      1.1 Hover me (auto)
     </button>
-    <button commandfor="nested-auto-1b" command="toggle-popover">
-      1.2 Press me (auto)
+    <button onpointerenter="document.getElementById('nested-auto-1b').showPopover({ source: this })">
+      1.2 Hover me (auto)
     </button>
     <button
-      onmouseenter="
+      onpointerenter="
         document.getElementById('nested-hint-1').showPopover({ source: this })
       "
     >
       1.3 Hover me (hint)
     </button>
     <button
-      onmouseenter="
+      onpointerenter="
         document.getElementById('nested-hint-1b').showPopover({ source: this })
       "
     >
@@ -110,21 +112,21 @@
 <div id="top-hint" popover="hint">
   <p>Top-level hint popover</p>
   <div class="buttons">
-    <button commandfor="nested-auto-2" command="toggle-popover">
-      3.1 Press me (auto)
+    <button onpointerenter="document.getElementById('nested-auto-2').showPopover({ source: this })">
+      3.1 Hover me (auto)
     </button>
-    <button commandfor="nested-auto-2b" command="toggle-popover">
-      3.2 Press me (auto)
+    <button onpointerenter="document.getElementById('nested-auto-2b').showPopover({ source: this })">
+      3.2 Hover me (auto)
     </button>
     <button
-      onmouseenter="
+      onpointerenter="
         document.getElementById('nested-hint-2').showPopover({ source: this })
       "
     >
       3.3 Hover me (hint)
     </button>
     <button
-      onmouseenter="
+      onpointerenter="
         document.getElementById('nested-hint-2b').showPopover({ source: this })
       "
     >
