@@ -1,0 +1,56 @@
+canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+.canvas-content {
+  --size: 512px;
+  width: var(--size);
+  height: var(--size);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: #0a0a0a;
+  padding: 70px;
+}
+
+.button-row {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 8px;
+
+  button {
+    padding: 8px 16px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #1e1e1e;
+    color: #e0e0e0;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+
+    &:hover {
+      background: #7c3aed;
+      border-color: #7c3aed;
+      color: #fff;
+    }
+
+    &:active {
+      background: #6d28d9;
+      border-color: #6d28d9;
+    }
+  }
+}
+
+.range-row {
+  display: grid;
+}
+
+select,
+select::picker(select) {
+  appearance: base-select;
+}
