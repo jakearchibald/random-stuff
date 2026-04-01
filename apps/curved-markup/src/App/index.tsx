@@ -40,6 +40,8 @@ const App: FunctionalComponent = () => {
     }
     positions.needsUpdate = true;
     geometry.current!.computeVertexNormals();
+    geometry.current!.computeBoundingSphere();
+    geometry.current!.computeBoundingBox();
   });
 
   useEffect(() => {
@@ -117,12 +119,11 @@ const App: FunctionalComponent = () => {
       const intersects = raycaster.intersectObject(mesh);
 
       if (intersects.length > 0 && intersects[0].uv) {
-        const uv = intersects[0].uv;
+        const uv = intersects[0].uv!;
         const el = canvas.firstElementChild as HTMLElement | null;
         if (!el) return;
         const w = el.offsetWidth;
         const h = el.offsetHeight;
-        // Pixel in the texture that is under the pointer
         const texX = uv.x * w;
         const texY = (1 - uv.y) * h;
         // Mouse position relative to the canvas
@@ -234,7 +235,7 @@ const App: FunctionalComponent = () => {
           <input
             type="range"
             min="-1"
-            max="1"
+            max="0.7"
             step="any"
             value={curveDepth}
             onInput={(e) => {

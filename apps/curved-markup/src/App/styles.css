@@ -48,6 +48,7 @@ canvas {
 
 .range-row {
   display: grid;
+  margin: 0 50px;
 }
 
 select,
