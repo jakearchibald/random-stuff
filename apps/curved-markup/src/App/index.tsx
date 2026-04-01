@@ -1,42 +1,63 @@
+import { signal, useSignalEffect } from '@preact/signals';
 import { type FunctionalComponent } from 'preact';
 import { useEffect, useRef } from 'preact/hooks';
 import * as THREE from 'three';
 import './styles.css';
 
-const CURVE_DEPTH = 0.7;
 const SEGMENTS_X = 40;
 const SEGMENTS_Y = 40;
 
+const curveDepth = signal(0.7);
+
 const App: FunctionalComponent = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const geometry = useRef<THREE.PlaneGeometry>();
+  const camera = useRef<THREE.PerspectiveCamera>();
+
+  useEffect(() => {
+    geometry.current = new THREE.PlaneGeometry(2, 2, SEGMENTS_X, SEGMENTS_Y);
+
+    return () => {
+      geometry.current?.dispose();
+    };
+  }, []);
+
+  useSignalEffect(() => {
+    const curveDepthValue = curveDepth.value;
+    if (!camera.current) return;
+    // As depth decreases (flatter), move camera back so the surface fills the view
+    camera.current.position.z = 1.5 + (0.7 - curveDepthValue) * 1;
+  });
+
+  useSignalEffect(() => {
+    const depth = curveDepth.value;
+    const positions = geometry.current!.attributes.position;
+
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i);
+      const y = positions.getY(i);
+      positions.setZ(i, -depth * (x * x + y * y));
+    }
+    positions.needsUpdate = true;
+    geometry.current!.computeVertexNormals();
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current!;
 
     // Scene
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
+    camera.current = new THREE.PerspectiveCamera(
       50,
       innerWidth / innerHeight,
       0.1,
       100,
     );
-    camera.position.set(0, 0, 1.5);
+    camera.current.position.set(0, 0, 1.5);
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(innerWidth, innerHeight);
     renderer.setPixelRatio(devicePixelRatio);
-
-    // Curved geometry: parabolic bow along X axis
-    const geometry = new THREE.PlaneGeometry(2, 2, SEGMENTS_X, SEGMENTS_Y);
-    const positions = geometry.attributes.position;
-    for (let i = 0; i < positions.count; i++) {
-      const x = positions.getX(i);
-      const y = positions.getY(i);
-      positions.setZ(i, -CURVE_DEPTH * (x * x + y * y));
-    }
-    positions.needsUpdate = true;
-    geometry.computeVertexNormals();
 
     // Texture backed by the canvas's first child element via texElementImage2D
     const gl = renderer.getContext() as WebGLRenderingContext & {
@@ -71,14 +92,14 @@ const App: FunctionalComponent = () => {
       map: texture,
       side: THREE.DoubleSide,
     });
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(geometry.current!, material);
     scene.add(mesh);
 
     // Animation loop — repaint every frame
     let rafId: number;
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      renderer.render(scene, camera);
+      renderer.render(scene, camera.current!);
     };
 
     animate();
@@ -92,7 +113,7 @@ const App: FunctionalComponent = () => {
       pointer.x = ((x - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((y - rect.top) / rect.height) * 2 + 1;
 
-      raycaster.setFromCamera(pointer, camera);
+      raycaster.setFromCamera(pointer, camera.current!);
       const intersects = raycaster.intersectObject(mesh);
 
       if (intersects.length > 0 && intersects[0].uv) {
@@ -121,8 +142,8 @@ const App: FunctionalComponent = () => {
 
     // Resize handler
     const handleResize = () => {
-      camera.aspect = innerWidth / innerHeight;
-      camera.updateProjectionMatrix();
+      camera.current!.aspect = innerWidth / innerHeight;
+      camera.current!.updateProjectionMatrix();
       renderer.setSize(innerWidth, innerHeight);
     };
     addEventListener('resize', handleResize);
@@ -155,7 +176,6 @@ const App: FunctionalComponent = () => {
       canvas.removeEventListener('paint', canvasPaint);
       removeEventListener('resize', handleResize);
       renderer.dispose();
-      geometry.dispose();
       material.dispose();
       texture.dispose();
     };
@@ -187,8 +207,6 @@ const App: FunctionalComponent = () => {
             will just work.
           </p>
 
-          <p></p>
-
           <p>
             For simple 2D cases, it still makes sense to have a nice high-level
             way to handle this, but I think this proves that for complex
@@ -213,7 +231,16 @@ const App: FunctionalComponent = () => {
           </p>
         </div>
         <div class="range-row">
-          <input type="range" min="0" max="1" step="any" value="0" />
+          <input
+            type="range"
+            min="-1"
+            max="1"
+            step="any"
+            value={curveDepth}
+            onInput={(e) => {
+              curveDepth.value = Number((e.target as HTMLInputElement).value);
+            }}
+          />
         </div>
       </div>
     </canvas>
