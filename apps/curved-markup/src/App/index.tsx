@@ -199,7 +199,7 @@ const App: FunctionalComponent = () => {
 
           <p>
             I'm sure there are edges cases with things like anchor-positioning
-            and stop layer content, like a custom select element's picker:{' '}
+            and top-layer content, like a custom select element's picker:{' '}
             <select>
               <option>Oh</option>
               <option>no</option>
