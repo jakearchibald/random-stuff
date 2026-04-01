@@ -180,16 +180,14 @@ const App: FunctionalComponent = () => {
           <p>
             This works because, on pointermove, the real element is given a
             transform so the point of the real element matches up to the point
-            of the texture under the mouse.
-          </p>
-
-          <p>
-            This means things like{' '}
+            of the texture under the mouse. This means things like{' '}
             <a href="https://jakearchibald.com" target="_blank">
               links
             </a>{' '}
             will just work.
           </p>
+
+          <p></p>
 
           <p>
             For simple 2D cases, it still makes sense to have a nice high-level
@@ -200,11 +198,14 @@ const App: FunctionalComponent = () => {
           <p>
             I'm sure there are edges cases with things like anchor-positioning
             and top-layer content, like a custom select element's picker:{' '}
+          </p>
+
+          <div>
             <select>
               <option>Oh</option>
               <option>no</option>
             </select>
-          </p>
+          </div>
 
           <p>
             Ah, yeah, it moves around on mouse move, and I'm not handling moving
