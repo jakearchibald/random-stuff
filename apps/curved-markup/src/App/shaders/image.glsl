@@ -16,12 +16,17 @@
 //
 // Hope you like it :)
 
-const float FINAL_BLUR_BIAS = 1.0;
+#define FINAL_BLUR_BIAS 1.0
+#define VIGNETTE_STRENGTH 2.2
+#define SCANLINE_BRIGHTNESS 0.85  // base brightness (0–1), lower = darker lines
+#define SCANLINE_DEPTH 0.15       // amplitude of oscillation, higher = more contrast
+#define SCANLINE_SIZE 6.0         // pixel rows per scanline, higher = thicker lines
 
 vec4 Televisionfy(in vec4 pixel, const in vec2 uv)
 {
-    float vignette = pow(uv.x * (1.0 - uv.x) * uv.y * (1.0 - uv.y), 0.25) * 2.2;
-    return pixel * vignette;;
+    float vignette = pow(uv.x * (1.0 - uv.x) * uv.y * (1.0 - uv.y), 0.25) * VIGNETTE_STRENGTH;
+    float scanline = SCANLINE_BRIGHTNESS + SCANLINE_DEPTH * sin(uv.y * iResolution.y * 3.14159 / SCANLINE_SIZE);
+    return pixel * vignette * scanline;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
