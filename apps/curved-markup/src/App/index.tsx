@@ -2,6 +2,7 @@ import { signal, useSignalEffect } from '@preact/signals';
 import { type FunctionalComponent } from 'preact';
 import { useEffect, useRef } from 'preact/hooks';
 import * as THREE from 'three';
+import { createVHSPipeline, type VHSPipeline } from './vhsPipeline';
 import './styles.css';
 
 const SEGMENTS_X = 40;
@@ -97,11 +98,32 @@ const App: FunctionalComponent = () => {
     const mesh = new THREE.Mesh(geometry.current!, material);
     scene.add(mesh);
 
+    const vhs = new URLSearchParams(location.search).has('vhs');
+    let vhsPipeline: VHSPipeline | null = null;
+    if (vhs) {
+      vhsPipeline = createVHSPipeline();
+    }
+
     // Animation loop — repaint every frame
     let rafId: number;
+    let frame = 0;
+    const startTime = performance.now();
     const animate = () => {
       rafId = requestAnimationFrame(animate);
+      if (vhsPipeline) {
+        const time = (performance.now() - startTime) / 1000;
+        const vhsTexture = vhsPipeline.render(
+          renderer,
+          texture,
+          innerWidth * devicePixelRatio,
+          innerHeight * devicePixelRatio,
+          time,
+          frame,
+        );
+        material.map = vhsTexture;
+      }
       renderer.render(scene, camera.current!);
+      frame++;
     };
 
     animate();
@@ -176,6 +198,7 @@ const App: FunctionalComponent = () => {
       canvas.removeEventListener('pointerdown', handleElementPointerPosition);
       canvas.removeEventListener('paint', canvasPaint);
       removeEventListener('resize', handleResize);
+      vhsPipeline?.dispose();
       renderer.dispose();
       material.dispose();
       texture.dispose();
