@@ -20,12 +20,12 @@
 #define VIGNETTE_STRENGTH 2.2
 #define SCANLINE_BRIGHTNESS 0.85  // base brightness (0–1), lower = darker lines
 #define SCANLINE_DEPTH 0.15       // amplitude of oscillation, higher = more contrast
-#define SCANLINE_SIZE 6.0         // pixel rows per scanline, higher = thicker lines
+#define SCANLINE_SIZE 0.005        // scanline period as fraction of screen height, higher = thicker lines
 
 vec4 Televisionfy(in vec4 pixel, const in vec2 uv)
 {
     float vignette = pow(uv.x * (1.0 - uv.x) * uv.y * (1.0 - uv.y), 0.25) * VIGNETTE_STRENGTH;
-    float scanline = SCANLINE_BRIGHTNESS + SCANLINE_DEPTH * sin(uv.y * iResolution.y * 3.14159 / SCANLINE_SIZE);
+    float scanline = SCANLINE_BRIGHTNESS + SCANLINE_DEPTH * sin(uv.y * 3.14159 / SCANLINE_SIZE);
     return pixel * vignette * scanline;
 }
 
