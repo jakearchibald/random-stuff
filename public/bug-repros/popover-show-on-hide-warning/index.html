@@ -1,0 +1,140 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nested popovers</title>
+<style>
+  html {
+    font-family: system-ui;
+    padding: 2rem;
+  }
+
+  form {
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+
+  fieldset {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+  }
+
+  legend {
+    font-weight: bold;
+    padding: 0 0.25rem;
+  }
+
+  fieldset label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+
+    & + label {
+      margin-top: 0.25rem;
+    }
+  }
+
+  [popover] {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin: 0;
+    position-area: bottom span-right;
+
+    p {
+      margin: 0 0 0.75rem;
+    }
+  }
+</style>
+
+<form>
+  <fieldset>
+    <legend>Show popover 4 on beforehide of:</legend>
+    <label>
+      <input type="radio" name="beforehide-target" value="none" checked />
+      None
+    </label>
+    <label>
+      <input type="radio" name="beforehide-target" value="popover-2" />
+      Popover 2
+    </label>
+    <label>
+      <input type="radio" name="beforehide-target" value="popover-3" />
+      Popover 3
+    </label>
+  </fieldset>
+</form>
+
+<p><button id="btn-1">Open popovers</button></p>
+
+<div id="popover-1" popover="auto">
+  <p>Popover 1</p>
+  <button id="btn-2">Open popover 2</button>
+</div>
+
+<div id="popover-2" popover="auto">
+  <p>Popover 2</p>
+  <button id="btn-3">Open popover 3</button>
+</div>
+
+<div id="popover-3" popover="auto">
+  <p>Popover 3</p>
+</div>
+
+<div id="popover-4" popover="auto">
+  <p>Popover 4</p>
+</div>
+
+<script>
+  document.getElementById('btn-1').addEventListener('click', function () {
+    document.getElementById('popover-1').showPopover({ source: this });
+    document
+      .getElementById('popover-2')
+      .showPopover({ source: document.getElementById('btn-2') });
+    document
+      .getElementById('popover-3')
+      .showPopover({ source: document.getElementById('btn-3') });
+  });
+
+  document.getElementById('btn-2').addEventListener('click', function () {
+    document.getElementById('popover-2').showPopover({ source: this });
+  });
+
+  document.getElementById('btn-3').addEventListener('click', function () {
+    document.getElementById('popover-3').showPopover({ source: this });
+  });
+
+  const form = document.querySelector('form');
+
+  const parentButton = {
+    'popover-2': document.querySelector('#popover-1 button'),
+    'popover-3': document.querySelector('#popover-2 button'),
+  };
+
+  document
+    .getElementById('popover-4')
+    .addEventListener('beforetoggle', (event) => {
+      console.log(
+        'popover-4 beforetoggle',
+        event.oldState,
+        '->',
+        event.newState,
+      );
+    });
+
+  for (const id of ['popover-2', 'popover-3']) {
+    document.getElementById(id).addEventListener('beforetoggle', (event) => {
+      if (
+        event.newState === 'closed' &&
+        new FormData(form).get('beforehide-target') === id
+      ) {
+        document
+          .getElementById('popover-4')
+          .showPopover({ source: parentButton[id] });
+      }
+    });
+  }
+</script>
