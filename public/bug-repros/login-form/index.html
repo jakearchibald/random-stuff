@@ -111,7 +111,7 @@
     <script>
       const loginForm = document.getElementById('login-form');
 
-      setTimeout(() => {
+      setInterval(() => {
         const data = new FormData(loginForm);
         console.log('Login formdata', Object.fromEntries(data));
       }, 1000);
