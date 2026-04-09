@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login / Create Account</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 400px;
+        margin: 40px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+      }
+      input {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      .forms {
+        display: grid;
+        gap: 3rem;
+      }
+      .hr {
+        border: none;
+        border-top: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="forms">
+      <section>
+        <h1>Create account</h1>
+        <form method="POST" action="">
+          <label for="signup-username">Username</label>
+          <input
+            type="text"
+            id="signup-username"
+            name="username"
+            autocomplete="username"
+            required
+          />
+
+          <label for="signup-password">Password</label>
+          <input
+            type="password"
+            id="signup-password"
+            name="password"
+            autocomplete="new-password"
+            required
+          />
+
+          <label for="signup-confirm">Confirm password</label>
+          <input
+            type="password"
+            id="signup-confirm"
+            name="confirm-password"
+            autocomplete="new-password"
+            required
+          />
+
+          <button type="submit">Create account</button>
+        </form>
+      </section>
+
+      <div class="hr"></div>
+
+      <section>
+        <h1>Log in</h1>
+        <form id="login-form" method="POST" action="">
+          <label for="login-username">Username</label>
+          <input
+            type="text"
+            id="login-username"
+            name="username"
+            autocomplete="username"
+            required
+          />
+
+          <label for="login-password">Password</label>
+          <input
+            type="password"
+            id="login-password"
+            name="password"
+            autocomplete="current-password"
+            required
+          />
+
+          <button type="submit">Log in</button>
+        </form>
+      </section>
+    </div>
+    <script>
+      const loginForm = document.getElementById('login-form');
+
+      setTimeout(() => {
+        const data = new FormData(loginForm);
+        console.log('Login formdata', Object.fromEntries(data));
+      }, 1000);
+    </script>
+  </body>
+</html>
