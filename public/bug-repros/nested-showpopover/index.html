@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nested showPopover demo</title>
+  </head>
+  <body>
+    <button commandfor="my-popover" command="show-popover">Show popover</button>
+
+    <div id="my-popover" popover>Hello from popover</div>
+
+    <script>
+      const popover = document.getElementById('my-popover');
+      const button = document.querySelector('[commandfor]');
+
+      popover.addEventListener('beforetoggle', (event) => {
+        if (event.newState === 'open') {
+          console.log('opening popover');
+          popover.showPopover({ source: button });
+        }
+      });
+    </script>
+  </body>
+</html>
