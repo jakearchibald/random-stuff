@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>contrast-color() demo</title>
+    <style>
+      @property --bg {
+        syntax: '<color>';
+        inherits: true;
+        initial-value: #3264c8;
+      }
+
+      body {
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        padding: 3rem;
+        background: #f0f0f0;
+      }
+
+      h1 {
+        margin: 0;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 2rem;
+      }
+
+      .btn {
+        background: var(--bg);
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        min-width: 180px;
+      }
+
+      /* contrast-color() picks the accessible contrast color automatically */
+      .btn--auto {
+        color: contrast-color(var(--bg));
+      }
+
+      .btn--opposite {
+        color: color(
+          from contrast-color(var(--bg)) srgb calc(1 - r) calc(1 - g)
+            calc(1 - b)
+        );
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1.1rem;
+      }
+
+      input[type='color'] {
+        width: 3rem;
+        height: 3rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+      }
+
+      .caption {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-top: 0.5rem;
+        text-align: center;
+      }
+
+      .col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>contrast-color() demo</h1>
+
+    <div class="buttons">
+      <div class="col">
+        <button class="btn btn--auto">Button text</button>
+        <p class="caption">contrast-color()</p>
+      </div>
+
+      <div class="col">
+        <button class="btn btn--opposite">Button text</button>
+        <p class="caption">opposite of contrast-color()</p>
+      </div>
+    </div>
+
+    <label>
+      Pick a color:
+      <input type="color" id="picker" value="#3264c8" />
+    </label>
+
+    <script>
+      const picker = document.getElementById('picker');
+      const btnAuto = document.querySelector('.btn--auto');
+      const btnOpposite = document.querySelector('.btn--opposite');
+
+      function update(color) {
+        document.documentElement.style.setProperty('--bg', color);
+      }
+
+      picker.addEventListener('input', (e) => {
+        location.replace('#' + e.target.value.slice(1));
+        update(e.target.value);
+      });
+
+      const initial = location.hash
+        ? '#' + location.hash.slice(1)
+        : picker.value;
+      picker.value = initial;
+      update(initial);
+    </script>
+  </body>
+</html>
