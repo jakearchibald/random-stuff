@@ -125,6 +125,12 @@
           margin: 0;
         }
       }
+
+      p {
+        max-width: 60ch;
+        text-align: center;
+        line-height: 1.7;
+      }
     </style>
   </head>
   <body>
@@ -148,6 +154,7 @@
           <a
             href="https://css-tricks.com/approximating-contrast-color-with-other-css-features/"
             target="_blank"
+            rel="noopener noreferrer"
             >oklch 0.7 lightness</a
           >
         </h2>
@@ -160,6 +167,17 @@
       Pick a color:
       <input type="color" id="picker" value="#3264c8" />
     </label>
+
+    <p>
+      If you pick a contrast value that's better for users, but doesn't comply
+      with WCAG, follow Adrian Roselli's advice and
+      <a
+        href="https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html#:~:text=document%20it%20and%20have%20a%20ready%20response%20should%20you%20receive%20a%20drive%2Dby%20lawsuit%20from%20a%20bad%20actor"
+        target="_blank"
+        rel="noopener noreferrer"
+        >document it</a
+      >.
+    </p>
 
     <script>
       const picker = document.getElementById('picker');
