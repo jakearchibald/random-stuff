@@ -14,7 +14,9 @@
       body {
         font-family: sans-serif;
         display: grid;
-        justify-items: center;
+        grid-auto-flow: row;
+        align-items: center;
+        justify-content: center;
         gap: 2rem;
         padding: 3rem;
         background: #f0f0f0;
@@ -22,29 +24,12 @@
 
       h1 {
         margin: 0;
-        text-align: center;
+        visibility: hidden;
       }
 
       .buttons {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: auto auto;
-        gap: 1rem 2rem;
-      }
-
-      .col {
-        display: grid;
-        grid-row: span 3;
-        grid-template-rows: subgrid;
-        justify-items: center;
-        gap: 1rem 2rem;
-      }
-
-      .col h2 {
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-align: center;
-        margin: 0;
+        display: flex;
+        gap: 2rem;
       }
 
       .btn {
@@ -83,19 +68,9 @@
         );
       }
 
-      .btn--oklch {
-        color: oklch(from var(--bg) calc((0.7 - l) * infinity) 0 0);
-      }
-
-      .btn--oklch-flipped {
-        background: oklch(from var(--bg) calc((0.7 - l) * infinity) 0 0);
-        color: var(--bg);
-      }
-
       label {
-        display: grid;
-        grid-auto-flow: column;
-        align-items: center;
+        display: flex;
+        align-items: start;
         gap: 1rem;
         font-size: 1.1rem;
       }
@@ -108,22 +83,17 @@
         cursor: pointer;
       }
 
-      @media (max-width: 720px) {
-        .buttons {
-          grid-template-columns: 1fr;
-          grid-template-rows: none;
-        }
+      .caption {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-top: 0.5rem;
+        text-align: center;
+      }
 
-        .col {
-          grid-row: span 1;
-          grid-template-rows: none;
-          gap: 1rem;
-          margin-bottom: 2em;
-        }
-
-        .col h2 {
-          margin: 0;
-        }
+      .col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
     </style>
   </head>
@@ -132,37 +102,24 @@
 
     <div class="buttons">
       <div class="col">
-        <h2>contrast-color()</h2>
         <button class="btn btn--auto">Button text</button>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <div class="col">
         <button class="btn btn--flipped">Button text</button>
-      </div>
-
-      <div class="col">
-        <h2>opposite</h2>
-        <button class="btn btn--opposite">Button text</button>
-        <button class="btn btn--flipped-opposite">Button text</button>
-      </div>
-
-      <div class="col">
-        <h2>
-          <a
-            href="https://css-tricks.com/approximating-contrast-color-with-other-css-features/"
-            target="_blank"
-            >oklch 0.7 lightness</a
-          >
-        </h2>
-        <button class="btn btn--oklch">Button text</button>
-        <button class="btn btn--oklch-flipped">Button text</button>
       </div>
     </div>
 
     <label>
-      Pick a color:
       <input type="color" id="picker" value="#3264c8" />
     </label>
 
     <script>
       const picker = document.getElementById('picker');
+      const btnAuto = document.querySelector('.btn--auto');
+      const btnOpposite = document.querySelector('.btn--opposite');
 
       function update(color) {
         document.documentElement.style.setProperty('--bg', color);
