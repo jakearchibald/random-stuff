@@ -11,33 +11,23 @@ export function htmlInputsPlugin(): Plugin {
     config(config, { command }) {
       if (command !== 'build') return;
       const root = config.root || process.cwd();
-      // Find all HTML files in src recursively
       const allHtmlFiles = glob.sync('apps/**/*.html', {
         cwd: resolve(root),
         absolute: true,
       });
 
-      const objPath = [
-        'environments',
-        'client',
-        'build',
-        'rollupOptions',
-        'input',
-      ];
-
-      let obj = config;
-      for (const segment of objPath) {
-        if (!(segment in obj)) (obj as any)[segment] = {};
-        obj = (obj as any)[segment];
-      }
-
+      const input: Record<string, string> = {};
       for (const file of allHtmlFiles) {
-        // Use the directory name (relative to root) as the key
         const rel = file.replace(resolve(root) + '/apps/', '');
         const key = rel.replace(/\/.*\.html$/, '');
-        // @ts-ignore fuck it
-        config.environments.client.build.rollupOptions.input[key] = file;
+        input[key] = file;
       }
+
+      return {
+        environments: {
+          client: { build: { rollupOptions: { input } } },
+        },
+      };
     },
   };
 }
