@@ -27,7 +27,13 @@ const Prompter: FunctionalComponent<PrompterProps> = ({ lines }) => {
     addEventListener(
       'keydown',
       (event) => {
-        if (event.key === 'Enter') {
+        if (event.key === 't') {
+          event.preventDefault();
+          container.value!.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+          });
+        } else if (event.key === 'Enter') {
           event.preventDefault();
 
           const now = Date.now();
@@ -50,7 +56,7 @@ const Prompter: FunctionalComponent<PrompterProps> = ({ lines }) => {
           }
         }
       },
-      { signal }
+      { signal },
     );
 
     return () => {

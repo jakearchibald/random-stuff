@@ -11,19 +11,19 @@
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.21.2",
-    "@mdn/browser-compat-data": "^7.2.5",
-    "@preact/preset-vite": "^2.10.2",
-    "@preact/signals": "^2.6.1",
-    "@types/node": "^25.0.10",
-    "dedent": "^1.7.1",
-    "glob": "^13.0.0",
-    "preact": "^10.28.2",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "wrangler": "^4.60.0",
-    "three": "^0.175.0",
-    "@types/three": "^0.175.0"
+    "@cloudflare/vite-plugin": "^1.32.3",
+    "@mdn/browser-compat-data": "^7.3.11",
+    "@preact/preset-vite": "^2.10.5",
+    "@preact/signals": "^2.9.0",
+    "@types/node": "^25.6.0",
+    "@types/three": "^0.184.0",
+    "dedent": "^1.7.2",
+    "glob": "^13.0.6",
+    "preact": "^10.29.1",
+    "three": "^0.184.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.8",
+    "wrangler": "^4.83.0"
   },
-  "packageManager": "pnpm@10.15.1"
+  "packageManager": "pnpm@10.33.0"
 }
