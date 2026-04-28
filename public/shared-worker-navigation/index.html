@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shared worker navigation</title>
+  </head>
+  <body>
+    <p>Number from worker: <span id="number">…</span></p>
+    <p><a id="link" href="">Navigate</a></p>
+    <script>
+      document.getElementById('link').href = `./?${Math.random()}`;
+
+      const worker = new SharedWorker('./worker.js');
+      worker.port.addEventListener('message', (event) => {
+        document.getElementById('number').textContent = event.data;
+      });
+      worker.port.start();
+    </script>
+  </body>
+</html>
