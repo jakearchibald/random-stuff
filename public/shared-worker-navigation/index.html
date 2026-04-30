@@ -9,7 +9,13 @@
     <p>Number from worker: <span id="number">…</span></p>
     <p><a id="link" href="">Navigate</a></p>
     <script>
-      document.getElementById('link').href = `./?${Math.random()}`;
+      const currentParams = new URLSearchParams(location.search);
+      if (currentParams.has('no-bfcache'))
+        addEventListener('unload', () => console.log('unload'));
+
+      const nextParams = new URLSearchParams(currentParams);
+      nextParams.set('rand', Math.random());
+      document.getElementById('link').href = `./?${nextParams}`;
 
       const worker = new SharedWorker('./worker.js');
       worker.port.addEventListener('message', (event) => {
