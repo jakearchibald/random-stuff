@@ -7,11 +7,15 @@
   </head>
   <body>
     <p>Number from worker: <span id="number">…</span></p>
+    <p>Number from page: <span id="page-number"></span></p>
     <p><a id="link" href="">Navigate</a></p>
     <script>
+      document.getElementById('page-number').textContent = Math.random();
+
       const currentParams = new URLSearchParams(location.search);
-      if (currentParams.has('no-bfcache'))
+      if (currentParams.has('no-bfcache')) {
         addEventListener('unload', () => console.log('unload'));
+      }
 
       const nextParams = new URLSearchParams(currentParams);
       nextParams.set('rand', Math.random());
