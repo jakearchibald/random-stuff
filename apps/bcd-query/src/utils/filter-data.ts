@@ -2,6 +2,7 @@ import type { Browsers, BrowserStatus } from '@mdn/browser-compat-data';
 import type { Filter } from '../App/FilterOptions';
 import type { SupportOptions } from '../App/FilterOptions/EngineSupportOptions';
 import type { VersionOptions } from '../App/FilterOptions/VersionSupportOptions';
+import type { FirstInBrowserOptions } from '../App/FilterOptions/FirstInBrowserOptions';
 import type {
   BCDBrowser,
   BCDFeatureDetails,
@@ -37,6 +38,9 @@ export function createFilter(
   }
   if (filter.type === 'version-support') {
     return createVersionSupportFilter(filter.options);
+  }
+  if (filter.type === 'first-in-browser') {
+    return createFirstInBrowserFilter(filter.options, browserData);
   }
   if (filter.type === 'approaching-baseline') {
     return createApproachingBaselineFilter(browserData);
@@ -125,6 +129,45 @@ function createNewlyBaselineFilter(
         (acceptableStableStatuses.has(mobileValue?.status) &&
           !browserSupport.mobile.flagged)
       );
+    });
+  };
+}
+
+function createFirstInBrowserFilter(
+  options: FirstInBrowserOptions,
+  browserData: Browsers
+): (details: BCDFeatureDetails) => boolean {
+  const earliestReleaseDate = (
+    browser: BCDBrowser,
+    version: string
+  ): string | undefined => {
+    if (!version) return undefined;
+    return browserData[browser].releases[version]?.release_date;
+  };
+
+  return (details: BCDFeatureDetails) => {
+    const dates: Partial<Record<BCDBrowser, string>> = {};
+
+    for (const browser of browserOrder) {
+      const support = details.support[browser];
+      const desktopDate = earliestReleaseDate(browser, support.desktop.supported);
+      const mobileDate = earliestReleaseDate(browser, support.mobile.supported);
+
+      const candidates = [desktopDate, mobileDate].filter(
+        (d): d is string => Boolean(d)
+      );
+      if (candidates.length === 0) continue;
+      dates[browser] = candidates.reduce((a, b) => (a < b ? a : b));
+    }
+
+    const targetDate = dates[options.browser];
+    if (!targetDate) return false;
+    if (options.after && targetDate <= options.after) return false;
+
+    return browserOrder.every((browser) => {
+      if (browser === options.browser) return true;
+      const other = dates[browser];
+      return !other || targetDate < other;
     });
   };
 }

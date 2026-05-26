@@ -6,6 +6,9 @@ import type { Browsers } from '@mdn/browser-compat-data';
 import VersionSupportOptions, {
   type VersionOptions,
 } from './VersionSupportOptions';
+import FirstInBrowserOptionsComp, {
+  type FirstInBrowserOptions,
+} from './FirstInBrowserOptions';
 
 export type Filter =
   | {
@@ -13,6 +16,7 @@ export type Filter =
       options: SupportOptions;
     }
   | { type: 'version-support'; options: VersionOptions }
+  | { type: 'first-in-browser'; options: FirstInBrowserOptions }
   | { type: 'approaching-baseline' }
   | { type: 'newly-baseline' };
 
@@ -30,6 +34,13 @@ export const filterDefaults: Record<Filter['type'], Filter> = {
     options: {
       browser: 'firefox',
       version: '142',
+    },
+  },
+  'first-in-browser': {
+    type: 'first-in-browser',
+    options: {
+      browser: 'firefox',
+      after: '',
     },
   },
   'approaching-baseline': { type: 'approaching-baseline' },
@@ -60,6 +71,7 @@ const FilterOptions: FunctionalComponent<Props> = ({
         <select value={filter.type} onInput={onFilterTypeChange}>
           <option value="engine-support">Engine Support</option>
           <option value="version-support">Added in version…</option>
+          <option value="first-in-browser">First in browser</option>
           <option value="approaching-baseline">Approaching baseline?</option>
           <option value="newly-baseline">Newly baseline</option>
         </select>
@@ -79,6 +91,15 @@ const FilterOptions: FunctionalComponent<Props> = ({
           value={filter.options}
           onChange={(newValue) =>
             onChange({ type: 'engine-support', options: newValue })
+          }
+        />
+      )}
+      {filter.type === 'first-in-browser' && (
+        <FirstInBrowserOptionsComp
+          browserData={browserData}
+          value={filter.options}
+          onChange={(newValue) =>
+            onChange({ type: 'first-in-browser', options: newValue })
           }
         />
       )}

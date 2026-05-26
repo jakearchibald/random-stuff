@@ -60,6 +60,21 @@ function useInitialState() {
         };
       }
 
+      // For first-in-browser, read browser and after-date from URL
+      if (
+        filterType === 'first-in-browser' &&
+        filter.type === 'first-in-browser'
+      ) {
+        const browser =
+          (params.get('browser') as any) || filter.options.browser;
+        const after = params.get('after') || filter.options.after;
+
+        return {
+          type: 'first-in-browser',
+          options: { browser, after },
+        };
+      }
+
       return filter;
     })();
 
@@ -91,6 +106,11 @@ export function useFilterURLState() {
     } else if (filterDef.value.type === 'version-support') {
       params.set('browser', filterDef.value.options.browser);
       params.set('version', filterDef.value.options.version);
+    } else if (filterDef.value.type === 'first-in-browser') {
+      params.set('browser', filterDef.value.options.browser);
+      if (filterDef.value.options.after) {
+        params.set('after', filterDef.value.options.after);
+      }
     }
 
     // Add title filter if not empty
