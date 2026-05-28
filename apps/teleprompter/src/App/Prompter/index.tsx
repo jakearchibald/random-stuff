@@ -27,7 +27,7 @@ const Prompter: FunctionalComponent<PrompterProps> = ({ lines }) => {
     addEventListener(
       'keydown',
       (event) => {
-        if (event.key === 't') {
+        if (event.key === 'PageUp') {
           event.preventDefault();
           container.value!.scrollTo({
             top: 0,
