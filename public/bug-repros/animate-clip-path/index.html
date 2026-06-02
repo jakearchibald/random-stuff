@@ -18,6 +18,19 @@
     background: #1a1a1a;
   }
 
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    color: #fff;
+  }
+
+  select,
+  button {
+    font: inherit;
+    padding: 6px 10px;
+  }
+
   .square {
     width: 300px;
     height: 300px;
@@ -26,7 +39,11 @@
     margin: 0 0 20px;
   }
 
-  @keyframes clip-animation {
+  /* Simple inset (the current option) */
+  .square.inset {
+    animation-name: clip-inset;
+  }
+  @keyframes clip-inset {
     0% {
       clip-path: inset(0% 0% 0% 0%);
     }
@@ -37,12 +54,205 @@
       clip-path: inset(0% 0% 0% 0%);
     }
   }
+
+  /* Rounded inset */
+  .square.rounded-inset {
+    animation-name: clip-rounded-inset;
+  }
+  @keyframes clip-rounded-inset {
+    0% {
+      clip-path: inset(0% 0% 0% 0% round 0px);
+    }
+    50% {
+      clip-path: inset(40% 40% 40% 40% round 80px);
+    }
+    100% {
+      clip-path: inset(0% 0% 0% 0% round 0px);
+    }
+  }
+
+  /* Rect */
+  .square.rect {
+    animation-name: clip-rect;
+  }
+  @keyframes clip-rect {
+    0% {
+      clip-path: rect(0% 100% 100% 0%);
+    }
+    50% {
+      clip-path: rect(40% 60% 60% 40%);
+    }
+    100% {
+      clip-path: rect(0% 100% 100% 0%);
+    }
+  }
+
+  /* Rounded rect */
+  .square.rounded-rect {
+    animation-name: clip-rounded-rect;
+  }
+  @keyframes clip-rounded-rect {
+    0% {
+      clip-path: rect(0% 100% 100% 0% round 0px);
+    }
+    50% {
+      clip-path: rect(40% 60% 60% 40% round 80px);
+    }
+    100% {
+      clip-path: rect(0% 100% 100% 0% round 0px);
+    }
+  }
+
+  /* Circle */
+  .square.circle {
+    animation-name: clip-circle;
+  }
+  @keyframes clip-circle {
+    0% {
+      clip-path: circle(50% at 50% 50%);
+    }
+    50% {
+      clip-path: circle(20% at 50% 50%);
+    }
+    100% {
+      clip-path: circle(50% at 50% 50%);
+    }
+  }
+
+  /* Ellipse */
+  .square.ellipse {
+    animation-name: clip-ellipse;
+  }
+  @keyframes clip-ellipse {
+    0% {
+      clip-path: ellipse(50% 50% at 50% 50%);
+    }
+    50% {
+      clip-path: ellipse(40% 20% at 50% 50%);
+    }
+    100% {
+      clip-path: ellipse(50% 50% at 50% 50%);
+    }
+  }
+
+  /* Polygon */
+  .square.polygon {
+    animation-name: clip-polygon;
+  }
+  @keyframes clip-polygon {
+    0% {
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    }
+    50% {
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    }
+    100% {
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    }
+  }
+
+  /* Path */
+  .square.path {
+    animation-name: clip-path-fn;
+  }
+  @keyframes clip-path-fn {
+    0% {
+      clip-path: path(
+        'M 0 0 C 100 0, 200 0, 300 0 C 300 100, 300 200, 300 300 C 200 300, 100 300, 0 300 C 0 200, 0 100, 0 0 Z'
+      );
+    }
+    50% {
+      clip-path: path(
+        'M 150 0 C 200 100, 200 100, 300 150 C 200 200, 200 200, 150 300 C 100 200, 100 200, 0 150 C 100 100, 100 100, 150 0 Z'
+      );
+    }
+    100% {
+      clip-path: path(
+        'M 0 0 C 100 0, 200 0, 300 0 C 300 100, 300 200, 300 300 C 200 300, 100 300, 0 300 C 0 200, 0 100, 0 0 Z'
+      );
+    }
+  }
+
+  /* XYWH */
+  .square.xywh {
+    animation-name: clip-xywh;
+  }
+  @keyframes clip-xywh {
+    0% {
+      clip-path: xywh(0% 0% 100% 100%);
+    }
+    50% {
+      clip-path: xywh(20% 20% 60% 60%);
+    }
+    100% {
+      clip-path: xywh(0% 0% 100% 100%);
+    }
+  }
+
+  /* Shape */
+  .square.shape {
+    animation-name: clip-shape;
+  }
+  @keyframes clip-shape {
+    0% {
+      clip-path: shape(
+        from 0% 0%,
+        curve to 100% 0% with 33% 0% / 66% 0%,
+        curve to 100% 100% with 100% 33% / 100% 66%,
+        curve to 0% 100% with 66% 100% / 33% 100%,
+        curve to 0% 0% with 0% 66% / 0% 33%,
+        close
+      );
+    }
+    50% {
+      clip-path: shape(
+        from 50% 0%,
+        curve to 100% 50% with 66% 33% / 66% 33%,
+        curve to 50% 100% with 66% 66% / 66% 66%,
+        curve to 0% 50% with 33% 66% / 33% 66%,
+        curve to 50% 0% with 33% 33% / 33% 33%,
+        close
+      );
+    }
+    100% {
+      clip-path: shape(
+        from 0% 0%,
+        curve to 100% 0% with 33% 0% / 66% 0%,
+        curve to 100% 100% with 100% 33% / 100% 66%,
+        curve to 0% 100% with 66% 100% / 33% 100%,
+        curve to 0% 0% with 0% 66% / 0% 33%,
+        close
+      );
+    }
+  }
 </style>
 
-<div class="square"></div>
+<div class="controls">
+  <label for="clipType">clip-path type:</label>
+  <select id="clipType">
+    <option value="inset">Simple inset</option>
+    <option value="rounded-inset">Rounded inset</option>
+    <option value="rect">Rect</option>
+    <option value="rounded-rect">Rounded rect</option>
+    <option value="circle">Circle</option>
+    <option value="ellipse">Ellipse</option>
+    <option value="polygon">Polygon</option>
+    <option value="path">Path</option>
+    <option value="xywh">XYWH</option>
+    <option value="shape">Shape</option>
+  </select>
+</div>
+<div class="square inset"></div>
 <button id="jankButton">Create Jank (Block 1s)</button>
 
 <script>
+  const square = document.querySelector('.square');
+  const clipType = document.getElementById('clipType');
+
+  clipType.addEventListener('change', () => {
+    square.className = `square ${clipType.value}`;
+  });
+
   document.getElementById('jankButton').addEventListener('click', () => {
     // Block the main thread for 1 second
     const start = Date.now();
