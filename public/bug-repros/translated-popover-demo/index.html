@@ -100,6 +100,33 @@
       .submenu button:hover {
         background: #e4e7eb;
       }
+
+      /* Base-select: opt the <select> into the customizable rendering */
+      .menu-select,
+      .menu-select::picker(select) {
+        appearance: base-select;
+      }
+
+      .menu-select {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+        border: 1px solid #52606d;
+        background: #323f4b;
+        color: white;
+        border-radius: 6px;
+      }
+
+      .menu-select::picker(select) {
+        border: 0;
+        padding: 0.25rem;
+        border-radius: 6px;
+        background: #fff;
+        color: #1f2933;
+      }
+
+      .menu-select option {
+        padding: 0.5rem 1rem;
+      }
     </style>
   </head>
   <body>
@@ -122,6 +149,13 @@
         <button class="menu-item" command="toggle-popover" commandfor="submenu">
           More options ▾
         </button>
+
+        <select class="menu-select">
+          <option>Custom select</option>
+          <option>One</option>
+          <option>Two</option>
+          <option>Three</option>
+        </select>
       </div>
     </div>
 
