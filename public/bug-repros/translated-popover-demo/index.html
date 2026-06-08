@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Translated popover demo</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        padding: 1rem;
+      }
+
+      .open-menu-btn {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+      }
+
+      /* The side menu popover */
+      .side-menu {
+        /* Reset default popover positioning */
+        margin: 0;
+        border: 0;
+        padding: 0;
+
+        /* Full height, pinned to the left edge */
+        position: fixed;
+        inset: 0 100% 0 auto;
+        width: 300px;
+        height: auto;
+
+        background: #1f2933;
+        color: white;
+
+        transition: translate 0.3s ease;
+      }
+
+      /* Shown state */
+      .side-menu:popover-open {
+        translate: 100% 0;
+      }
+
+      /* Starting style: begins off-screen to the left, then animates in */
+      @starting-style {
+        .side-menu:popover-open {
+          translate: 0 0;
+        }
+      }
+
+      .side-menu-inner {
+        padding: 1rem;
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .side-menu h2 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .menu-item {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+        text-align: left;
+        border: 1px solid #52606d;
+        background: #323f4b;
+        color: white;
+        border-radius: 6px;
+      }
+
+      /* The nested popover anchored to its button */
+      .submenu {
+        margin: 0;
+        border: 0;
+        padding: 0.5rem;
+        border-radius: 8px;
+        background: #fff;
+        color: #1f2933;
+        position-area: bottom;
+        min-width: anchor-size(width);
+      }
+
+      .submenu button {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: 0;
+        background: none;
+        text-align: left;
+        font-size: 1rem;
+        border-radius: 4px;
+      }
+
+      .submenu button:hover {
+        background: #e4e7eb;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Side menu demo</h1>
+    <p>
+      Tap the button to open a left-side menu. Inside it, open a nested popover.
+    </p>
+
+    <button
+      class="open-menu-btn"
+      command="toggle-popover"
+      commandfor="side-menu"
+    >
+      ☰ Open menu
+    </button>
+
+    <div class="side-menu" id="side-menu" popover>
+      <div class="side-menu-inner">
+        <h2>Menu</h2>
+        <button class="menu-item" command="toggle-popover" commandfor="submenu">
+          More options ▾
+        </button>
+      </div>
+    </div>
+
+    <div class="submenu" id="submenu" popover>
+      <button>Settings</button>
+      <button>Help</button>
+      <button>Sign out</button>
+    </div>
+  </body>
+</html>
