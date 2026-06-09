@@ -4,6 +4,10 @@ html {
   interpolate-size: allow-keywords;
 }
 
+body {
+  height: 200vh;
+}
+
 @font-face {
   font-family: seti;
   src: url('./seti.woff') format('woff');
@@ -290,4 +294,3 @@ html {
     }
   }
 }
-
