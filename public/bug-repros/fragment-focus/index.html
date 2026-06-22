@@ -10,9 +10,15 @@
   :target {
     background: yellow;
   }
+  .good:focus {
+    background: lightgreen;
+  }
+  .bad:focus {
+    background: lightcoral;
+  }
 </style>
 <p><a href="#">Reset</a></p>
 <p><a href="#fragment-target">Click me</a></p>
-<p><a href="/">Unexpected next focus target</a></p>
+<p><a href="/" class="bad">Unexpected next focus target</a></p>
 <p id="fragment-target">Fragment target</p>
-<p><a href="/">Expected next focus target</a></p>
+<p><a href="/" class="good">Expected next focus target</a></p>
