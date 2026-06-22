@@ -1,0 +1,18 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fragment focus</title>
+<style>
+  html {
+    font-family: system-ui;
+    line-height: 1.5;
+  }
+  :target {
+    background: yellow;
+  }
+</style>
+<p><a href="#">Click me</a></p>
+<p><a href="#fragment-target">Click me</a></p>
+<p><a href="/">Unexpected next focus target</a></p>
+<p id="fragment-target">Fragment target</p>
+<p><a href="/">Expected next focus target</a></p>
