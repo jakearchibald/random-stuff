@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cross-origin video + service worker</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 40em;
+        margin: 2em auto;
+        padding: 0 1em;
+        line-height: 1.5;
+      }
+      video {
+        width: 100%;
+        max-width: 100%;
+        background: #000;
+        display: block;
+      }
+      #status {
+        padding: 0.5em 0.75em;
+        border-radius: 4px;
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cross-origin video + service worker</h1>
+    <p id="status">Registering service worker…</p>
+    <div id="video-container"></div>
+
+    <script>
+      const status = document.getElementById('status');
+
+      async function init() {
+        if (!('serviceWorker' in navigator)) {
+          status.textContent =
+            'Service workers are not supported in this browser.';
+          return;
+        }
+
+        try {
+          await navigator.serviceWorker.register('sw.js');
+        } catch (err) {
+          status.textContent = `Service worker registration failed: ${err.message}`;
+          return;
+        }
+
+        // If we're not already controlled, wait until we are.
+        if (!navigator.serviceWorker.controller) {
+          status.textContent =
+            'Service worker registered. Waiting for it to take control…';
+          await new Promise((resolve) => {
+            navigator.serviceWorker.addEventListener(
+              'controllerchange',
+              resolve,
+              {
+                once: true,
+              },
+            );
+          });
+        }
+
+        status.textContent =
+          'Service worker is controlling the page. Adding video…';
+        addVideo();
+      }
+
+      function addVideo() {
+        const video = document.createElement('video');
+        video.src =
+          'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4';
+        video.controls = true;
+        video.preload = 'metadata';
+        video.muted = true;
+        // No autoplay.
+        document.getElementById('video-container').append(video);
+        status.textContent =
+          'Service worker is controlling the page. Video added below.';
+      }
+
+      init();
+    </script>
+  </body>
+</html>
