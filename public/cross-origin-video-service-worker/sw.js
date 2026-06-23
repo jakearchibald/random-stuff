@@ -11,6 +11,11 @@ self.addEventListener('activate', (event) => {
 // Let every request go to the network as normal. The cross-origin video
 // request passes through here too.
 self.addEventListener('fetch', (event) => {
-  console.log('[sw] request:', event.request.url);
+  const range = event.request.headers.get('Range');
+  console.log(
+    '[sw] request:',
+    event.request.url,
+    range ? `(Range: ${range})` : '(no range)',
+  );
   event.respondWith(fetch(event.request));
 });
