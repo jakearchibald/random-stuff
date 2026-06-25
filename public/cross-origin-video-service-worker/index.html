@@ -69,8 +69,10 @@
 
       function addVideo() {
         const video = document.createElement('video');
-        video.src =
-          'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4';
+        const params = new URLSearchParams(location.search);
+        video.src = params.has('fx')
+          ? 'https://www.firefox.com/en-GB/download/all/desktop-release/win64/'
+          : 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4';
         video.controls = true;
         video.preload = 'metadata';
         video.muted = true;
