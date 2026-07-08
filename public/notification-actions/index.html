@@ -55,12 +55,6 @@
   const statusEl = document.querySelector('#status');
   const logEl = document.querySelector('#log');
   const showButton = document.querySelector('#show');
-
-  function log(message) {
-    const time = new Date().toLocaleTimeString();
-    logEl.textContent += `[${time}] ${message}\n`;
-  }
-
   if (!('serviceWorker' in navigator)) {
     statusEl.textContent = 'Service workers are not supported in this browser.';
     showButton.disabled = true;
@@ -72,7 +66,9 @@
     // clicked.
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data?.type === 'notification-action') {
-        log(`Action clicked: ${event.data.action || '(notification body)'}`);
+        console.log(
+          `Action clicked: ${event.data.action || '(notification body)'}`,
+        );
       }
     });
 
@@ -98,26 +94,26 @@
     let permission = Notification.permission;
 
     if (permission === 'default') {
-      log('Requesting notification permission…');
+      console.log('Requesting notification permission…');
       permission = await Notification.requestPermission();
     }
 
     if (permission !== 'granted') {
-      log(`Permission ${permission}. Cannot show notification.`);
+      console.log(`Permission ${permission}. Cannot show notification.`);
       return;
     }
 
     await registration.showNotification('New message', {
-      body: 'Tap an action below, or tap the notification itself.',
+      body: 'Hey! Firefox now supports notification actions!',
       tag: 'demo-notification',
       // Browsers cap the number of actions shown — check maxActions.
       actions: [
         { action: 'archive', title: 'Archive' },
-        { action: 'reply', title: 'Reply' },
+        { action: 'quick-reply', title: 'Quick reply' },
       ],
     });
 
-    log(
+    console.log(
       `Notification shown (browser shows up to ` +
         `${Notification.maxActions} actions).`,
     );
