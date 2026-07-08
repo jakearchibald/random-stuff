@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>::slotted demo</title>
+  </head>
+  <body>
+    <h1>::slotted demo</h1>
+
+    <my-card>
+      <template shadowrootmode="open">
+        <style>
+          ::slotted(.highlight) {
+            background: yellow;
+          }
+        </style>
+        <p>Shadow content (not slotted, so unstyled):</p>
+        <slot></slot>
+      </template>
+
+      <span class="highlight">I'm slotted with a highlight</span>
+    </my-card>
+  </body>
+</html>

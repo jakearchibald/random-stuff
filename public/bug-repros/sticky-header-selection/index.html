@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sticky headers in a scroll area</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem;
+      }
+
+      .scroller {
+        height: 300px;
+        background: #f8f8f8;
+        border: 0.0625em solid #d4d4d4;
+        overflow: auto;
+        overscroll-behavior: none;
+        scroll-padding-top: 3.125em;
+      }
+
+      .scroller h2 {
+        position: sticky;
+        top: 0;
+        font-size: inherit;
+        margin: 0;
+        padding: 0.5rem 1rem;
+        background: #eee;
+        border-bottom: 1px solid #ccc;
+      }
+
+      .scroller p {
+        margin: 0;
+        padding: 0.5rem 1rem;
+      }
+
+      section {
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sticky headers in a scroll area</h1>
+
+    <div class="scroller">
+      <section>
+        <h2>Section A</h2>
+        <p>Item A1</p>
+        <p>Item A2</p>
+        <p>Item A3</p>
+        <p>Item A4</p>
+        <p>Item A5</p>
+        <p>Item A6</p>
+      </section>
+      <section>
+        <h2>Section B</h2>
+        <p>Item B1</p>
+        <p>Item B2</p>
+        <p>Item B3</p>
+        <p>Item B4</p>
+        <p>Item B5</p>
+        <p>Item B6</p>
+      </section>
+      <section>
+        <h2>Section C</h2>
+        <p>Item C1</p>
+        <p>Item C2</p>
+        <p>Item C3</p>
+        <p>Item C4</p>
+        <p>Item C5</p>
+        <p>Item C6</p>
+      </section>
+    </div>
+  </body>
+</html>
