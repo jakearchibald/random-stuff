@@ -11,25 +11,7 @@ sw.addEventListener('notificationclick', (event) => {
   // or the `action` id of the button that was clicked.
   const action = event.action;
 
-  // When the "quick-reply" action is clicked, replace the notification's
-  // actions with emoji choices and update its body, rather than closing it.
-  if (action === 'quick-reply') {
-    // Re-showing with the same tag replaces the current notification in place.
-    event.waitUntil(
-      sw.registration.showNotification(event.notification.title, {
-        body: 'Choose reply…',
-        // Reuse the same tag so this replaces the existing notification.
-        tag: event.notification.tag,
-        actions: [
-          { action: 'reply-happy', title: '😀' },
-          { action: 'reply-sad', title: '😢' },
-        ],
-      }),
-    );
-    return;
-  }
-
-  if (!action) event.notification.close();
+  event.notification.close();
 
   event.waitUntil(
     (async () => {
