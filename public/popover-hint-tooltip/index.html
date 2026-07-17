@@ -364,6 +364,7 @@
       // while a tooltip is showing, plus DELAY after the last one hides).
       let activeHint = null;
       let warm = false;
+      let shownByFocus = false;
       let showTimer;
       let cooldownTimer;
 
@@ -375,10 +376,13 @@
         hint.showPopover({ source: button });
         activeHint = hint;
         warm = true;
+        // Default to hover ownership; the focus handler flips this on if the
+        // show was triggered by keyboard focus.
+        shownByFocus = false;
       }
 
       function hideHint() {
-        activeHint?.hidePopover();
+        activeHint.hidePopover();
         activeHint = null;
       }
 
@@ -429,12 +433,18 @@
             clearTimeout(showTimer);
             clearTimeout(cooldownTimer);
             showHint(button);
+            shownByFocus = true;
           }
         });
 
         button.addEventListener('blur', () => {
-          hideHint();
-          warm = false;
+          // Only respond to losing keyboard focus. When the tooltip was shown
+          // by hover, the pointer logic owns hiding it — blurring the button
+          // (e.g. by clicking into the tooltip) must not hide it here.
+          if (shownByFocus) {
+            hideHint();
+            warm = false;
+          }
         });
       }
 
