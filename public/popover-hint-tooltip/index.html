@@ -81,6 +81,17 @@
         margin-top: 0.6em;
       }
 
+      /* Bridge the gap between button and tooltip so the pointer can travel
+         onto the tooltip without leaving a hoverable surface. */
+      .tooltip::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 100%;
+        height: 0.6em;
+      }
+
       .swatches {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -317,12 +328,29 @@
         activeHint = null;
       }
 
+      // Hide after a short grace period, giving the pointer time to travel
+      // from the button onto the tooltip (or to another button) without it
+      // vanishing. Any pointerenter on a button or the active tooltip cancels
+      // this via clearTimeout(hideTimer).
+      let hideTimer;
+
+      function scheduleHide() {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          hideHint();
+          cooldownTimer = setTimeout(() => {
+            warm = false;
+          }, DELAY);
+        }, DELAY);
+      }
+
       for (const button of document.querySelectorAll(
         '.toolbar-button[aria-describedby]',
       )) {
         button.addEventListener('pointerenter', () => {
           clearTimeout(showTimer);
           clearTimeout(cooldownTimer);
+          clearTimeout(hideTimer);
 
           if (warm) {
             // Already warm — swap tooltips with no delay.
@@ -337,13 +365,8 @@
           clearTimeout(showTimer);
           clearTimeout(cooldownTimer);
 
-          hideHint();
-
-          // Stay warm briefly so moving to another button is still instant,
-          // but cool down if the pointer lingers outside any button.
-          cooldownTimer = setTimeout(() => {
-            warm = false;
-          }, DELAY);
+          // Don't hide immediately — the pointer may be heading to the tooltip.
+          scheduleHide();
         });
 
         button.addEventListener('focus', () => {
@@ -359,6 +382,17 @@
           hideHint();
           warm = false;
         });
+      }
+
+      // Keep the tooltip visible while it's hovered, and hide once the pointer
+      // leaves it (unless it moves back onto a button, which re-cancels).
+      for (const tooltip of document.querySelectorAll('.tooltip')) {
+        tooltip.addEventListener('pointerenter', () => {
+          clearTimeout(hideTimer);
+          clearTimeout(cooldownTimer);
+        });
+
+        tooltip.addEventListener('pointerleave', scheduleHide);
       }
     </script>
   </body>
