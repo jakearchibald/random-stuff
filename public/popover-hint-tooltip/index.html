@@ -53,9 +53,6 @@
       }
 
       .color-popover {
-        /* Popovers are top-layer / separate subtrees, so they inherit
-           font-size from :root rather than .toolbar — scale via a common
-           ancestor (e.g. body) to keep them in step with the toolbar. */
         margin: 0;
         padding: 0.5em;
         background: #2e2e2e;
@@ -64,6 +61,7 @@
         box-shadow: 0 0.125em 0.5em rgb(0 0 0 / 0.4);
         position-area: bottom span-right;
         margin-top: 0.5em;
+        margin-left: -0.35em;
       }
 
       .tooltip {
@@ -288,7 +286,9 @@
           style="background: #fff176"
           autofocus
         ></button>
-        <div id="highlight-yellow-hint" class="tooltip" popover="hint">Yellow</div>
+        <div id="highlight-yellow-hint" class="tooltip" popover="hint">
+          Yellow
+        </div>
 
         <button
           type="button"
@@ -296,7 +296,9 @@
           aria-describedby="highlight-green-hint"
           style="background: #aed581"
         ></button>
-        <div id="highlight-green-hint" class="tooltip" popover="hint">Green</div>
+        <div id="highlight-green-hint" class="tooltip" popover="hint">
+          Green
+        </div>
 
         <button
           type="button"
@@ -320,7 +322,9 @@
           aria-describedby="highlight-orange-hint"
           style="background: #ffb74d"
         ></button>
-        <div id="highlight-orange-hint" class="tooltip" popover="hint">Orange</div>
+        <div id="highlight-orange-hint" class="tooltip" popover="hint">
+          Orange
+        </div>
 
         <button
           type="button"
@@ -346,7 +350,9 @@
           aria-describedby="highlight-salmon-hint"
           style="background: #ff8a80"
         ></button>
-        <div id="highlight-salmon-hint" class="tooltip" popover="hint">Salmon</div>
+        <div id="highlight-salmon-hint" class="tooltip" popover="hint">
+          Salmon
+        </div>
       </div>
     </div>
 
