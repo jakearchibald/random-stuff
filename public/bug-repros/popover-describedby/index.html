@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Popover and describedby</title>
+  </head>
+  <body>
+    <script>
+      const roles = [
+        'generic',
+        'note',
+        'button',
+        'region',
+        'alert',
+        'status',
+        'img',
+      ];
+
+      for (const [i, role] of roles.entries()) {
+        const id = `desc${i + 1}`;
+
+        const wrapper = document.createElement('div');
+        wrapper.tabIndex = 0;
+        wrapper.setAttribute('aria-describedby', id);
+        wrapper.setAttribute('role', role);
+        wrapper.append('This element should also have a description.');
+
+        const desc = document.createElement('div');
+        desc.id = id;
+        desc.setAttribute('popover', 'hint');
+        desc.textContent = 'This is the description.';
+
+        wrapper.append(desc);
+        document.body.append(wrapper);
+      }
+    </script>
+  </body>
+</html>

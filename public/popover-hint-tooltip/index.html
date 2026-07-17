@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Popover hint tooltip</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 3rem;
+        background: #222;
+      }
+
+      .toolbar {
+        /* Everything below is sized in em, so scale the whole widget by
+           setting font-size here or on a parent. */
+        display: inline-flex;
+        gap: 0.125em;
+        padding: 0.25em;
+        background: #2e2e2e;
+        border: 0.0625em solid #444;
+        border-radius: 0.5em;
+        box-shadow: 0 0.0625em 0.1875em rgb(0 0 0 / 0.4);
+      }
+
+      .toolbar-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25em;
+        height: 2.25em;
+        padding: 0;
+        border: none;
+        border-radius: 0.375em;
+        background: transparent;
+        color: #e3e3e3;
+        cursor: pointer;
+      }
+
+      .toolbar-button:hover {
+        background: #3f3f3f;
+      }
+
+      .toolbar-button:focus-visible {
+        outline: 0.125em solid #1a73e8;
+        outline-offset: -0.125em;
+      }
+
+      .toolbar-button svg {
+        width: 1.5em;
+        height: 1.5em;
+        fill: currentColor;
+      }
+
+      .color-popover {
+        /* Popovers are top-layer / separate subtrees, so they inherit
+           font-size from :root rather than .toolbar — scale via a common
+           ancestor (e.g. body) to keep them in step with the toolbar. */
+        margin: 0;
+        padding: 0.5em;
+        background: #2e2e2e;
+        border: 0.0625em solid #444;
+        border-radius: 0.5em;
+        box-shadow: 0 0.125em 0.5em rgb(0 0 0 / 0.4);
+        position-area: bottom span-right;
+        margin-top: 0.5em;
+      }
+
+      .tooltip {
+        font-size: 0.8125em;
+        margin: 0;
+        padding: 0.3em 0.6em;
+        background: #111;
+        color: #e3e3e3;
+        border: 0.0625em solid #444;
+        border-radius: 0.3em;
+        white-space: nowrap;
+        /* Positioned relative to the button passed as `source` to
+           showPopover() — the implicit anchor, so no anchor-name needed. */
+        position-area: bottom;
+        margin-top: 0.6em;
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.375em;
+      }
+
+      .swatches button {
+        width: 1.75em;
+        height: 1.75em;
+        padding: 0;
+        border: 0.0625em solid rgb(255 255 255 / 0.2);
+        border-radius: 0.25em;
+        cursor: pointer;
+      }
+
+      .swatches button:focus-visible {
+        outline: 0.125em solid #1a73e8;
+        outline-offset: 0.125em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toolbar">
+      <button type="button" class="toolbar-button" aria-describedby="bold-hint">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+        >
+          <path
+            d="M272-200v-560h221q65 0 120 40t55 111q0 51-23 78.5T602-491q25 11 55.5 41t30.5 90q0 89-65 124.5T501-200H272Zm121-112h104q48 0 58.5-24.5T566-372q0-11-10.5-35.5T494-432H393v120Zm0-228h93q33 0 48-17t15-38q0-24-17-39t-44-15h-95v109Z"
+          />
+        </svg>
+      </button>
+      <div id="bold-hint" class="tooltip" popover="hint">Bold (⌘B)</div>
+
+      <button
+        type="button"
+        class="toolbar-button"
+        aria-describedby="italic-hint"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+        >
+          <path
+            d="M200-200v-100h160l120-360H320v-100h400v100H580L460-300h140v100H200Z"
+          />
+        </svg>
+      </button>
+      <div id="italic-hint" class="tooltip" popover="hint">Italic (⌘I)</div>
+
+      <button
+        type="button"
+        class="toolbar-button"
+        aria-describedby="underline-hint"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+        >
+          <path
+            d="M200-120v-80h560v80H200Zm123-223q-56-63-56-167v-330h103v336q0 56 28 91t82 35q54 0 82-35t28-91v-336h103v330q0 104-56 167t-157 63q-101 0-157-63Z"
+          />
+        </svg>
+      </button>
+      <div id="underline-hint" class="tooltip" popover="hint">
+        Underline (⌘U)
+      </div>
+
+      <button
+        type="button"
+        class="toolbar-button"
+        aria-describedby="color-hint"
+        command="toggle-popover"
+        commandfor="color-popover"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+        >
+          <path
+            d="M80 0v-160h800V0H80Zm140-280 210-560h100l210 560h-96l-50-144H368l-52 144h-96Zm176-224h168l-82-232h-4l-82 232Z"
+          />
+        </svg>
+      </button>
+      <div id="color-hint" class="tooltip" popover="hint">Text color</div>
+
+      <button
+        type="button"
+        class="toolbar-button"
+        aria-describedby="highlight-hint"
+        command="toggle-popover"
+        commandfor="highlight-popover"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+        >
+          <path
+            d="M80 0v-160h800V0H80Zm504-480L480-584 320-424l103 104 161-160Zm-47-160 103 103 160-159-104-104-159 160Zm-84-29 216 216-189 190q-24 24-56.5 24T367-263l-27 23H140l126-125q-24-24-25-57.5t23-57.5l189-189Zm0 0 187-187q24-24 56.5-24t56.5 24l104 103q24 24 24 56.5T857-640L669-453 453-669Z"
+          />
+        </svg>
+      </button>
+      <div id="highlight-hint" class="tooltip" popover="hint">
+        Highlight color
+      </div>
+    </div>
+
+    <div class="color-popover" id="color-popover" popover>
+      <div class="swatches">
+        <button
+          type="button"
+          aria-label="Black"
+          style="background: #000000"
+          autofocus
+        ></button>
+        <button
+          type="button"
+          aria-label="Red"
+          style="background: #e53935"
+        ></button>
+        <button
+          type="button"
+          aria-label="Green"
+          style="background: #43a047"
+        ></button>
+        <button
+          type="button"
+          aria-label="Blue"
+          style="background: #1e88e5"
+        ></button>
+        <button
+          type="button"
+          aria-label="Orange"
+          style="background: #fb8c00"
+        ></button>
+        <button
+          type="button"
+          aria-label="Purple"
+          style="background: #8e24aa"
+        ></button>
+        <button
+          type="button"
+          aria-label="Teal"
+          style="background: #00897b"
+        ></button>
+        <button
+          type="button"
+          aria-label="White"
+          style="background: #ffffff"
+        ></button>
+      </div>
+    </div>
+
+    <div class="color-popover" id="highlight-popover" popover>
+      <div class="swatches">
+        <button
+          type="button"
+          aria-label="Yellow"
+          style="background: #fff176"
+          autofocus
+        ></button>
+        <button
+          type="button"
+          aria-label="Green"
+          style="background: #aed581"
+        ></button>
+        <button
+          type="button"
+          aria-label="Cyan"
+          style="background: #4dd0e1"
+        ></button>
+        <button
+          type="button"
+          aria-label="Pink"
+          style="background: #f48fb1"
+        ></button>
+        <button
+          type="button"
+          aria-label="Orange"
+          style="background: #ffb74d"
+        ></button>
+        <button
+          type="button"
+          aria-label="Lavender"
+          style="background: #b39ddb"
+        ></button>
+        <button
+          type="button"
+          aria-label="Grey"
+          style="background: #cfd8dc"
+        ></button>
+        <button
+          type="button"
+          aria-label="Salmon"
+          style="background: #ff8a80"
+        ></button>
+      </div>
+    </div>
+
+    <script>
+      const DELAY = 500;
+
+      // Tracks the currently visible tooltip so we can hide it on leave, and
+      // whether we're in the "warm" period where no delay applies (kept warm
+      // while a tooltip is showing, plus DELAY after the last one hides).
+      let activeHint = null;
+      let warm = false;
+      let showTimer;
+      let cooldownTimer;
+
+      function showHint(button) {
+        // Showing this hint auto-hides any other open hint popover.
+        const hint = document.getElementById(
+          button.getAttribute('aria-describedby'),
+        );
+        hint.showPopover({ source: button });
+        activeHint = hint;
+        warm = true;
+      }
+
+      function hideHint() {
+        activeHint?.hidePopover();
+        activeHint = null;
+      }
+
+      for (const button of document.querySelectorAll(
+        '.toolbar-button[aria-describedby]',
+      )) {
+        button.addEventListener('pointerenter', () => {
+          clearTimeout(showTimer);
+          clearTimeout(cooldownTimer);
+
+          if (warm) {
+            // Already warm — swap tooltips with no delay.
+            showHint(button);
+          } else {
+            showTimer = setTimeout(() => showHint(button), DELAY);
+          }
+        });
+
+        button.addEventListener('pointerleave', () => {
+          // Cancel a pending show if the pointer left before it fired.
+          clearTimeout(showTimer);
+          clearTimeout(cooldownTimer);
+
+          hideHint();
+
+          // Stay warm briefly so moving to another button is still instant,
+          // but cool down if the pointer lingers outside any button.
+          cooldownTimer = setTimeout(() => {
+            warm = false;
+          }, DELAY);
+        });
+
+        button.addEventListener('focus', () => {
+          // Only for keyboard focus, not click/pointer focus.
+          if (button.matches(':focus-visible')) {
+            clearTimeout(showTimer);
+            clearTimeout(cooldownTimer);
+            showHint(button);
+          }
+        });
+
+        button.addEventListener('blur', () => {
+          hideHint();
+          warm = false;
+        });
+      }
+    </script>
+  </body>
+</html>
