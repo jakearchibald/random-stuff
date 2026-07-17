@@ -98,7 +98,7 @@
         gap: 0.375em;
       }
 
-      .swatches button {
+      .swatch {
         width: 1.75em;
         height: 1.75em;
         padding: 0;
@@ -107,7 +107,7 @@
         cursor: pointer;
       }
 
-      .swatches button:focus-visible {
+      .swatch:focus-visible {
         outline: 0.125em solid #1a73e8;
         outline-offset: 0.125em;
       }
@@ -214,45 +214,68 @@
       <div class="swatches">
         <button
           type="button"
-          aria-label="Black"
+          class="swatch"
+          aria-describedby="color-black-hint"
           style="background: #000000"
           autofocus
         ></button>
+        <div id="color-black-hint" class="tooltip" popover="hint">Black</div>
+
         <button
           type="button"
-          aria-label="Red"
+          class="swatch"
+          aria-describedby="color-red-hint"
           style="background: #e53935"
         ></button>
+        <div id="color-red-hint" class="tooltip" popover="hint">Red</div>
+
         <button
           type="button"
-          aria-label="Green"
+          class="swatch"
+          aria-describedby="color-green-hint"
           style="background: #43a047"
         ></button>
+        <div id="color-green-hint" class="tooltip" popover="hint">Green</div>
+
         <button
           type="button"
-          aria-label="Blue"
+          class="swatch"
+          aria-describedby="color-blue-hint"
           style="background: #1e88e5"
         ></button>
+        <div id="color-blue-hint" class="tooltip" popover="hint">Blue</div>
+
         <button
           type="button"
-          aria-label="Orange"
+          class="swatch"
+          aria-describedby="color-orange-hint"
           style="background: #fb8c00"
         ></button>
+        <div id="color-orange-hint" class="tooltip" popover="hint">Orange</div>
+
         <button
           type="button"
-          aria-label="Purple"
+          class="swatch"
+          aria-describedby="color-purple-hint"
           style="background: #8e24aa"
         ></button>
+        <div id="color-purple-hint" class="tooltip" popover="hint">Purple</div>
+
         <button
           type="button"
-          aria-label="Teal"
+          class="swatch"
+          aria-describedby="color-teal-hint"
           style="background: #00897b"
         ></button>
+        <div id="color-teal-hint" class="tooltip" popover="hint">Teal</div>
+
         <button
           type="button"
-          aria-label="White"
+          class="swatch"
+          aria-describedby="color-white-hint"
           style="background: #ffffff"
         ></button>
+        <div id="color-white-hint" class="tooltip" popover="hint">White</div>
       </div>
     </div>
 
@@ -260,45 +283,70 @@
       <div class="swatches">
         <button
           type="button"
-          aria-label="Yellow"
+          class="swatch"
+          aria-describedby="highlight-yellow-hint"
           style="background: #fff176"
           autofocus
         ></button>
+        <div id="highlight-yellow-hint" class="tooltip" popover="hint">Yellow</div>
+
         <button
           type="button"
-          aria-label="Green"
+          class="swatch"
+          aria-describedby="highlight-green-hint"
           style="background: #aed581"
         ></button>
+        <div id="highlight-green-hint" class="tooltip" popover="hint">Green</div>
+
         <button
           type="button"
-          aria-label="Cyan"
+          class="swatch"
+          aria-describedby="highlight-cyan-hint"
           style="background: #4dd0e1"
         ></button>
+        <div id="highlight-cyan-hint" class="tooltip" popover="hint">Cyan</div>
+
         <button
           type="button"
-          aria-label="Pink"
+          class="swatch"
+          aria-describedby="highlight-pink-hint"
           style="background: #f48fb1"
         ></button>
+        <div id="highlight-pink-hint" class="tooltip" popover="hint">Pink</div>
+
         <button
           type="button"
-          aria-label="Orange"
+          class="swatch"
+          aria-describedby="highlight-orange-hint"
           style="background: #ffb74d"
         ></button>
+        <div id="highlight-orange-hint" class="tooltip" popover="hint">Orange</div>
+
         <button
           type="button"
-          aria-label="Lavender"
+          class="swatch"
+          aria-describedby="highlight-lavender-hint"
           style="background: #b39ddb"
         ></button>
+        <div id="highlight-lavender-hint" class="tooltip" popover="hint">
+          Lavender
+        </div>
+
         <button
           type="button"
-          aria-label="Grey"
+          class="swatch"
+          aria-describedby="highlight-grey-hint"
           style="background: #cfd8dc"
         ></button>
+        <div id="highlight-grey-hint" class="tooltip" popover="hint">Grey</div>
+
         <button
           type="button"
-          aria-label="Salmon"
+          class="swatch"
+          aria-describedby="highlight-salmon-hint"
           style="background: #ff8a80"
         ></button>
+        <div id="highlight-salmon-hint" class="tooltip" popover="hint">Salmon</div>
       </div>
     </div>
 
@@ -345,7 +393,7 @@
       }
 
       for (const button of document.querySelectorAll(
-        '.toolbar-button[aria-describedby]',
+        '.toolbar-button[aria-describedby], .swatch[aria-describedby]',
       )) {
         button.addEventListener('pointerenter', () => {
           clearTimeout(showTimer);
