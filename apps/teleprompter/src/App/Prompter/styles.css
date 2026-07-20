@@ -14,6 +14,19 @@
   }
 }
 
+.prompter-timer {
+  position: fixed;
+  bottom: 20px;
+  right: 30px;
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+  color: white;
+  background: rgb(0 0 0 / 60%);
+  padding: 6px 14px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
 .prompter-line {
   padding: 20px 30px;
 
