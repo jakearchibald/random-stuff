@@ -383,6 +383,7 @@
       // Long-press (touch) state.
       let lastPointerType = '';
       let longPressFired = false;
+      let shownByLongPress = false;
 
       function showHint(button) {
         // Showing this hint auto-hides any other open hint popover.
@@ -392,9 +393,10 @@
         hint.showPopover({ source: button });
         activeHint = hint;
         warm = true;
-        // Default to hover ownership; the focus handler flips this on if the
-        // show was triggered by keyboard focus.
+        // Default to hover ownership; the focus/long-press handlers flip their
+        // flag on if they triggered the show.
         shownByFocus = false;
+        shownByLongPress = false;
       }
 
       function hideHint() {
@@ -439,6 +441,10 @@
           clearTimeout(showTimer);
           clearTimeout(cooldownTimer);
 
+          // A long-press tooltip is owned by the touch path, not hover — a
+          // touch pointerleave fires on finger release and must not hide it.
+          if (shownByLongPress) return;
+
           // Don't hide immediately — the pointer may be heading to the tooltip.
           scheduleHide();
         });
@@ -477,6 +483,7 @@
           event.preventDefault();
           longPressFired = true;
           showHint(button);
+          shownByLongPress = true;
         });
       }
 
