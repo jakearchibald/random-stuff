@@ -371,32 +371,24 @@
     <script>
       const DELAY = 500;
 
-      // Tracks the currently visible tooltip so we can hide it on leave, and
-      // whether we're in the "warm" period where no delay applies (kept warm
-      // while a tooltip is showing, plus DELAY after the last one hides).
+      // "warm" = no show delay applies (while a tooltip shows, plus DELAY after).
       let activeHint = null;
       let warm = false;
       let shownByFocus = false;
       let showTimer;
       let cooldownTimer;
-
-      // Long-press (touch) state.
       let lastPointerType = '';
       let longPressFired = false;
-      let shownByLongPress = false;
 
       function showHint(button) {
-        // Showing this hint auto-hides any other open hint popover.
         const hint = document.getElementById(
           button.getAttribute('aria-labelledby'),
         );
         hint.showPopover({ source: button });
         activeHint = hint;
         warm = true;
-        // Default to hover ownership; the focus/long-press handlers flip their
-        // flag on if they triggered the show.
         shownByFocus = false;
-        shownByLongPress = false;
+        longPressFired = false;
       }
 
       function hideHint() {
@@ -404,10 +396,7 @@
         activeHint = null;
       }
 
-      // Hide after a short grace period, giving the pointer time to travel
-      // from the button onto the tooltip (or to another button) without it
-      // vanishing. Any pointerenter on a button or the active tooltip cancels
-      // this via clearTimeout(hideTimer).
+      // Delayed hide, so the pointer can cross the gap onto the tooltip.
       let hideTimer;
 
       function scheduleHide() {
@@ -437,20 +426,13 @@
         });
 
         button.addEventListener('pointerleave', () => {
-          // Cancel a pending show if the pointer left before it fired.
           clearTimeout(showTimer);
           clearTimeout(cooldownTimer);
-
-          // A long-press tooltip is owned by the touch path, not hover — a
-          // touch pointerleave fires on finger release and must not hide it.
-          if (shownByLongPress) return;
-
-          // Don't hide immediately — the pointer may be heading to the tooltip.
           scheduleHide();
         });
 
         button.addEventListener('focus', () => {
-          // Only for keyboard focus, not click/pointer focus.
+          // Keyboard focus only, not click/pointer focus.
           if (button.matches(':focus-visible')) {
             clearTimeout(showTimer);
             clearTimeout(cooldownTimer);
@@ -460,35 +442,37 @@
         });
 
         button.addEventListener('blur', () => {
-          // Only respond to losing keyboard focus. When the tooltip was shown
-          // by hover, the pointer logic owns hiding it — blurring the button
-          // (e.g. by clicking into the tooltip) must not hide it here.
+          // Hover-shown tooltips are owned by the pointer logic, not blur.
           if (shownByFocus) {
             hideHint();
             warm = false;
           }
         });
 
-        // --- Touch long-press ---
-        // Touch devices have no hover, but a long-press fires `contextmenu` —
-        // let the browser do the press timing and use that to show the tooltip.
+        // Touch has no hover; a long-press fires `contextmenu` — use it to show.
         button.addEventListener('pointerdown', (event) => {
           lastPointerType = event.pointerType;
         });
 
         button.addEventListener('contextmenu', (event) => {
-          if (lastPointerType !== 'touch') return; // ignore mouse right-click
+          if (lastPointerType !== 'touch') return;
 
-          // Show the tooltip instead of the OS context menu.
           event.preventDefault();
           longPressFired = true;
           showHint(button);
-          shownByLongPress = true;
+
+          // Veto the first close so releasing the finger doesn't dismiss it.
+          activeHint.addEventListener(
+            'beforetoggle',
+            (toggle) => {
+              if (toggle.newState === 'closed') toggle.preventDefault();
+            },
+            { once: true },
+          );
         });
       }
 
-      // Keep the tooltip visible while it's hovered, and hide once the pointer
-      // leaves it (unless it moves back onto a button, which re-cancels).
+      // Keep the tooltip alive while it's itself hovered.
       for (const tooltip of document.querySelectorAll('.tooltip')) {
         tooltip.addEventListener('pointerenter', () => {
           clearTimeout(hideTimer);
@@ -498,10 +482,8 @@
         tooltip.addEventListener('pointerleave', scheduleHide);
       }
 
-      // A long-press tooltip is a `popover="hint"`, so tapping elsewhere light-
-      // dismisses it automatically. We only need to swallow the click that the
-      // long-press triggers, so it doesn't also fire the button's action (e.g.
-      // toggle the Color popover).
+      // Swallow the click a long-press triggers so it doesn't also fire the
+      // button's action (e.g. toggle the Color popover).
       document.addEventListener(
         'click',
         (event) => {
