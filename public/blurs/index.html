@@ -923,6 +923,184 @@ function makeDownscaler(gl, bindQuad) {
 }
 
 // ---------------------------------------------------------------------------
+// 4b. Dual Kawase, animated by a floating-point offset.
+//     The production trick for a *smooth* Kawase blur. Keep the pyramid a
+//     FIXED size (same buffers, same pass count, every frame) and instead
+//     scale the sample offset by a floating-point uniform. Bilinear filtering
+//     turns a fractional offset (1.42 → 1.43) into a sub-pixel interpolation of
+//     the sampled colours, so the blur grows perfectly smoothly — identical
+//     sample count, zero shimmer, constant cost regardless of blur amount.
+// ---------------------------------------------------------------------------
+{
+  const { frame, cost } = build(
+    'Dual Kawase (offset)', 'WebGL', '',
+    'Fixed pyramid (constant passes), blur driven by a floating-point sample ' +
+    'offset. A fractional offset is bilinearly interpolated on the GPU, so the ' +
+    'blur scales continuously with no shimmer and no extra passes — the trick ' +
+    'real engines use to animate Kawase. Constant cost at any blur. A fixed ' +
+    'depth only spans a bounded range, so the sharp source is cross-faded in at ' +
+    'small radii and the blur hits a ceiling at the top of the slider.'
+  );
+  const { gl, resize, bindQuad } = makeGL(frame);
+  const src = makeSourceTexture(gl);
+
+  // Fixed pyramid: same buffer sizes and pass count every frame. A fixed depth
+  // can only represent a bounded blur range — deeper = more baseline blur but
+  // worse low-end reach. 3 levels keeps the floor low enough to cross-fade the
+  // sharp source in at small radii (see the mapping below).
+  const FIXED_LEVELS = 3;
+  const chain = [];
+  for (let i = 0; i < FIXED_LEVELS; i++) chain.push(makeTargets(gl)[0]);
+  const [result] = makeTargets(gl); // full-res pyramid output, before source mix
+
+  // Down/up filters identical to the Dual Kawase panel, but the sample offset
+  // is the half-pixel step SCALED by a floating-point u_offset uniform.
+  const DOWN = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  uniform vec2 u_halfpixel;
+  uniform float u_offset;
+  out vec4 outColor;
+  void main() {
+    vec2 uv = v_uv;
+    vec2 hp = u_halfpixel * u_offset;
+    vec4 sum = texture(u_tex, uv) * 4.0;
+    sum += texture(u_tex, uv - hp);
+    sum += texture(u_tex, uv + hp);
+    sum += texture(u_tex, uv + vec2(hp.x, -hp.y));
+    sum += texture(u_tex, uv - vec2(hp.x, -hp.y));
+    outColor = sum / 8.0;
+  }`;
+  const UP = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  uniform vec2 u_halfpixel;
+  uniform float u_offset;
+  out vec4 outColor;
+  void main() {
+    vec2 uv = v_uv;
+    vec2 hp = u_halfpixel * u_offset;
+    vec4 sum = texture(u_tex, uv + vec2(-hp.x * 2.0, 0.0));
+    sum += texture(u_tex, uv + vec2(-hp.x, hp.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(0.0, hp.y * 2.0));
+    sum += texture(u_tex, uv + vec2(hp.x, hp.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(hp.x * 2.0, 0.0));
+    sum += texture(u_tex, uv + vec2(hp.x, -hp.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(0.0, -hp.y * 2.0));
+    sum += texture(u_tex, uv + vec2(-hp.x, -hp.y)) * 2.0;
+    outColor = sum / 12.0;
+  }`;
+  // Cross-fade the sharp source against the blurred result. The fixed pyramid
+  // has a minimum blur (the downsampling floor) it can't go below, which would
+  // otherwise make small radii snap straight to "already quite blurred". Mixing
+  // in the sharp source by u_mix ramps smoothly up from sharp at radius 0.
+  const MIX = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_sharp;
+  uniform sampler2D u_blur;
+  uniform float u_mix;   // 0 = sharp source, 1 = full pyramid blur
+  out vec4 outColor;
+  void main() {
+    outColor = mix(texture(u_sharp, v_uv), texture(u_blur, v_uv), u_mix);
+  }`;
+
+  const down = program(gl, DOWN);
+  const up = program(gl, UP);
+  const mixProg = program(gl, MIX);
+  const dTex = gl.getUniformLocation(down, 'u_tex');
+  const dHalf = gl.getUniformLocation(down, 'u_halfpixel');
+  const dOff = gl.getUniformLocation(down, 'u_offset');
+  const uTex = gl.getUniformLocation(up, 'u_tex');
+  const uHalf = gl.getUniformLocation(up, 'u_halfpixel');
+  const uOff = gl.getUniformLocation(up, 'u_offset');
+  const mSharp = gl.getUniformLocation(mixProg, 'u_sharp');
+  const mBlur = gl.getUniformLocation(mixProg, 'u_blur');
+  const mMix = gl.getUniformLocation(mixProg, 'u_mix');
+
+  function blit(prog, texLoc, halfLoc, offLoc, offset, fromTex, to, w, h) {
+    gl.useProgram(prog);
+    bindQuad(prog);
+    gl.uniform1i(texLoc, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, fromTex);
+    gl.uniform2f(halfLoc, 0.5 / w, 0.5 / h);
+    gl.uniform1f(offLoc, offset);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, to ? to.fbo : null);
+    gl.viewport(0, 0, w, h);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  // The sigma the fixed pyramid produces at offset 1.0 (device px). Below this
+  // the pyramid can't go — its downsampling floor — so we cross-fade the sharp
+  // source over [0, PYRAMID_SIGMA]. Above it, the offset scales up to OFFSET_MAX,
+  // which sets the panel's blur ceiling (this technique is deliberately bounded).
+  const PYRAMID_SIGMA = 1.5 * Math.pow(2, FIXED_LEVELS);
+  const OFFSET_MAX = 2.5;
+  const SIGMA_MAX = PYRAMID_SIGMA * OFFSET_MAX;
+
+  demos.push((r) => {
+    const { w, h, dpr } = resize();
+    const sigma = r * dpr;
+
+    // Two continuous ramps, so the composite is smooth everywhere:
+    //  • offset: OFFSET_MIN → OFFSET_MAX linearly across the whole sigma range
+    //    (never near 0, so the down filter always samples real neighbours).
+    //  • mix: 0 → 1 over [0, PYRAMID_SIGMA], cross-fading the sharp source in so
+    //    small radii ramp up from sharp instead of snapping to the blur floor.
+    const OFFSET_MIN = 0.7;
+    const capped = Math.min(sigma, SIGMA_MAX);
+    const off = OFFSET_MIN + (OFFSET_MAX - OFFSET_MIN) * (capped / SIGMA_MAX);
+    const mix = Math.max(0.0, Math.min(1.0, sigma / PYRAMID_SIGMA));
+
+    // Size the fixed chain (each level halves), then down- then up-sample into
+    // the full-res result buffer (not the screen — the source mix comes last).
+    let w0 = w, h0 = h;
+    for (let i = 0; i < FIXED_LEVELS; i++) {
+      w0 = Math.max(1, w0 >> 1);
+      h0 = Math.max(1, h0 >> 1);
+      sizeTarget(gl, chain[i], w0, h0);
+    }
+    sizeTarget(gl, result, w, h);
+
+    let fromTex = src;
+    for (let i = 0; i < FIXED_LEVELS; i++) {
+      const c = chain[i];
+      blit(down, dTex, dHalf, dOff, off, fromTex, c, c.w, c.h);
+      fromTex = c.tex;
+    }
+    for (let i = FIXED_LEVELS - 1; i > 0; i--) {
+      const c = chain[i - 1];
+      blit(up, uTex, uHalf, uOff, off, fromTex, c, c.w, c.h);
+      fromTex = c.tex;
+    }
+    blit(up, uTex, uHalf, uOff, off, fromTex, result, w, h);
+
+    // Final: mix sharp source vs pyramid result → screen.
+    gl.useProgram(mixProg);
+    bindQuad(mixProg);
+    gl.uniform1i(mSharp, 0);
+    gl.uniform1i(mBlur, 1);
+    gl.uniform1f(mMix, mix);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, src);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, result.tex);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, w, h);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    const passes = FIXED_LEVELS * 2 + 1;
+    const ceiling = sigma > SIGMA_MAX ? ' · at ceiling' : '';
+    cost.innerHTML =
+      `<b>${FIXED_LEVELS}</b> fixed levels · <b>${passes}</b> passes · ` +
+      `offset=${off.toFixed(2)} mix=${mix.toFixed(2)}${ceiling}`;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Drive everything from the one slider.
 // ---------------------------------------------------------------------------
 function renderAll() {
