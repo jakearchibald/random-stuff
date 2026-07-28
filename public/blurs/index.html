@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Efficient blur algorithms — WebGL demo</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #14161a;
+    --panel: #1d2026;
+    --border: #2c313a;
+    --text: #e6e8ec;
+    --muted: #9aa2ad;
+    --accent: #6ea8fe;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 15px/1.5 system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .lede { color: var(--muted); margin: 0 0 20px; max-width: 70ch; }
+
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    padding: 12px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .controls label { font-weight: 600; white-space: nowrap; }
+  .controls input[type=range] { flex: 1 1 320px; min-width: 200px; accent-color: var(--accent); }
+  .controls output {
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    min-width: 5ch;
+    text-align: right;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  .demo {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .demo .frame {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background: #000;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .demo .frame > * {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .demo .meta { padding: 12px 14px; }
+  .demo h2 { font-size: 15px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+  .demo h2 .tag {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #2a3340;
+    color: var(--accent);
+  }
+  .demo h2 .tag.css { background: #3a2f1f; color: #f0c674; }
+  .demo p { margin: 0 0 6px; color: var(--muted); font-size: 13px; }
+  .demo .cost {
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .demo .cost b { color: var(--text); font-weight: 600; }
+  code { background: #000; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+  <h1>Efficient blur algorithms</h1>
+  <p class="lede">
+    A single slider drives every panel so you can compare quality and cost at the
+    same blur radius. The value is a Gaussian standard deviation in CSS pixels —
+    the same thing CSS <code>filter: blur()</code> takes — so the CSS panel is the
+    ground truth and every WebGL panel is calibrated to match it. The focus is on
+    techniques that stay cheap as the radius grows — the naïve approach's cost scales
+    with radius (or radius²), while the good ones don't.
+  </p>
+
+  <div class="controls">
+    <label for="blur">Blur radius</label>
+    <input type="range" id="blur" min="0" max="100" value="30" step="0.5">
+    <output id="blurOut">30 px</output>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+<script type="module">
+const IMG_SRC = 'bike.avif';
+
+// ---------------------------------------------------------------------------
+// Load the source image once, shared across every demo.
+// ---------------------------------------------------------------------------
+const image = new Image();
+image.src = IMG_SRC;
+await image.decode();
+
+const state = { radius: 30 };
+const slider = document.getElementById('blur');
+const sliderOut = document.getElementById('blurOut');
+const grid = document.getElementById('grid');
+
+// Every demo registers a render(radius) callback here.
+const demos = [];
+
+function build(title, tag, tagClass, description) {
+  const demo = document.createElement('div');
+  demo.className = 'demo';
+  const frame = document.createElement('div');
+  frame.className = 'frame';
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  const h2 = document.createElement('h2');
+  h2.innerHTML = `${title} <span class="tag ${tagClass}">${tag}</span>`;
+  const p = document.createElement('p');
+  p.innerHTML = description;
+  const cost = document.createElement('div');
+  cost.className = 'cost';
+  meta.append(h2, p, cost);
+  demo.append(frame, meta);
+  grid.append(demo);
+  return { frame, cost };
+}
+
+// ---------------------------------------------------------------------------
+// 1. CSS blur filter — the browser's own (non-WebGL) baseline.
+// ---------------------------------------------------------------------------
+{
+  const { frame, cost } = build(
+    'CSS filter', 'CSS', 'css',
+    'The browser\'s built-in <code>filter: blur()</code>. A true Gaussian, ' +
+    'GPU-composited by the browser. Our reference for "correct".'
+  );
+  const img = document.createElement('img');
+  img.src = IMG_SRC;
+  img.alt = '';
+  frame.append(img);
+  demos.push((r) => {
+    img.style.filter = `blur(${r}px)`;
+    cost.innerHTML = `<b>1</b> composited layer · cost handled by the browser`;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Shared WebGL plumbing. Each WebGL demo gets its own canvas + context so the
+// panels are fully independent, but they share these helper functions.
+// ---------------------------------------------------------------------------
+const VERT = `#version 300 es
+in vec2 a_pos;
+out vec2 v_uv;
+void main() {
+  v_uv = a_pos * 0.5 + 0.5;
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+}`;
+
+function compile(gl, type, src) {
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+    throw new Error(gl.getShaderInfoLog(sh) + '\n' + src);
+  }
+  return sh;
+}
+
+function program(gl, fragSrc) {
+  const p = gl.createProgram();
+  gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, VERT));
+  gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, fragSrc));
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+    throw new Error(gl.getProgramInfoLog(p));
+  }
+  return p;
+}
+
+// A ping-pong pair of framebuffers with attached textures, resizable.
+function makeTargets(gl) {
+  const make = () => {
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    return { tex, fbo, w: 0, h: 0 };
+  };
+  return [make(), make()];
+}
+
+function sizeTarget(gl, t, w, h) {
+  if (t.w === w && t.h === h) return;
+  t.w = w; t.h = h;
+  gl.bindTexture(gl.TEXTURE_2D, t.tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+}
+
+// Upload the source image into a texture (flipped so UVs are top-left origin).
+function makeSourceTexture(gl) {
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return tex;
+}
+
+// Build a canvas sized to the frame, plus a GL context and fullscreen quad.
+function makeGL(frame) {
+  const canvas = document.createElement('canvas');
+  frame.append(canvas);
+  const gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
+  if (!gl) throw new Error('WebGL2 not available');
+
+  const quad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+  gl.bufferData(gl.ARRAY_BUFFER,
+    new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+
+  // Match the canvas backing store to its displayed size (capped DPR).
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.round(frame.clientWidth * dpr));
+    const h = Math.max(1, Math.round(frame.clientHeight * dpr));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w; canvas.height = h;
+    }
+    return { w, h, dpr };
+  }
+
+  // Bind a program's a_pos attribute to the shared quad.
+  function bindQuad(prog) {
+    const loc = gl.getAttribLocation(prog, 'a_pos');
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  }
+
+  return { gl, canvas, resize, bindQuad };
+}
+
+// A multi-step halving downscaler. Downscaling in one big jump point-samples
+// the source, so detail that falls between the sparse taps aliases and shimmers
+// as the target size changes. Stepping down by /2 each pass makes every step a
+// bilinear average of a 2x2 region — a manually-built mip chain — so the source
+// is properly pre-filtered before the final decimation. Each step works on a
+// quarter-area buffer, so the extra draws are nearly free and there's zero
+// load-time cost (unlike generateMipmap).
+function makeDownscaler(gl, bindQuad) {
+  const COPY = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  out vec4 outColor;
+  void main() { outColor = texture(u_tex, v_uv); }`;
+  const prog = program(gl, COPY);
+  const uTex = gl.getUniformLocation(prog, 'u_tex');
+  const [a, b] = makeTargets(gl); // scratch ping-pong
+
+  // Downscale srcTex (srcW x srcH) to exactly dstW x dstH via /2 steps.
+  // Returns the texture holding the result and how many draws it took.
+  function downscaleTo(srcTex, srcW, srcH, dstW, dstH) {
+    gl.useProgram(prog);
+    bindQuad(prog);
+    gl.uniform1i(uTex, 0);
+    gl.activeTexture(gl.TEXTURE0);
+
+    let fromTex = srcTex, fromW = srcW, fromH = srcH;
+    let ping = a, pong = b, draws = 0;
+
+    // Halve until one more halving would pass the target, then land exactly.
+    while (true) {
+      const halfW = Math.max(dstW, fromW >> 1);
+      const halfH = Math.max(dstH, fromH >> 1);
+      // Stop stepping once we're within a single /2 of the target.
+      const done = (halfW <= dstW && halfH <= dstH);
+      const tw = done ? dstW : halfW;
+      const th = done ? dstH : halfH;
+      sizeTarget(gl, ping, tw, th);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, ping.fbo);
+      gl.viewport(0, 0, tw, th);
+      gl.bindTexture(gl.TEXTURE_2D, fromTex);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      draws++;
+      fromTex = ping.tex; fromW = tw; fromH = th;
+      [ping, pong] = [pong, ping];
+      if (done) break;
+    }
+    return { tex: fromTex, draws };
+  }
+
+  return { downscaleTo };
+}
+
+// ---------------------------------------------------------------------------
+// 2. Low-resolution render, upscaled on the GPU.
+//    The single cheapest trick: draw the image tiny, let bilinear filtering
+//    smear it back up to full size. Cost is independent of the "radius".
+// ---------------------------------------------------------------------------
+{
+  const { frame, cost } = build(
+    'Low-res upscale', 'WebGL', '',
+    'Render into a tiny framebuffer (downscaled in ÷2 steps so it doesn\'t ' +
+    'shimmer), then bilinear-upscale back to full size. The downscale factor ' +
+    'is picked so the box-blur it approximates roughly matches the CSS sigma. ' +
+    'Blocky on the upscale, but almost free — cost is near-constant with radius.'
+  );
+  const { gl, resize, bindQuad } = makeGL(frame);
+  const src = makeSourceTexture(gl);
+  const downscaler = makeDownscaler(gl, bindQuad);
+
+  const COPY = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  out vec4 outColor;
+  void main() { outColor = texture(u_tex, v_uv); }`;
+  const prog = program(gl, COPY);
+  const uTex = gl.getUniformLocation(prog, 'u_tex');
+
+  demos.push((r) => {
+    const { w, h, dpr } = resize();
+    // Match the CSS Gaussian: blur(r px) → sigma = r (device px = r * dpr).
+    // Downscaling by factor f then bilinear-upscaling ≈ a box blur of width f,
+    // whose Gaussian-equivalent sigma is f / sqrt(12). So f = sigma * sqrt(12).
+    const sigma = r * dpr;
+    const factor = Math.max(1, sigma * Math.sqrt(12));
+    const sw = Math.max(1, Math.round(w / factor));
+    const sh = Math.max(1, Math.round(h / factor));
+
+    // Pre-filtered downscale via /2 steps (no shimmer), then bilinear upscale.
+    const down = downscaler.downscaleTo(src, w, h, sw, sh);
+
+    gl.useProgram(prog);
+    bindQuad(prog);
+    gl.uniform1i(uTex, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, w, h);
+    gl.bindTexture(gl.TEXTURE_2D, down.tex);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    cost.innerHTML =
+      `<b>${down.draws + 1}</b> draws · downscale to <b>${sw}×${sh}</b> px`;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// 2b. Low-res render, bicubic upscale.
+//     Same tiny buffer, but reconstructed with a smooth cubic B-spline instead
+//     of bilinear. The B-spline is C²-continuous, so the blocky facets of the
+//     linear tent filter melt away — for the cost of 4 bilinear taps on the
+//     upscale (the classic "fast cubic filtering" trick) rather than 1.
+// ---------------------------------------------------------------------------
+{
+  const { frame, cost } = build(
+    'Low-res + bicubic', 'WebGL', '',
+    'The same low-res buffer, upscaled with a cubic B-spline instead of ' +
+    'bilinear. Four bilinear taps reconstruct a smooth (C²) surface, so the ' +
+    'facets of the linear filter vanish. Still cheap and radius-independent.'
+  );
+  const { gl, resize, bindQuad } = makeGL(frame);
+  const src = makeSourceTexture(gl);
+  const downscaler = makeDownscaler(gl, bindQuad);
+
+  // Cubic B-spline upscale in 4 bilinear taps (Sigg & Hadwiger). Reads the
+  // low-res texture's size to place the taps at the right sub-texel offsets.
+  const BICUBIC = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  uniform vec2 u_texSize;    // low-res texture dimensions in texels
+  out vec4 outColor;
+
+  vec4 cubic(float v) {
+    // B-spline basis weights for the four contributing texels.
+    vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+    vec4 s = n * n * n;
+    float x = s.x;
+    float y = s.y - 4.0 * s.x;
+    float z = s.z - 4.0 * s.y + 6.0 * s.x;
+    float w = 6.0 - x - y - z;
+    return vec4(x, y, z, w) / 6.0;
+  }
+
+  vec4 sampleBicubic(sampler2D tex, vec2 texCoords) {
+    vec2 texSize = u_texSize;
+    vec2 invTexSize = 1.0 / texSize;
+    vec2 tc = texCoords * texSize - 0.5;
+    vec2 fxy = fract(tc);
+    tc -= fxy;
+
+    vec4 xcubic = cubic(fxy.x);
+    vec4 ycubic = cubic(fxy.y);
+
+    vec4 c = tc.xxyy + vec2(-0.5, 1.5).xyxy;
+    vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
+    vec4 offset = c + vec4(xcubic.yw, ycubic.yw) / s;
+    offset *= invTexSize.xxyy;
+
+    // Four bilinear taps, weighted so the result is the cubic reconstruction.
+    vec4 s0 = texture(tex, offset.xz);
+    vec4 s1 = texture(tex, offset.yz);
+    vec4 s2 = texture(tex, offset.xw);
+    vec4 s3 = texture(tex, offset.yw);
+    float sx = s.x / (s.x + s.y);
+    float sy = s.z / (s.z + s.w);
+    return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy);
+  }
+
+  void main() { outColor = sampleBicubic(u_tex, v_uv); }`;
+
+  const cubicProg = program(gl, BICUBIC);
+  const bUTex = gl.getUniformLocation(cubicProg, 'u_tex');
+  const bSize = gl.getUniformLocation(cubicProg, 'u_texSize');
+
+  demos.push((r) => {
+    const { w, h, dpr } = resize();
+    const sigma = r * dpr;
+    const factor = Math.max(1, sigma * Math.sqrt(12));
+    const sw = Math.max(1, Math.round(w / factor));
+    const sh = Math.max(1, Math.round(h / factor));
+
+    // Pre-filtered downscale via /2 steps (no shimmer).
+    const down = downscaler.downscaleTo(src, w, h, sw, sh);
+
+    // Bicubic upscale down → screen.
+    gl.useProgram(cubicProg);
+    bindQuad(cubicProg);
+    gl.uniform1i(bUTex, 0);
+    gl.uniform2f(bSize, sw, sh);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, w, h);
+    gl.bindTexture(gl.TEXTURE_2D, down.tex);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    cost.innerHTML =
+      `<b>${down.draws + 1}</b> draws · <b>${sw}×${sh}</b> px · 4-tap cubic upscale`;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// 2c. Kawase-hybrid: aggressive downscale + Dual Kawase up-filter.
+//     What production engines actually do. One big scale-down does the coarse
+//     blur cheaply (cost ~independent of radius), then instead of a dumb
+//     bilinear blit we reconstruct with the Dual Kawase 8-tap tent-of-tents
+//     up-filter over a few steps — smooth like Kawase, cheap like low-res.
+// ---------------------------------------------------------------------------
+{
+  const { frame, cost } = build(
+    'Kawase-hybrid', 'WebGL', '',
+    'Aggressive downscale for the coarse blur (constant cost), then rebuild ' +
+    'to full size with the Dual Kawase 8-tap up-filter instead of a bilinear ' +
+    'blit. Smooth like Kawase, nearly as cheap as plain low-res.'
+  );
+  const { gl, resize, bindQuad } = makeGL(frame);
+  const src = makeSourceTexture(gl);
+  const downscaler = makeDownscaler(gl, bindQuad);
+
+  // A short chain of buffers for the up-filter steps.
+  const MAX_STEPS = 4;
+  const chain = [];
+  for (let i = 0; i < MAX_STEPS + 1; i++) chain.push(makeTargets(gl)[0]);
+
+  const COPY = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  out vec4 outColor;
+  void main() { outColor = texture(u_tex, v_uv); }`;
+  // Dual Kawase up-filter (8-tap tent-of-tents) — same as the Dual Kawase panel.
+  const UP = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  uniform vec2 u_halfpixel;
+  out vec4 outColor;
+  void main() {
+    vec2 uv = v_uv;
+    vec4 sum = texture(u_tex, uv + vec2(-u_halfpixel.x * 2.0, 0.0));
+    sum += texture(u_tex, uv + vec2(-u_halfpixel.x, u_halfpixel.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(0.0, u_halfpixel.y * 2.0));
+    sum += texture(u_tex, uv + vec2(u_halfpixel.x, u_halfpixel.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(u_halfpixel.x * 2.0, 0.0));
+    sum += texture(u_tex, uv + vec2(u_halfpixel.x, -u_halfpixel.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(0.0, -u_halfpixel.y * 2.0));
+    sum += texture(u_tex, uv + vec2(-u_halfpixel.x, -u_halfpixel.y)) * 2.0;
+    outColor = sum / 12.0;
+  }`;
+  const copyProg = program(gl, COPY);
+  const upProg = program(gl, UP);
+  const cTex = gl.getUniformLocation(copyProg, 'u_tex');
+  const uTex = gl.getUniformLocation(upProg, 'u_tex');
+  const uHalf = gl.getUniformLocation(upProg, 'u_halfpixel');
+
+  function blit(prog, texLoc, fromTex, to, w, h, halfLoc) {
+    gl.useProgram(prog);
+    bindQuad(prog);
+    gl.uniform1i(texLoc, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, fromTex);
+    if (halfLoc) gl.uniform2f(halfLoc, 0.5 / w, 0.5 / h);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, to ? to.fbo : null);
+    gl.viewport(0, 0, w, h);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  demos.push((r) => {
+    const { w, h, dpr } = resize();
+    const sigma = r * dpr;
+    const factor = Math.max(1, sigma * Math.sqrt(12));
+
+    if (factor <= 1.01) {
+      // No meaningful downscale: straight copy.
+      blit(copyProg, cTex, src, null, w, h);
+      cost.innerHTML = `<b>1</b> draw · no downscale`;
+      return;
+    }
+
+    // Downscale to the small buffer (the cheap coarse blur), then walk back up
+    // in halving steps with the Kawase up-filter.
+    const sw = Math.max(1, Math.round(w / factor));
+    const sh = Math.max(1, Math.round(h / factor));
+
+    // Build the ladder of sizes from small (sw×sh) up to full (w×h), doubling
+    // each step, capped at MAX_STEPS. chain[0] = smallest.
+    const sizes = [{ w: sw, h: sh }];
+    while (sizes.length < MAX_STEPS &&
+           (sizes[0].w * 2 < w || sizes[0].h * 2 < h)) {
+      sizes.unshift({
+        w: Math.min(w, sizes[0].w * 2),
+        h: Math.min(h, sizes[0].h * 2),
+      });
+    }
+    const steps = sizes.length; // up-filter steps, smallest first
+    // Intermediate up-filter targets (chain[0..steps-2]); the final step goes
+    // to screen. chain[steps-1] is unused — the smallest level is `down.tex`.
+    for (let i = 0; i < steps - 1; i++) sizeTarget(gl, chain[i], sizes[i].w, sizes[i].h);
+
+    // Pre-filtered downscale src → smallest level (via /2 steps, no shimmer).
+    const down = downscaler.downscaleTo(src, w, h, sw, sh);
+
+    // Up-filter: smallest → … → chain[0], then chain[0] → screen.
+    let fromTex = down.tex;
+    for (let i = steps - 2; i >= 0; i--) {
+      blit(upProg, uTex, fromTex, chain[i], sizes[i].w, sizes[i].h, uHalf);
+      fromTex = chain[i].tex;
+    }
+    // Final up-filter step to the screen at full resolution.
+    blit(upProg, uTex, fromTex, null, w, h, uHalf);
+
+    const draws = down.draws + steps; // downscale draws + (steps-1 up-filters) + 1 to screen
+    cost.innerHTML =
+      `<b>${draws}</b> draws · <b>${sw}×${sh}</b> px · <b>${steps}</b>-step Kawase up-filter`;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// 3. Separable Gaussian — the "textbook correct" WebGL blur.
+//    A 2D Gaussian factors into a horizontal then a vertical 1D pass, turning
+//    an O(n²) kernel into O(2n). Still gets expensive at large radii.
+// ---------------------------------------------------------------------------
+{
+  const { frame, cost } = build(
+    'Separable Gaussian', 'WebGL', '',
+    'Two 1D passes (horizontal + vertical) using linear-sampling taps, each ' +
+    'tap reading two texels at once. High quality; taps scale with radius, so ' +
+    'it gets costly when the radius is large.'
+  );
+  const { gl, resize, bindQuad } = makeGL(frame);
+  const src = makeSourceTexture(gl);
+  const [a, b] = makeTargets(gl);
+
+  // Linear-sampled Gaussian: MAX_TAPS taps each fetch a bilinear pair.
+  const FRAG = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  uniform vec2 u_dir;       // texel step along the blur axis
+  uniform int u_taps;       // number of side taps actually used
+  uniform float u_offset[32];
+  uniform float u_weight[32];
+  out vec4 outColor;
+  void main() {
+    vec4 sum = texture(u_tex, v_uv) * u_weight[0];
+    for (int i = 1; i < 32; i++) {
+      if (i > u_taps) break;
+      vec2 o = u_dir * u_offset[i];
+      sum += texture(u_tex, v_uv + o) * u_weight[i];
+      sum += texture(u_tex, v_uv - o) * u_weight[i];
+    }
+    outColor = sum;
+  }`;
+  const prog = program(gl, FRAG);
+  const uTex = gl.getUniformLocation(prog, 'u_tex');
+  const uDir = gl.getUniformLocation(prog, 'u_dir');
+  const uTaps = gl.getUniformLocation(prog, 'u_taps');
+  const uOff = gl.getUniformLocation(prog, 'u_offset');
+  const uWt = gl.getUniformLocation(prog, 'u_weight');
+
+  // Precompute discrete Gaussian weights for sigma, then fold adjacent pairs
+  // into single linearly-interpolated taps (the classic optimisation).
+  function gaussianTaps(sigma) {
+    const radius = Math.max(1, Math.ceil(sigma * 3));
+    const discrete = [];
+    for (let i = 0; i <= radius; i++) {
+      discrete[i] = Math.exp(-(i * i) / (2 * sigma * sigma));
+    }
+    let total = discrete[0];
+    for (let i = 1; i <= radius; i++) total += 2 * discrete[i];
+    for (let i = 0; i <= radius; i++) discrete[i] /= total;
+
+    // Fold pairs (1,2), (3,4), … into linear taps.
+    const offsets = [0];
+    const weights = [discrete[0]];
+    for (let i = 1; i <= radius; i += 2) {
+      const w1 = discrete[i];
+      const w2 = discrete[i + 1] || 0;
+      const w = w1 + w2;
+      const off = (i * w1 + (i + 1) * w2) / w;
+      offsets.push(off);
+      weights.push(w);
+    }
+    // Clamp to the 32-slot uniform arrays, then renormalize by the weight
+    // actually used so a truncated kernel still integrates to 1 (no darkening).
+    const taps = Math.min(offsets.length - 1, 31);
+    const usedOffsets = offsets.slice(0, taps + 1);
+    const usedWeights = weights.slice(0, taps + 1);
+    let used = usedWeights[0];
+    for (let i = 1; i <= taps; i++) used += 2 * usedWeights[i];
+    for (let i = 0; i <= taps; i++) usedWeights[i] /= used;
+    return { taps, offsets: usedOffsets, weights: usedWeights };
+  }
+
+  // Draw `from` into `to` (or the screen if null) at viewport dstW×dstH.
+  // The blur direction step is in units of the SOURCE texel size (srcW/srcH),
+  // so a pass can upscale while blurring by giving a smaller source than dest.
+  function pass(from, to, dirX, dirY, dstW, dstH, srcW, srcH, tapData) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, to ? to.fbo : null);
+    gl.viewport(0, 0, dstW, dstH);
+    gl.bindTexture(gl.TEXTURE_2D, from);
+    gl.uniform2f(uDir, dirX / srcW, dirY / srcH);
+    gl.uniform1i(uTaps, tapData.taps);
+    gl.uniform1fv(uOff, padTo32(tapData.offsets));
+    gl.uniform1fv(uWt, padTo32(tapData.weights));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  const padTo32 = (arr) => {
+    const out = new Float32Array(32);
+    out.set(arr.slice(0, 32));
+    return out;
+  };
+  const COPY_TAPS = { taps: 0, offsets: [0], weights: [1] };
+
+  demos.push((r) => {
+    const { w, h, dpr } = resize();
+    gl.useProgram(prog);
+    bindQuad(prog);
+    gl.uniform1i(uTex, 0);
+    gl.activeTexture(gl.TEXTURE0);
+
+    if (r < 0.5) {
+      // No blur: just copy the source straight to screen.
+      pass(src, null, 0, 0, w, h, w, h, COPY_TAPS);
+      cost.innerHTML = `<b>0</b> blur passes`;
+      return;
+    }
+
+    // CSS blur(r px) sets the Gaussian standard deviation to r (in CSS px).
+    // Our buffers are in device pixels, so scale sigma by the DPR to match.
+    const sigma = r * dpr;
+
+    // A 31-tap folded kernel only reaches ~3*sigma when sigma is small. For
+    // large sigma, first downscale by an integer factor so the per-pixel sigma
+    // stays within the tap budget — the blur stays a true, energy-preserving
+    // Gaussian instead of a truncated (and darkened) one.
+    const SIGMA_MAX = 16;
+    const scale = Math.max(1, Math.ceil(sigma / SIGMA_MAX));
+    const sw = Math.max(1, Math.ceil(w / scale));
+    const sh = Math.max(1, Math.ceil(h / scale));
+    const sigmaReduced = sigma / scale;
+    const tapData = gaussianTaps(sigmaReduced);
+
+    if (scale === 1) {
+      // Full-res: horizontal src → a, vertical a → screen.
+      sizeTarget(gl, a, w, h);
+      pass(src, a, 1, 0, w, h, w, h, tapData);
+      pass(a.tex, null, 0, 1, w, h, w, h, tapData);
+    } else {
+      // Downscale src → a, blur H a → b, blur V + upscale b → screen. Both
+      // working buffers are sized to sw×sh so their content fills [0,1] UV;
+      // bilinear filtering handles the down/upsampling.
+      sizeTarget(gl, a, sw, sh);
+      sizeTarget(gl, b, sw, sh);
+      pass(src, a, 0, 0, sw, sh, w, h, COPY_TAPS);
+      pass(a.tex, b, 1, 0, sw, sh, sw, sh, tapData);
+      pass(b.tex, null, 0, 1, w, h, sw, sh, tapData);
+    }
+    const kernel = tapData.taps * 2 + 1;
+    cost.innerHTML = scale === 1
+      ? `<b>2</b> passes · <b>${kernel}</b> taps/px`
+      : `<b>3</b> passes · <b>${kernel}</b> taps/px · prefiltered at 1/<b>${scale}</b>`;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// 4. Dual Kawase blur — the high-efficiency star.
+//    Downsample in N steps, each a cheap 5-tap box-ish filter, then upsample
+//    back with an 8-tap tent filter. A large blur costs a handful of tiny
+//    passes instead of a huge kernel — this is what modern engines/compositors
+//    (KDE, Unreal-style bloom) actually use.
+// ---------------------------------------------------------------------------
+{
+  const { frame, cost } = build(
+    'Dual Kawase', 'WebGL', '',
+    'Iterative down/upsample with tiny fixed-size filters (5-tap down, 8-tap ' +
+    'up). Big blurs come from <em>more, smaller</em> passes on ever-tinier ' +
+    'buffers — cost grows with log(radius), not radius. The efficient choice. ' +
+    'The blur amount is quantised to integer pyramid levels, so here we run the ' +
+    'two bracketing levels and cross-fade them for a smooth, continuous slider.'
+  );
+  const { gl, resize, bindQuad } = makeGL(frame);
+  const src = makeSourceTexture(gl);
+
+  // Chain of half-resolution targets for the down/up pyramid.
+  const MAX_LEVELS = 8;
+  const chain = [];
+  for (let i = 0; i < MAX_LEVELS; i++) chain.push(makeTargets(gl)[0]);
+
+  const DOWN = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  uniform vec2 u_halfpixel;
+  out vec4 outColor;
+  void main() {
+    vec2 uv = v_uv;
+    vec4 sum = texture(u_tex, uv) * 4.0;
+    sum += texture(u_tex, uv - u_halfpixel.xy);
+    sum += texture(u_tex, uv + u_halfpixel.xy);
+    sum += texture(u_tex, uv + vec2(u_halfpixel.x, -u_halfpixel.y));
+    sum += texture(u_tex, uv - vec2(u_halfpixel.x, -u_halfpixel.y));
+    outColor = sum / 8.0;
+  }`;
+  const UP = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_tex;
+  uniform vec2 u_halfpixel;
+  out vec4 outColor;
+  void main() {
+    vec2 uv = v_uv;
+    vec4 sum = texture(u_tex, uv + vec2(-u_halfpixel.x * 2.0, 0.0));
+    sum += texture(u_tex, uv + vec2(-u_halfpixel.x, u_halfpixel.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(0.0, u_halfpixel.y * 2.0));
+    sum += texture(u_tex, uv + vec2(u_halfpixel.x, u_halfpixel.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(u_halfpixel.x * 2.0, 0.0));
+    sum += texture(u_tex, uv + vec2(u_halfpixel.x, -u_halfpixel.y)) * 2.0;
+    sum += texture(u_tex, uv + vec2(0.0, -u_halfpixel.y * 2.0));
+    sum += texture(u_tex, uv + vec2(-u_halfpixel.x, -u_halfpixel.y)) * 2.0;
+    outColor = sum / 12.0;
+  }`;
+  // Weighted-average blend of two blurred results. A single-pass mix reading
+  // both textures — out = a*(1-t) + b*t — so neither layer is favoured. (Drawing
+  // b over a with alpha blending would double-count a's contribution and bias
+  // toward whichever is on top; this doesn't.)
+  const BLEND = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_a;
+  uniform sampler2D u_b;
+  uniform float u_t;
+  out vec4 outColor;
+  void main() {
+    outColor = mix(texture(u_a, v_uv), texture(u_b, v_uv), u_t);
+  }`;
+
+  const down = program(gl, DOWN);
+  const up = program(gl, UP);
+  const blend = program(gl, BLEND);
+  const dTex = gl.getUniformLocation(down, 'u_tex');
+  const dHalf = gl.getUniformLocation(down, 'u_halfpixel');
+  const uTex = gl.getUniformLocation(up, 'u_tex');
+  const uHalf = gl.getUniformLocation(up, 'u_halfpixel');
+  const bA = gl.getUniformLocation(blend, 'u_a');
+  const bB = gl.getUniformLocation(blend, 'u_b');
+  const bT = gl.getUniformLocation(blend, 'u_t');
+
+  // Two full-res targets holding each pyramid's result, plus the blend output.
+  const outA = makeTargets(gl)[0];
+  const outB = makeTargets(gl)[0];
+
+  function blit(prog, texLoc, halfLoc, fromTex, to, w, h) {
+    gl.useProgram(prog);
+    bindQuad(prog);
+    gl.uniform1i(texLoc, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, fromTex);
+    gl.uniform2f(halfLoc, 0.5 / w, 0.5 / h);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, to ? to.fbo : null);
+    gl.viewport(0, 0, w, h);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  demos.push((r) => {
+    const { w, h, dpr } = resize();
+
+    if (r < 0.5) {
+      // Passthrough: draw the source with a zero-offset down filter (all taps
+      // collapse onto the centre texel, so it's a straight copy).
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, w, h);
+      gl.useProgram(down);
+      bindQuad(down);
+      gl.uniform1i(dTex, 0);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, src);
+      gl.uniform2f(dHalf, 0, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      cost.innerHTML = `<b>0</b> pyramid levels`;
+      return;
+    }
+
+    // Match the CSS Gaussian (sigma = r px = r * dpr device px). Each pyramid
+    // level roughly doubles the blur reach, so the effective sigma is about
+    // C * 2^levels device px. Invert for a FRACTIONAL level count; C ~= 1.5 for
+    // this 5/8-tap kernel.
+    const sigma = r * dpr;
+    const L = Math.max(1, Math.min(MAX_LEVELS, Math.log2(sigma / 1.5)));
+    // Cross-fade the two bracketing integer levels by the fractional part.
+    // Clamp the lower level so n+1 never exceeds the buffers we allocated.
+    const n = Math.max(1, Math.min(MAX_LEVELS - 1, Math.floor(L)));
+    const t = L - n; // 0 at level n, →1 approaching level n+1
+
+    // Run a full down/up pyramid of `levels` levels into `dest`.
+    function runPyramid(levels, dest) {
+      let w0 = w, h0 = h;
+      for (let i = 0; i < levels; i++) {
+        w0 = Math.max(1, w0 >> 1);
+        h0 = Math.max(1, h0 >> 1);
+        sizeTarget(gl, chain[i], w0, h0);
+      }
+      // Downsample: src → chain[0] → chain[1] → …
+      let fromTex = src;
+      for (let i = 0; i < levels; i++) {
+        const c = chain[i];
+        blit(down, dTex, dHalf, fromTex, c, c.w, c.h);
+        fromTex = c.tex;
+      }
+      // Upsample: chain[levels-1] → … → chain[0] → dest (full res).
+      for (let i = levels - 1; i > 0; i--) {
+        const c = chain[i - 1];
+        blit(up, uTex, uHalf, fromTex, c, c.w, c.h);
+        fromTex = c.tex;
+      }
+      blit(up, uTex, uHalf, fromTex, dest, w, h);
+    }
+
+    sizeTarget(gl, outA, w, h);
+    sizeTarget(gl, outB, w, h);
+    runPyramid(n, outA);
+    runPyramid(n + 1, outB);
+
+    // Blend the two results in one unbiased weighted-average pass → screen.
+    gl.useProgram(blend);
+    bindQuad(blend);
+    gl.uniform1i(bA, 0);
+    gl.uniform1i(bB, 1);
+    gl.uniform1f(bT, t);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, outA.tex);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, outB.tex);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, w, h);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    const passes = n * 2 + (n + 1) * 2 + 1;
+    cost.innerHTML =
+      `<b>${n}</b>–<b>${n + 1}</b> levels (t=${t.toFixed(2)}) · <b>${passes}</b> passes`;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Drive everything from the one slider.
+// ---------------------------------------------------------------------------
+function renderAll() {
+  for (const render of demos) render(state.radius);
+}
+function onInput() {
+  state.radius = parseFloat(slider.value);
+  sliderOut.textContent = `${state.radius} px`;
+  renderAll();
+}
+slider.addEventListener('input', onInput);
+window.addEventListener('resize', renderAll);
+onInput();
+</script>
+</body>
+</html>
