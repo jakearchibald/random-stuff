@@ -23,6 +23,16 @@
         box-shadow: 0 0.0625em 0.1875em rgb(0 0 0 / 0.4);
       }
 
+      .toolbar-button,
+      .swatch {
+        /* Suppress the long-press callout / text-selection UI on touch so a
+           hold reveals the tooltip instead. */
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: manipulation;
+      }
+
       .toolbar-button {
         display: inline-flex;
         align-items: center;
@@ -370,6 +380,10 @@
       let showTimer;
       let cooldownTimer;
 
+      // Long-press (touch) state.
+      let lastPointerType = '';
+      let longPressFired = false;
+
       function showHint(button) {
         // Showing this hint auto-hides any other open hint popover.
         const hint = document.getElementById(
@@ -384,7 +398,7 @@
       }
 
       function hideHint() {
-        activeHint.hidePopover();
+        activeHint?.hidePopover();
         activeHint = null;
       }
 
@@ -448,6 +462,22 @@
             warm = false;
           }
         });
+
+        // --- Touch long-press ---
+        // Touch devices have no hover, but a long-press fires `contextmenu` —
+        // let the browser do the press timing and use that to show the tooltip.
+        button.addEventListener('pointerdown', (event) => {
+          lastPointerType = event.pointerType;
+        });
+
+        button.addEventListener('contextmenu', (event) => {
+          if (lastPointerType !== 'touch') return; // ignore mouse right-click
+
+          // Show the tooltip instead of the OS context menu.
+          event.preventDefault();
+          longPressFired = true;
+          showHint(button);
+        });
       }
 
       // Keep the tooltip visible while it's hovered, and hide once the pointer
@@ -460,6 +490,22 @@
 
         tooltip.addEventListener('pointerleave', scheduleHide);
       }
+
+      // A long-press tooltip is a `popover="hint"`, so tapping elsewhere light-
+      // dismisses it automatically. We only need to swallow the click that the
+      // long-press triggers, so it doesn't also fire the button's action (e.g.
+      // toggle the Color popover).
+      document.addEventListener(
+        'click',
+        (event) => {
+          if (longPressFired) {
+            event.preventDefault();
+            event.stopPropagation();
+            longPressFired = false;
+          }
+        },
+        true,
+      );
     </script>
   </body>
 </html>
