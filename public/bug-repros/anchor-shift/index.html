@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>anchor position shift</title>
+    <style>
+      #anchor {
+        position: absolute;
+        top: 50%;
+        anchor-name: --anchor;
+      }
+
+      #anchored {
+        position: absolute;
+        position-anchor: --anchor;
+        position-area: bottom;
+        height: 80dvh;
+        width: 200px;
+        background: cornflowerblue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="anchor">Anchor</div>
+    <div id="anchored">Anchored</div>
+  </body>
+</html>
