@@ -923,34 +923,35 @@ function makeDownscaler(gl, bindQuad) {
 }
 
 // ---------------------------------------------------------------------------
-// 4b. Dual Kawase, animated by a floating-point offset.
-//     The production trick for a *smooth* Kawase blur. Keep the pyramid a
-//     FIXED size (same buffers, same pass count, every frame) and instead
-//     scale the sample offset by a floating-point uniform. Bilinear filtering
-//     turns a fractional offset (1.42 → 1.43) into a sub-pixel interpolation of
-//     the sampled colours, so the blur grows perfectly smoothly — identical
-//     sample count, zero shimmer, constant cost regardless of blur amount.
+// 4b. Dual Kawase, animated by a floating-point offset (adaptive depth).
+//     The production trick for a *smooth* Kawase blur: scale the sample offset
+//     by a floating-point uniform, so bilinear filtering turns a fractional
+//     offset (1.42 → 1.43) into a sub-pixel blend of the samples — smooth, zero
+//     shimmer, no extra passes. To avoid a blur ceiling, the pyramid DEPTH is
+//     chosen from the radius and the offset only ever carries one octave [1,2],
+//     so it never grows large enough to undersample. Unbounded range, always
+//     smooth; cost grows as log(radius), not radius.
 // ---------------------------------------------------------------------------
 {
   const { frame, cost } = build(
     'Dual Kawase (offset)', 'WebGL', '',
-    'Fixed pyramid (constant passes), blur driven by a floating-point sample ' +
-    'offset. A fractional offset is bilinearly interpolated on the GPU, so the ' +
-    'blur scales continuously with no shimmer and no extra passes — the trick ' +
-    'real engines use to animate Kawase. Constant cost at any blur. A fixed ' +
-    'depth only spans a bounded range, so the sharp source is cross-faded in at ' +
-    'small radii and the blur hits a ceiling at the top of the slider.'
+    'Blur driven by a floating-point sample offset, bilinearly interpolated on ' +
+    'the GPU — smooth, no shimmer, no extra passes. The pyramid depth adapts to ' +
+    'the radius while the offset carries just one octave, so it never hits a ' +
+    'ceiling or breaks up. The sharp source is cross-faded in at small radii. ' +
+    'Unbounded range; cost grows as log(radius).'
   );
   const { gl, resize, bindQuad } = makeGL(frame);
   const src = makeSourceTexture(gl);
 
-  // Fixed pyramid: same buffer sizes and pass count every frame. A fixed depth
-  // can only represent a bounded blur range — deeper = more baseline blur but
-  // worse low-end reach. 3 levels keeps the floor low enough to cross-fade the
-  // sharp source in at small radii (see the mapping below).
-  const FIXED_LEVELS = 3;
+  // Adaptive depth + one-octave offset. The depth is chosen from the radius so
+  // the range is unbounded (no ceiling), while the floating-point offset carries
+  // the fractional level *within* one octave [1,2] — never large enough to make
+  // the taps undersample, so it never breaks up. Cost grows only as log(radius).
+  const MIN_LEVELS = 1;
+  const MAX_LEVELS = 6;
   const chain = [];
-  for (let i = 0; i < FIXED_LEVELS; i++) chain.push(makeTargets(gl)[0]);
+  for (let i = 0; i < MAX_LEVELS; i++) chain.push(makeTargets(gl)[0]);
   const [result] = makeTargets(gl); // full-res pyramid output, before source mix
 
   // Down/up filters identical to the Dual Kawase panel, but the sample offset
@@ -1033,32 +1034,33 @@ function makeDownscaler(gl, bindQuad) {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
-  // The sigma the fixed pyramid produces at offset 1.0 (device px). Below this
-  // the pyramid can't go — its downsampling floor — so we cross-fade the sharp
-  // source over [0, PYRAMID_SIGMA]. Above it, the offset scales up to OFFSET_MAX,
-  // which sets the panel's blur ceiling (this technique is deliberately bounded).
-  const PYRAMID_SIGMA = 1.5 * Math.pow(2, FIXED_LEVELS);
-  const OFFSET_MAX = 2.5;
-  const SIGMA_MAX = PYRAMID_SIGMA * OFFSET_MAX;
+  // sigma per level at offset 1.0 (device px) — matches the other Kawase panels.
+  const BASE_SIGMA = 1.5;
+  // Below this the shallowest pyramid can't go, so we cross-fade the sharp source.
+  const FLOOR_SIGMA = BASE_SIGMA * Math.pow(2, MIN_LEVELS);
 
   demos.push((r) => {
     const { w, h, dpr } = resize();
     const sigma = r * dpr;
 
-    // Two continuous ramps, so the composite is smooth everywhere:
-    //  • offset: OFFSET_MIN → OFFSET_MAX linearly across the whole sigma range
-    //    (never near 0, so the down filter always samples real neighbours).
-    //  • mix: 0 → 1 over [0, PYRAMID_SIGMA], cross-fading the sharp source in so
-    //    small radii ramp up from sharp instead of snapping to the blur floor.
-    const OFFSET_MIN = 0.7;
-    const capped = Math.min(sigma, SIGMA_MAX);
-    const off = OFFSET_MIN + (OFFSET_MAX - OFFSET_MIN) * (capped / SIGMA_MAX);
-    const mix = Math.max(0.0, Math.min(1.0, sigma / PYRAMID_SIGMA));
+    // Fractional target level. The integer part picks the pyramid DEPTH; the
+    // fraction becomes an offset within one octave [1,2], so the offset is never
+    // large enough to make the taps undersample (which is what used to break the
+    // high end). Effective sigma ≈ BASE_SIGMA * offset * 2^levels, continuous
+    // across depth boundaries because 2·2^n == 1·2^(n+1).
+    const Ltarget = Math.log2(Math.max(sigma, 1e-3) / BASE_SIGMA);
+    const levels = Math.max(MIN_LEVELS, Math.min(MAX_LEVELS, Math.floor(Ltarget)));
+    // Offset carries whatever fractional (or, once depth saturates, extra) level
+    // remains. Within the normal range this stays in [1,2]; at MAX_LEVELS it may
+    // grow beyond 2 — the new, far higher soft ceiling.
+    const off = Math.max(0.7, Math.pow(2, Ltarget - levels));
+    // Low-end cross-fade: ramp the sharp source in below the shallowest floor.
+    const mix = Math.max(0.0, Math.min(1.0, sigma / FLOOR_SIGMA));
 
-    // Size the fixed chain (each level halves), then down- then up-sample into
+    // Size the chain for `levels` (each level halves), then down/up-sample into
     // the full-res result buffer (not the screen — the source mix comes last).
     let w0 = w, h0 = h;
-    for (let i = 0; i < FIXED_LEVELS; i++) {
+    for (let i = 0; i < levels; i++) {
       w0 = Math.max(1, w0 >> 1);
       h0 = Math.max(1, h0 >> 1);
       sizeTarget(gl, chain[i], w0, h0);
@@ -1066,12 +1068,12 @@ function makeDownscaler(gl, bindQuad) {
     sizeTarget(gl, result, w, h);
 
     let fromTex = src;
-    for (let i = 0; i < FIXED_LEVELS; i++) {
+    for (let i = 0; i < levels; i++) {
       const c = chain[i];
       blit(down, dTex, dHalf, dOff, off, fromTex, c, c.w, c.h);
       fromTex = c.tex;
     }
-    for (let i = FIXED_LEVELS - 1; i > 0; i--) {
+    for (let i = levels - 1; i > 0; i--) {
       const c = chain[i - 1];
       blit(up, uTex, uHalf, uOff, off, fromTex, c, c.w, c.h);
       fromTex = c.tex;
@@ -1092,11 +1094,10 @@ function makeDownscaler(gl, bindQuad) {
     gl.viewport(0, 0, w, h);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-    const passes = FIXED_LEVELS * 2 + 1;
-    const ceiling = sigma > SIGMA_MAX ? ' · at ceiling' : '';
+    const passes = levels * 2 + 1;
     cost.innerHTML =
-      `<b>${FIXED_LEVELS}</b> fixed levels · <b>${passes}</b> passes · ` +
-      `offset=${off.toFixed(2)} mix=${mix.toFixed(2)}${ceiling}`;
+      `<b>${levels}</b> levels · <b>${passes}</b> passes · ` +
+      `offset=${off.toFixed(2)} mix=${mix.toFixed(2)}`;
   });
 }
 

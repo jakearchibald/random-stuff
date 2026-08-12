@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>text-box-trim</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 3rem;
+        background: #222;
+        color: #fff;
+      }
+
+      .stack {
+        /* Everything below is sized in em, so scale the whole demo by
+           setting font-size here. */
+        font-size: 2.5em;
+        font-weight: 600;
+        line-height: 1.5;
+
+        display: grid;
+        /* One cell: every copy occupies it, so they overlay. Baseline
+           alignment makes the first line of each copy share an anchor,
+           regardless of how much leading each one trims. */
+        grid-template: 'text';
+        align-items: baseline;
+        justify-items: center;
+        color: transparent;
+        margin: 0 0 1em;
+
+        & > p {
+          grid-area: text;
+          margin: 0;
+          padding: 0 1.5em;
+        }
+      }
+
+      /* Back to front: least trimmed first, so each smaller box paints on
+         top of the larger ones behind it. */
+      .text {
+        background: #1d3f6e;
+        text-box: trim-both text alphabetic;
+      }
+      .descender {
+        background: #3d68ab;
+        text-box: trim-both text;
+      }
+      .rendered-text {
+        color: #fff;
+      }
+      p.line-height {
+        background: rgb(255, 255, 255, 0.2);
+        line-height: 1.5;
+        padding: 0 1.3em;
+      }
+      p.full {
+        background: #1d3f6e;
+        line-height: 1.5;
+      }
+      p.text-top {
+        background: #1d3f6e;
+        text-box: trim-start text;
+      }
+      p.text-both {
+        background: #1d3f6e;
+        text-box: trim-both text;
+      }
+      p.text-cap {
+        background: #1d3f6e;
+        text-box: trim-both cap text;
+      }
+      p.text-ex {
+        background: #1d3f6e;
+        text-box: trim-both ex text;
+      }
+      p.alphabetic-ex {
+        background: #1d3f6e;
+        text-box: trim-both ex alphabetic;
+      }
+      .span-trim {
+        text-box: trim-both ex alphabetic;
+        background: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stack">
+      <p class="descender">Štylįng</p>
+      <p class="text">Štylįng</p>
+      <p class="line-height">Štylįng</p>
+      <p class="rendered-text">Štylįng</p>
+    </div>
+    <div class="stack">
+      <p class="full rendered-text">Štylįng</p>
+    </div>
+    <div class="stack">
+      <p class="text-top rendered-text">Štylįng</p>
+    </div>
+    <div class="stack">
+      <p class="text-both rendered-text">Štylįng</p>
+    </div>
+    <div class="stack">
+      <p class="text-cap rendered-text">Štylįng</p>
+    </div>
+    <div class="stack">
+      <p class="text-ex rendered-text">Štylįng</p>
+    </div>
+    <div class="stack">
+      <p class="alphabetic-ex rendered-text">Štylįng</p>
+    </div>
+
+    <div class="stack">
+      <p class="full rendered-text">
+        <span class="span-trim"
+          >This is a run of<br />text that includes Štylįng</span
+        >
+      </p>
+    </div>
+  </body>
+</html>
