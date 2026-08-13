@@ -102,6 +102,10 @@
 
 <div class="controls">
   <button id="run">Run</button>
+  <label>
+    <input type="checkbox" id="split" />
+    Split into 3-character chunks
+  </label>
 </div>
 
 <p>
@@ -114,6 +118,14 @@
   chunks after it aren't pulled until that script has run.
 </p>
 
+<p>
+  The file is small enough to arrive in a single chunk, so tick the checkbox to
+  insert another <code>TransformStream</code> that re-splits it into 3-character
+  chunks. That lands tag names, attributes and the
+  <code>&lt;/script&gt;</code> end tags across chunk boundaries, so the parser
+  has to hold partial tokens between writes.
+</p>
+
 <h2>Target div</h2>
 <div id="output"></div>
 
@@ -124,6 +136,7 @@
   const output = document.querySelector('#output');
   const logEl = document.querySelector('#log');
   const runButton = document.querySelector('#run');
+  const splitInput = document.querySelector('#split');
 
   let startTime = 0;
 
@@ -138,6 +151,25 @@
 
   // The streamed scripts run against this document, so they can call this.
   globalThis.demoLog = (message) => log(message, 'script');
+
+  // Re-chunks the text into `size`-character pieces, so tokens end up split
+  // across chunk boundaries. Carries a remainder between chunks since incoming
+  // chunks won't divide evenly.
+  function splittingStream(size) {
+    let buffer = '';
+    return new TransformStream({
+      transform(chunk, controller) {
+        buffer += chunk;
+        while (buffer.length >= size) {
+          controller.enqueue(buffer.slice(0, size));
+          buffer = buffer.slice(size);
+        }
+      },
+      flush(controller) {
+        if (buffer) controller.enqueue(buffer);
+      },
+    });
+  }
 
   // Logs each chunk as the writable pulls it, so backpressure from a
   // parser-blocking script is visible.
@@ -170,10 +202,10 @@
       // Calling the method replaces the div's existing children immediately.
       const writable = output.streamHTMLUnsafe({ runScripts: true });
 
-      await response.body
-        .pipeThrough(new TextDecoderStream())
-        .pipeThrough(loggingStream())
-        .pipeTo(writable);
+      let stream = response.body.pipeThrough(new TextDecoderStream());
+      if (splitInput.checked) stream = stream.pipeThrough(splittingStream(3));
+
+      await stream.pipeThrough(loggingStream()).pipeTo(writable);
 
       log('pipeTo() resolved', 'write');
     } catch (error) {
