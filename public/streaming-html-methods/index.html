@@ -1,0 +1,187 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Streaming HTML methods: streamHTMLUnsafe script order</title>
+<style>
+  :root {
+    color-scheme: light dark;
+  }
+  body {
+    font: 1rem/1.5 system-ui, sans-serif;
+    max-width: 52rem;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  code {
+    font-family: ui-monospace, monospace;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-block: 1rem;
+  }
+  #output {
+    min-height: 4rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid light-dark(#bbb, #555);
+    border-radius: 0.25rem;
+  }
+  #output p {
+    margin-block: 0.5rem;
+  }
+  /* Paragraphs the scripts append, rather than ones the parser inserts. */
+  #output .from-script {
+    font-weight: bold;
+    color: light-dark(#0a5c2e, #6ee7a0);
+  }
+  #log {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: ui-monospace, monospace;
+    font-size: 0.85rem;
+  }
+  #log li {
+    padding: 0.15rem 0;
+    border-bottom: 1px solid light-dark(#eee, #333);
+    overflow-wrap: anywhere;
+  }
+  #log time {
+    display: inline-block;
+    min-width: 6em;
+    text-align: right;
+    margin-right: 0.75em;
+    color: light-dark(#666, #999);
+  }
+  #log .script {
+    color: light-dark(#0a5c2e, #6ee7a0);
+  }
+  #log .write {
+    color: light-dark(#1c4fa1, #8fb8ff);
+  }
+  #log .error {
+    color: light-dark(#a11, #ff9d9d);
+  }
+</style>
+
+<h1>streamHTMLUnsafe script order</h1>
+
+<p>
+  Streams HTML into a <code>&lt;div&gt;</code> with
+  <code>streamHTMLUnsafe({ runScripts: true })</code>, per
+  <a href="https://github.com/whatwg/html/pull/12758"
+    >whatwg/html#12758</a
+  >. The method returns a <code>WritableStream</code> synchronously; strings
+  written to it are fed to an HTML fragment parser that inserts nodes into the
+  div as they're parsed.
+</p>
+
+<p>The streamed markup contains, in order:</p>
+
+<ol>
+  <li>Some text</li>
+  <li>
+    A classic external script, loaded via <code>/slow-redirect/</code> with a
+    <strong>2000ms</strong> delay
+  </li>
+  <li>Some more text</li>
+  <li>
+    A second classic external script, delayed by only <strong>500ms</strong>
+  </li>
+  <li>Some final text</li>
+</ol>
+
+<p>
+  Each script appends a paragraph to the div. The second script is much faster
+  to fetch than the first, so if execution order were fetch order it would go
+  first — it shouldn't. The expected order is 1, 2, 3, 4, 5, with the text after
+  each script held back until that script has run.
+</p>
+
+<div class="controls">
+  <button id="run">Run</button>
+</div>
+
+<p>
+  The markup lives in
+  <a href="./content.html">content.html</a>. It's fetched, piped through a
+  <code>TextDecoderStream</code>, and piped straight into the writable — nothing
+  buffers it first, and chunk boundaries come from the network rather than being
+  chosen here. A logging <code>TransformStream</code> sits in the middle so you
+  can see each chunk as it's pulled: if the parser blocks on a script, the
+  chunks after it aren't pulled until that script has run.
+</p>
+
+<h2>Target div</h2>
+<div id="output"></div>
+
+<h2>Log</h2>
+<ol id="log"></ol>
+
+<script type="module">
+  const output = document.querySelector('#output');
+  const logEl = document.querySelector('#log');
+  const runButton = document.querySelector('#run');
+
+  let startTime = 0;
+
+  function log(message, kind) {
+    const li = document.createElement('li');
+    if (kind) li.className = kind;
+    const time = document.createElement('time');
+    time.textContent = `+${Math.round(performance.now() - startTime)}ms`;
+    li.append(time, message);
+    logEl.append(li);
+  }
+
+  // The streamed scripts run against this document, so they can call this.
+  globalThis.demoLog = (message) => log(message, 'script');
+
+  // Logs each chunk as the writable pulls it, so backpressure from a
+  // parser-blocking script is visible.
+  function loggingStream() {
+    let n = 0;
+    return new TransformStream({
+      transform(chunk, controller) {
+        n++;
+        log(`chunk ${n}: ${JSON.stringify(chunk)}`, 'write');
+        controller.enqueue(chunk);
+      },
+      flush() {
+        log('source stream ended', 'write');
+      },
+    });
+  }
+
+  async function run() {
+    runButton.disabled = true;
+    logEl.replaceChildren();
+    startTime = performance.now();
+
+    try {
+      log('fetch("./content.html")', 'write');
+      const response = await fetch('./content.html');
+      if (!response.ok) throw Error(`HTTP ${response.status}`);
+      log('response headers received', 'write');
+
+      log('streamHTMLUnsafe({ runScripts: true })', 'write');
+      // Calling the method replaces the div's existing children immediately.
+      const writable = output.streamHTMLUnsafe({ runScripts: true });
+
+      await response.body
+        .pipeThrough(new TextDecoderStream())
+        .pipeThrough(loggingStream())
+        .pipeTo(writable);
+
+      log('pipeTo() resolved', 'write');
+    } catch (error) {
+      log(`threw: ${error}`, 'error');
+    } finally {
+      runButton.disabled = false;
+    }
+  }
+
+  runButton.addEventListener('click', run);
+</script>
