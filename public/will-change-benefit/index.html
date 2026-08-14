@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>will-change and paint cost</title>
     <style>
+      /* 28 Days Later is a distressed, grungy face: every glyph is a mass of
+         speckles and torn edges, each one its own contour. It averages ~1,400
+         outline points per glyph and peaks over 4,500, where a normal text face
+         is more like 30-50. That's an enormous amount of path geometry to
+         rasterise, which is exactly what this demo wants from its text.
+
+         Note the cost here is outline complexity, not colour: this is a plain
+         monochrome font, so unlike a COLRv1 font the glyphs can still be cached
+         in the glyph atlas at a given size and transform. */
+      @font-face {
+        font-family: '28 Days Later';
+        src: url('28-days-later.ttf') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+        /* block, not swap: the point is to measure the cost of painting *this*
+           font, so it shouldn't briefly render in a fallback and animate with
+           the wrong glyphs. */
+        font-display: block;
+      }
+
       body {
         font-family: system-ui, sans-serif;
         margin: 2rem;
@@ -88,6 +108,8 @@
       .expensive {
         width: 100%;
         line-height: 0;
+        /* So the label can be positioned against the car's box. */
+        position: relative;
       }
 
       .expensive svg {
@@ -105,6 +127,34 @@
          the need frame by frame. */
       .expensive.will-change {
         will-change: transform;
+      }
+
+      /* A label centred over the car, and deliberately a *child* of the
+         animated element, so it rotates with it and is re-painted along with
+         it. Text is raster paint: laying out and rasterising glyphs is real
+         per-frame work in the cases where the layer isn't promoted, so this
+         adds to exactly the cost the demo is measuring rather than sitting
+         outside it. */
+      .car-label {
+        position: absolute;
+        /* Filling the car's box rather than being a small centred span: the
+           text repeats enough to wrap over the whole drawing, which is the
+           point — hundreds of glyphs to shape and rasterise per frame. */
+        inset: 0 7.5%;
+        /* Centres the wrapped block of text vertically within that box. */
+        display: grid;
+        align-content: center;
+        text-align: center;
+        /* Set explicitly rather than inherited, since .expensive sets
+           line-height: 0 for the SVG. system-ui is the fallback, so the demo
+           still works if the font fails to load — just more cheaply. */
+        font-family: '28 Days Later', system-ui, sans-serif;
+        font-size: 1.25rem;
+        line-height: 1.3;
+        /* Legible against whichever part of the drawing ends up underneath. No
+           text-shadow: it would add a blur pass on top of the glyph
+           rasterisation and confuse what's actually being measured. */
+        color: #fff;
       }
 
       .status {
@@ -132,10 +182,12 @@
     </p>
 
     <p>
-      All four produce the same visible rotation. The last one is a 3D transform
-      about the Z axis — the axis pointing out of the screen — so it looks
+      All five produce the same visible rotation. The last two are 3D transforms
+      about the Z axis — the axis pointing out of the screen — so they look
       identical to the plain 2D version, but browsers tend to promote 3D
-      transforms to their own layer automatically.
+      transforms to their own layer automatically. If those two perform the
+      same, that says <code>will-change</code> adds nothing once a 3D transform
+      has already forced the promotion.
     </p>
 
     <fieldset>
@@ -156,11 +208,22 @@
         <input type="radio" name="method" value="raf-3d" />
         requestAnimationFrame, setting a 3D <code>matrix3d()</code> transform
       </label>
+      <label>
+        <input type="radio" name="method" value="raf-3d-wc" />
+        requestAnimationFrame + <code>matrix3d()</code> +
+        <code>will-change: transform</code>
+      </label>
       <button id="toggle" disabled>Start</button>
     </fieldset>
 
     <div class="stage">
-      <div class="expensive" id="target"></div>
+      <div class="expensive" id="target">
+        <!-- Inside the animated element, so it rotates and re-paints with the
+             car. The SVG is appended after this by script; the label still
+             draws on top of it by virtue of being positioned. Text is filled in
+             by script rather than written out 100 times here. -->
+        <span class="car-label" id="car-label"></span>
+      </div>
     </div>
 
     <p class="status" id="status"></p>
@@ -169,15 +232,26 @@
       const target = document.querySelector('#target');
       const toggleButton = document.querySelector('#toggle');
       const statusEl = document.querySelector('#status');
+      const carLabel = document.querySelector('#car-label');
 
       // Milliseconds per full rotation.
       const PERIOD = 3000;
+
+      // Repeated so there's a substantial amount of text over the car. Every
+      // one of these glyphs has to be rasterised again on any frame where the
+      // element's layer isn't reused, on top of the SVG's few hundred paths.
+      //
+      // No full stop: 28 Days Later only covers letters, digits, space and '*',
+      // so a '.' would fall back to another font mid-sentence and paint far more
+      // cheaply than the glyphs around it.
+      carLabel.textContent = 'This is a car '.repeat(100);
 
       const LABELS = {
         waapi: 'WAAPI',
         raf: 'rAF',
         'raf-wc': 'rAF + will-change',
         'raf-3d': 'rAF + matrix3d',
+        'raf-3d-wc': 'rAF + matrix3d + will-change',
       };
 
       /** Whatever is currently animating, with a way to stop it. */
@@ -230,8 +304,15 @@
           parent layer's 2D drawing. So this tends to behave like the
           will-change case without being asked to — which is where the old
           "translateZ(0) / transform: translate3d(0,0,0) hack" came from, before
-          will-change existed to say it directly. */
-      function startRaf3d() {
+          will-change existed to say it directly.
+
+          Combining it with will-change tests whether saying so explicitly adds
+          anything once the 3D transform has already forced the promotion. If
+          the two 3D options perform the same, that's the answer: the hint is
+          redundant here. */
+      function startRaf3d(willChange) {
+        if (willChange) target.classList.add('will-change');
+
         let start;
         let frameId;
 
@@ -242,16 +323,24 @@
           const cos = Math.cos(radians);
           const sin = Math.sin(radians);
 
-          // A column-major 4x4 rotation about the Z axis. Written out as a
-          // literal matrix3d rather than rotateZ() so it's unambiguously a 3D
-          // transform, and so there's nothing for the browser to simplify back
-          // down into a 2D one.
+          // A column-major 4x4 rotation about the Z axis, plus a 1px
+          // translation along Z in the last row.
+          //
+          // That translation is load-bearing. A pure Z rotation is exactly
+          // representable as a 2D matrix, so browsers simplify it back down to
+          // one — Chrome reports such a transform as `matrix(...)`, not
+          // `matrix3d(...)`, and it gets no 3D treatment at all. Offsetting
+          // along Z makes the matrix irreducibly 3D, which is what actually
+          // triggers the layer promotion this option is here to demonstrate.
+          //
+          // 1px of Z has no visible effect without a perspective on the parent,
+          // so this still looks identical to the 2D rotation.
           // prettier-ignore
           const matrix = [
              cos, sin, 0, 0,
             -sin, cos, 0, 0,
                0,   0, 1, 0,
-               0,   0, 0, 1,
+               0,   0, 1, 1,
           ];
 
           target.style.transform = `matrix3d(${matrix.join(', ')})`;
@@ -263,6 +352,7 @@
         return () => {
           cancelAnimationFrame(frameId);
           target.style.transform = '';
+          if (willChange) target.classList.remove('will-change');
         };
       }
 
@@ -282,7 +372,8 @@
           waapi: startWaapi,
           raf: () => startRaf(false),
           'raf-wc': () => startRaf(true),
-          'raf-3d': startRaf3d,
+          'raf-3d': () => startRaf3d(false),
+          'raf-3d-wc': () => startRaf3d(true),
         };
 
         current = starters[method]();
@@ -339,6 +430,13 @@
       svg.removeAttribute('height');
 
       target.append(svg);
+
+      // Wait for the font too, so the first run can't animate with fallback
+      // glyphs while the font is still downloading. document.fonts.ready resolves
+      // once font loading has settled, including on failure, so a missing font
+      // leaves the demo usable with the fallback rather than stuck disabled.
+      statusEl.textContent = 'Loading font…';
+      await document.fonts.ready;
 
       toggleButton.disabled = false;
       statusEl.textContent = '';
