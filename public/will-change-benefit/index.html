@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>will-change and paint cost</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem;
+        background: #222;
+        color: #fff;
+      }
+
+      h1 {
+        font-size: 1.3rem;
+        margin: 0 0 0.5rem;
+      }
+
+      p {
+        color: #bbb;
+        max-width: 42rem;
+        margin: 0 0 1rem;
+      }
+
+      fieldset {
+        border: 1px solid #555;
+        border-radius: 0.4rem;
+        max-width: 42rem;
+        margin: 0 0 1.5rem;
+        padding: 0.75rem 1rem 1rem;
+      }
+
+      legend {
+        padding: 0 0.4rem;
+        font-weight: 600;
+      }
+
+      label {
+        display: block;
+        margin: 0.3rem 0;
+      }
+
+      button {
+        font: inherit;
+        padding: 0.4rem 0.9rem;
+        margin: 0.6rem 0.4rem 0 0;
+        border-radius: 0.3rem;
+        border: 1px solid #777;
+        background: #333;
+        color: #fff;
+      }
+
+      .stage {
+        /* A square stage that grows with the viewport, so the paint area is
+           bigger — and the cost more obvious — on a desktop screen. Bounded by
+           viewport height as well as width so the whole thing stays on screen
+           without scrolling, whichever axis is the tighter constraint.
+
+           Note this makes the paint cost resolution-dependent: a larger stage
+           means more pixels to rasterise per frame, so comparisons are only
+           meaningful between runs at the same window size. */
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+        background: #191919;
+        border-radius: 0.5rem;
+        /* The stage clips, so rotation can't grow the page and cause layout
+           work that would muddy the comparison. */
+        overflow: hidden;
+      }
+
+      /* The expensive element: a wrapper around an inline SVG of a car, which
+         is a ~500KB Inkscape drawing with several hundred paths, gradients and
+         filters. Rasterising it costs a lot.
+
+         Deliberately no filter, opacity or other promotion-affecting property
+         on this element itself — those would create a stacking context and
+         change how it gets promoted to a layer, which is exactly the variable
+         this demo isolates.
+
+         Nothing about the drawing changes as it rotates: the same pixels, just
+         oriented differently. That's the point. A transform is a
+         compositor-level operation, so if the element has its own layer the
+         browser rasterises these paths once and re-uses that texture every
+         frame. If it doesn't, the transform changes what the shared layer looks
+         like, so the whole drawing is re-rasterised — every single frame. */
+      .expensive {
+        width: 100%;
+        line-height: 0;
+      }
+
+      .expensive svg {
+        display: block;
+        width: 100%;
+        /* The viewBox added at load time gives the SVG an aspect ratio, so
+           height follows from the width. */
+        height: auto;
+      }
+
+      /* Applied only in the rAF + will-change mode, and only while the
+         animation is running. will-change: transform tells the browser the
+         transform is about to change, so it can promote the element to its own
+         compositor layer *before* the animation starts, rather than discovering
+         the need frame by frame. */
+      .expensive.will-change {
+        will-change: transform;
+      }
+
+      .status {
+        margin-top: 1rem;
+        color: #ff9e3d;
+        min-height: 1.4em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Does <code>will-change</code> actually help?</h1>
+
+    <p>
+      The car below is an inline SVG that's very expensive to <em>paint</em> — a
+      few hundred paths with gradients — but nothing about it changes as it
+      rotates. Try each method and watch how smoothly it turns.
+    </p>
+
+    <p>
+      Judge this by eye, and by the Performance panel in devtools. A frame-rate
+      counter measured on the main thread would be misleading here: when the
+      animation runs on the compositor, the main thread can be idle while the
+      animation is perfectly smooth, and it can also be busy while the animation
+      is still smooth.
+    </p>
+
+    <fieldset>
+      <legend>Animation method</legend>
+      <label>
+        <input type="radio" name="method" value="waapi" checked />
+        Web Animations API (<code>element.animate</code>)
+      </label>
+      <label>
+        <input type="radio" name="method" value="raf" />
+        requestAnimationFrame, setting <code>style.transform</code>
+      </label>
+      <label>
+        <input type="radio" name="method" value="raf-wc" />
+        requestAnimationFrame + <code>will-change: transform</code>
+      </label>
+      <button id="toggle" disabled>Start</button>
+    </fieldset>
+
+    <div class="stage">
+      <div class="expensive" id="target"></div>
+    </div>
+
+    <p class="status" id="status"></p>
+
+    <script type="module">
+      const target = document.querySelector('#target');
+      const toggleButton = document.querySelector('#toggle');
+      const statusEl = document.querySelector('#status');
+
+      // Milliseconds per full rotation.
+      const PERIOD = 3000;
+
+      const LABELS = {
+        waapi: 'WAAPI',
+        raf: 'rAF',
+        'raf-wc': 'rAF + will-change',
+      };
+
+      /** Whatever is currently animating, with a way to stop it. */
+      let current = null;
+
+      /** WAAPI: the browser knows the whole transform timeline up front, so it
+          can promote the element to its own layer for the animation's duration
+          without being told to. */
+      function startWaapi() {
+        const animation = target.animate(
+          [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+          { duration: PERIOD, easing: 'linear', iterations: Infinity },
+        );
+
+        return () => animation.cancel();
+      }
+
+      /** rAF: each frame sets a new transform from script. The browser only
+          ever sees one new value at a time; there's no timeline for it to look
+          ahead at, so with no will-change it has nothing to act on in advance. */
+      function startRaf(willChange) {
+        if (willChange) target.classList.add('will-change');
+
+        let start;
+        let frameId;
+
+        function frame(now) {
+          start ??= now;
+          const angle = (((now - start) / PERIOD) * 360) % 360;
+          target.style.transform = `rotate(${angle}deg)`;
+          frameId = requestAnimationFrame(frame);
+        }
+
+        frameId = requestAnimationFrame(frame);
+
+        return () => {
+          cancelAnimationFrame(frameId);
+          target.style.transform = '';
+          if (willChange) target.classList.remove('will-change');
+        };
+      }
+
+      function stop() {
+        current?.();
+        current = null;
+        toggleButton.textContent = 'Start';
+        statusEl.textContent = '';
+      }
+
+      function start() {
+        const method = document.querySelector(
+          'input[name=method]:checked',
+        ).value;
+
+        current =
+          method === 'waapi' ? startWaapi() : startRaf(method === 'raf-wc');
+
+        toggleButton.textContent = 'Stop';
+        statusEl.textContent = `Running: ${LABELS[method]}`;
+      }
+
+      toggleButton.addEventListener('click', () => {
+        if (current) stop();
+        else start();
+      });
+
+      // Switching method mid-run restarts with the newly chosen one, so the old
+      // animation can't be left running underneath the new one.
+      for (const input of document.querySelectorAll('input[name=method]')) {
+        input.addEventListener('change', () => {
+          if (current) {
+            stop();
+            start();
+          }
+        });
+      }
+
+      // Fetch the SVG and put it in the DOM as real, inline SVG elements —
+      // rather than an <img>, which browsers can cache as a decoded bitmap and
+      // so wouldn't demonstrate the per-frame paint cost.
+      statusEl.textContent = 'Loading SVG…';
+
+      const response = await fetch('car.svg');
+      if (!response.ok)
+        throw new Error(`Failed to fetch car.svg: ${response.status}`);
+      const source = await response.text();
+
+      // Parsed as XML, since that's what SVG is. The resulting document's root
+      // element is imported into this document so it can be appended.
+      const svgDoc = new DOMParser().parseFromString(source, 'image/svg+xml');
+      const parseError = svgDoc.querySelector('parsererror');
+      if (parseError) throw new Error('Failed to parse car.svg as XML');
+
+      const svg = document.importNode(svgDoc.documentElement, true);
+
+      // This SVG has width/height but no viewBox, so it has a fixed intrinsic
+      // size and no way to scale: sizing it with CSS would resize its viewport
+      // while the drawing inside stayed at 900x600, cropping it. Deriving a
+      // viewBox from those attributes makes the drawing itself scale, then the
+      // width/height attributes are dropped so the CSS width wins.
+      if (!svg.hasAttribute('viewBox')) {
+        const width = svg.getAttribute('width');
+        const height = svg.getAttribute('height');
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      }
+      svg.removeAttribute('width');
+      svg.removeAttribute('height');
+
+      target.append(svg);
+
+      toggleButton.disabled = false;
+      statusEl.textContent = '';
+    </script>
+  </body>
+</html>
