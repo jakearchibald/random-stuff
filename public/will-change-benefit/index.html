@@ -131,6 +131,13 @@
       is still smooth.
     </p>
 
+    <p>
+      All four produce the same visible rotation. The last one is a 3D transform
+      about the Z axis — the axis pointing out of the screen — so it looks
+      identical to the plain 2D version, but browsers tend to promote 3D
+      transforms to their own layer automatically.
+    </p>
+
     <fieldset>
       <legend>Animation method</legend>
       <label>
@@ -144,6 +151,10 @@
       <label>
         <input type="radio" name="method" value="raf-wc" />
         requestAnimationFrame + <code>will-change: transform</code>
+      </label>
+      <label>
+        <input type="radio" name="method" value="raf-3d" />
+        requestAnimationFrame, setting a 3D <code>matrix3d()</code> transform
       </label>
       <button id="toggle" disabled>Start</button>
     </fieldset>
@@ -166,6 +177,7 @@
         waapi: 'WAAPI',
         raf: 'rAF',
         'raf-wc': 'rAF + will-change',
+        'raf-3d': 'rAF + matrix3d',
       };
 
       /** Whatever is currently animating, with a way to stop it. */
@@ -208,6 +220,52 @@
         };
       }
 
+      /** rAF, but writing the same rotation as a 3D transform.
+
+          Visually identical to the plain rAF case: this is a rotation about the
+          Z axis, which is the axis pointing out of the screen, so it's the same
+          on-screen movement expressed in 3D. The interesting part is that
+          browsers generally give an element with a 3D transform its own
+          compositor layer, because a 3D transform can't be flattened into the
+          parent layer's 2D drawing. So this tends to behave like the
+          will-change case without being asked to — which is where the old
+          "translateZ(0) / transform: translate3d(0,0,0) hack" came from, before
+          will-change existed to say it directly. */
+      function startRaf3d() {
+        let start;
+        let frameId;
+
+        function frame(now) {
+          start ??= now;
+          const angle = (((now - start) / PERIOD) * 360) % 360;
+          const radians = (angle * Math.PI) / 180;
+          const cos = Math.cos(radians);
+          const sin = Math.sin(radians);
+
+          // A column-major 4x4 rotation about the Z axis. Written out as a
+          // literal matrix3d rather than rotateZ() so it's unambiguously a 3D
+          // transform, and so there's nothing for the browser to simplify back
+          // down into a 2D one.
+          // prettier-ignore
+          const matrix = [
+             cos, sin, 0, 0,
+            -sin, cos, 0, 0,
+               0,   0, 1, 0,
+               0,   0, 0, 1,
+          ];
+
+          target.style.transform = `matrix3d(${matrix.join(', ')})`;
+          frameId = requestAnimationFrame(frame);
+        }
+
+        frameId = requestAnimationFrame(frame);
+
+        return () => {
+          cancelAnimationFrame(frameId);
+          target.style.transform = '';
+        };
+      }
+
       function stop() {
         current?.();
         current = null;
@@ -220,8 +278,14 @@
           'input[name=method]:checked',
         ).value;
 
-        current =
-          method === 'waapi' ? startWaapi() : startRaf(method === 'raf-wc');
+        const starters = {
+          waapi: startWaapi,
+          raf: () => startRaf(false),
+          'raf-wc': () => startRaf(true),
+          'raf-3d': startRaf3d,
+        };
+
+        current = starters[method]();
 
         toggleButton.textContent = 'Stop';
         statusEl.textContent = `Running: ${LABELS[method]}`;
