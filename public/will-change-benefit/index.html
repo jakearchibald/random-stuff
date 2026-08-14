@@ -32,17 +32,6 @@
         color: #fff;
       }
 
-      h1 {
-        font-size: 1.3rem;
-        margin: 0 0 0.5rem;
-      }
-
-      p {
-        color: #bbb;
-        max-width: 42rem;
-        margin: 0 0 1rem;
-      }
-
       fieldset {
         border: 1px solid #555;
         border-radius: 0.4rem;
@@ -158,38 +147,13 @@
       }
 
       .status {
-        margin-top: 1rem;
+        margin: 1rem 0 0;
         color: #ff9e3d;
         min-height: 1.4em;
       }
     </style>
   </head>
   <body>
-    <h1>Does <code>will-change</code> actually help?</h1>
-
-    <p>
-      The car below is an inline SVG that's very expensive to <em>paint</em> — a
-      few hundred paths with gradients — but nothing about it changes as it
-      rotates. Try each method and watch how smoothly it turns.
-    </p>
-
-    <p>
-      Judge this by eye, and by the Performance panel in devtools. A frame-rate
-      counter measured on the main thread would be misleading here: when the
-      animation runs on the compositor, the main thread can be idle while the
-      animation is perfectly smooth, and it can also be busy while the animation
-      is still smooth.
-    </p>
-
-    <p>
-      All five produce the same visible rotation. The last two are 3D transforms
-      about the Z axis — the axis pointing out of the screen — so they look
-      identical to the plain 2D version, but browsers tend to promote 3D
-      transforms to their own layer automatically. If those two perform the
-      same, that says <code>will-change</code> adds nothing once a 3D transform
-      has already forced the promotion.
-    </p>
-
     <fieldset>
       <legend>Animation method</legend>
       <label>
@@ -212,6 +176,11 @@
         <input type="radio" name="method" value="raf-3d-wc" />
         requestAnimationFrame + <code>matrix3d()</code> +
         <code>will-change: transform</code>
+      </label>
+      <label>
+        <input type="radio" name="method" value="raf-3d-hack" />
+        requestAnimationFrame, setting
+        <code>translate3d(0, 0, 0) rotate(…)</code>
       </label>
       <button id="toggle" disabled>Start</button>
     </fieldset>
@@ -252,6 +221,7 @@
         'raf-wc': 'rAF + will-change',
         'raf-3d': 'rAF + matrix3d',
         'raf-3d-wc': 'rAF + matrix3d + will-change',
+        'raf-3d-hack': 'rAF + translate3d(0,0,0) rotate()',
       };
 
       /** Whatever is currently animating, with a way to stop it. */
@@ -356,6 +326,43 @@
         };
       }
 
+      /** rAF, setting `translate3d(0, 0, 0) rotate(...)`.
+
+          The classic layer-promotion hack, and included here because it's the
+          thing people actually write — but measured in current Chrome it does
+          NOT do what it's reputed to do.
+
+          Chrome flattens a transform whose *values* are representable in 2D,
+          regardless of which functions were used to write it. Because this
+          translate3d is all zeros, the whole list computes to a plain
+          `matrix(...)`, exactly as a bare `rotate()` would, and the element gets
+          no 3D treatment. The same is true of `translateZ(0)` and
+          `rotate3d(0, 0, 1, Xdeg)`.
+
+          What actually stays 3D is a non-zero Z: `translate3d(0, 0, 1px)` or
+          `translateZ(1px)`. A single pixel of Z is invisible without a
+          perspective on the parent, which is why that variant became the
+          reliable form of the hack. This option is here as the counter-example —
+          expect it to behave like plain rAF, not like the matrix3d options. */
+      function startRaf3dHack() {
+        let start;
+        let frameId;
+
+        function frame(now) {
+          start ??= now;
+          const angle = (((now - start) / PERIOD) * 360) % 360;
+          target.style.transform = `translate3d(0, 0, 0) rotate(${angle}deg)`;
+          frameId = requestAnimationFrame(frame);
+        }
+
+        frameId = requestAnimationFrame(frame);
+
+        return () => {
+          cancelAnimationFrame(frameId);
+          target.style.transform = '';
+        };
+      }
+
       function stop() {
         current?.();
         current = null;
@@ -374,6 +381,7 @@
           'raf-wc': () => startRaf(true),
           'raf-3d': () => startRaf3d(false),
           'raf-3d-wc': () => startRaf3d(true),
+          'raf-3d-hack': startRaf3dHack,
         };
 
         current = starters[method]();
