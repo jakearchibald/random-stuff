@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>margin-trim with negative margins</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 3rem;
+        background: #222;
+        color: #fff;
+      }
+
+      h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+      }
+
+      .key {
+        color: #bbb;
+        max-width: 40rem;
+        margin: 0 0 1rem;
+      }
+
+      /* The measuring wrapper. display: flow-root establishes a new block
+         formatting context, so the margins inside can't collapse out through
+         it — the wrapper's box is forced to actually contain the margin boxes
+         of its contents. The outline therefore sits where the real, used
+         margins reach: whatever the browser genuinely did, including whether
+         it trimmed a negative margin. Nothing here is hardcoded to the
+         expected result. */
+      .measure {
+        display: flow-root;
+        outline: 2px dashed #ff9e3d;
+        width: 20rem;
+        /* Space between demos, on the wrapper rather than between the boxes,
+           so it can't be mistaken for part of what's being measured. */
+        margin-block-end: 3rem;
+      }
+
+      /* The container. Its background fills its padding box, so the solid
+         blue region is the container's own extent. Any gap between the blue
+         and the orange outline is margin escaping the container. */
+      .box {
+        background: #1d3f6e;
+      }
+
+      .box > p {
+        background: #7aa7e6;
+        color: #111;
+        padding: 0.5rem;
+        /* The block margins are what margin-trim acts on: the first child's
+           margin-block-start and the last child's margin-block-end adjoin
+           the container's edges. */
+        margin-block: 1rem;
+      }
+
+      /* Negative margins: children overlap each other, and the first/last
+         pull inward from the container's edges. */
+      .negative > p {
+        margin-block: -1rem;
+      }
+
+      .trim {
+        margin-trim: block;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="key">
+      The dashed orange outline is a <code>display: flow-root</code> wrapper,
+      so it's stretched by the real margins inside it. Solid blue is the
+      container, light blue the children. A gap between orange and blue is
+      margin reaching outside the container; orange sitting flush against blue
+      means there's no margin there.
+    </p>
+
+    <h2>Positive margins, <code>margin-trim: none</code></h2>
+    <div class="measure">
+      <div class="demo box">
+        <p>One</p>
+        <p>Two</p>
+      </div>
+    </div>
+
+    <h2>Positive margins, <code>margin-trim: block</code></h2>
+    <div class="measure">
+      <div class="demo box trim">
+        <p>One</p>
+        <p>Two</p>
+      </div>
+    </div>
+
+    <h2>Negative margins, <code>margin-trim: none</code></h2>
+    <div class="measure">
+      <div class="demo box negative">
+        <p>One</p>
+        <p>Two</p>
+      </div>
+    </div>
+
+    <h2>Negative margins, <code>margin-trim: block</code></h2>
+    <div class="measure">
+      <div class="demo box negative trim">
+        <p>One</p>
+        <p>Two</p>
+      </div>
+    </div>
+  </body>
+</html>
