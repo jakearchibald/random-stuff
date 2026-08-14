@@ -178,6 +178,10 @@
         <code>will-change: transform</code>
       </label>
       <label>
+        <input type="radio" name="method" value="waapi-3d" />
+        Web Animations API, animating a 3D <code>matrix3d()</code> transform
+      </label>
+      <label>
         <input type="radio" name="method" value="raf-3d-hack" />
         requestAnimationFrame, setting
         <code>translate3d(0, 0, 0) rotate(…)</code>
@@ -221,6 +225,7 @@
         'raf-wc': 'rAF + will-change',
         'raf-3d': 'rAF + matrix3d',
         'raf-3d-wc': 'rAF + matrix3d + will-change',
+        'waapi-3d': 'WAAPI + matrix3d',
         'raf-3d-hack': 'rAF + translate3d(0,0,0) rotate()',
       };
 
@@ -264,6 +269,34 @@
         };
       }
 
+      /** A `matrix3d()` rotation of `angle` degrees about the Z axis.
+
+          The 1px translation along Z in the last row is load-bearing. A pure Z
+          rotation is exactly representable as a 2D matrix, so browsers simplify
+          it back down to one — Chrome reports such a transform as `matrix(...)`,
+          not `matrix3d(...)`, and it gets no 3D treatment at all. Offsetting
+          along Z makes the matrix irreducibly 3D, which is what actually
+          triggers the layer promotion the 3D options are here to demonstrate.
+
+          1px of Z has no visible effect without a perspective on the parent, so
+          this still looks identical to a 2D rotation. */
+      function matrix3dRotateZ(angle) {
+        const radians = (angle * Math.PI) / 180;
+        const cos = Math.cos(radians);
+        const sin = Math.sin(radians);
+
+        // Column-major 4x4.
+        // prettier-ignore
+        const matrix = [
+           cos, sin, 0, 0,
+          -sin, cos, 0, 0,
+             0,   0, 1, 0,
+             0,   0, 1, 1,
+        ];
+
+        return `matrix3d(${matrix.join(', ')})`;
+      }
+
       /** rAF, but writing the same rotation as a 3D transform.
 
           Visually identical to the plain rAF case: this is a rotation about the
@@ -289,31 +322,7 @@
         function frame(now) {
           start ??= now;
           const angle = (((now - start) / PERIOD) * 360) % 360;
-          const radians = (angle * Math.PI) / 180;
-          const cos = Math.cos(radians);
-          const sin = Math.sin(radians);
-
-          // A column-major 4x4 rotation about the Z axis, plus a 1px
-          // translation along Z in the last row.
-          //
-          // That translation is load-bearing. A pure Z rotation is exactly
-          // representable as a 2D matrix, so browsers simplify it back down to
-          // one — Chrome reports such a transform as `matrix(...)`, not
-          // `matrix3d(...)`, and it gets no 3D treatment at all. Offsetting
-          // along Z makes the matrix irreducibly 3D, which is what actually
-          // triggers the layer promotion this option is here to demonstrate.
-          //
-          // 1px of Z has no visible effect without a perspective on the parent,
-          // so this still looks identical to the 2D rotation.
-          // prettier-ignore
-          const matrix = [
-             cos, sin, 0, 0,
-            -sin, cos, 0, 0,
-               0,   0, 1, 0,
-               0,   0, 1, 1,
-          ];
-
-          target.style.transform = `matrix3d(${matrix.join(', ')})`;
+          target.style.transform = matrix3dRotateZ(angle);
           frameId = requestAnimationFrame(frame);
         }
 
@@ -324,6 +333,30 @@
           target.style.transform = '';
           if (willChange) target.classList.remove('will-change');
         };
+      }
+
+      /** WAAPI driving the same 3D matrix.
+
+          This pairs the two things that each cause promotion on their own: a
+          declarative animation the browser can see the whole timeline for, and a
+          transform that's irreducibly 3D. If it matches the WAAPI and matrix3d
+          options, neither adds anything on top of the other.
+
+          Quarter-turn keyframes rather than a single 0deg -> 360deg pair.
+          Interpolating between two matrix3d values decomposes them into
+          translate/rotate/scale/skew components and interpolates those, and a
+          360deg rotation decomposes to the same orientation as 0deg — so a
+          two-keyframe version would sit perfectly still. Five keyframes at 90deg
+          steps keep every adjacent pair unambiguous. */
+      function startWaapi3d() {
+        const animation = target.animate(
+          [0, 90, 180, 270, 360].map((angle) => ({
+            transform: matrix3dRotateZ(angle),
+          })),
+          { duration: PERIOD, easing: 'linear', iterations: Infinity },
+        );
+
+        return () => animation.cancel();
       }
 
       /** rAF, setting `translate3d(0, 0, 0) rotate(...)`.
@@ -381,6 +414,7 @@
           'raf-wc': () => startRaf(true),
           'raf-3d': () => startRaf3d(false),
           'raf-3d-wc': () => startRaf3d(true),
+          'waapi-3d': startWaapi3d,
           'raf-3d-hack': startRaf3dHack,
         };
 
