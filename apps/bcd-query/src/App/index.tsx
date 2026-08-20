@@ -24,7 +24,7 @@ import './styles.css';
 import BrowserVersions from './BrowserVersions';
 import TitleFilter from './TitleFilter';
 
-const bcdURL = 'https://unpkg.com/@mdn/browser-compat-data';
+const bcdURL = '/bcd-data/';
 // const bcdURL = new URL('./bcd.json', import.meta.url);
 
 const App: FunctionalComponent = () => {
