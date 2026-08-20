@@ -101,12 +101,21 @@
         position: relative;
       }
 
-      .expensive svg {
+      /* The SVG and the canvas are interchangeable renderings of the same
+         drawing at the same size, so only one is shown at a time. */
+      .expensive svg,
+      .expensive canvas {
         display: block;
         width: 100%;
         /* The viewBox added at load time gives the SVG an aspect ratio, so
-           height follows from the width. */
+           height follows from the width. The canvas gets its ratio from its
+           width/height attributes. */
         height: auto;
+      }
+
+      .expensive.show-bitmap svg,
+      .expensive:not(.show-bitmap) canvas {
+        display: none;
       }
 
       /* Applied only in the rAF + will-change mode, and only while the
@@ -189,12 +198,21 @@
       <button id="toggle" disabled>Start</button>
     </fieldset>
 
+    <fieldset>
+      <legend>Content</legend>
+      <label>
+        <input type="checkbox" id="bitmap" disabled />
+        Draw the car to a <code>&lt;canvas&gt;</code> bitmap instead of inline
+        SVG
+      </label>
+    </fieldset>
+
     <div class="stage">
       <div class="expensive" id="target">
         <!-- Inside the animated element, so it rotates and re-paints with the
-             car. The SVG is appended after this by script; the label still
-             draws on top of it by virtue of being positioned. Text is filled in
-             by script rather than written out 100 times here. -->
+             car. The SVG and canvas are appended after this by script; the label
+             still draws on top of both by virtue of being positioned. Text is
+             filled in by script rather than written out 100 times here. -->
         <span class="car-label" id="car-label"></span>
       </div>
     </div>
@@ -206,6 +224,7 @@
       const toggleButton = document.querySelector('#toggle');
       const statusEl = document.querySelector('#status');
       const carLabel = document.querySelector('#car-label');
+      const bitmapCheckbox = document.querySelector('#bitmap');
 
       // Milliseconds per full rotation.
       const PERIOD = 3000;
@@ -472,6 +491,51 @@
       svg.removeAttribute('height');
 
       target.append(svg);
+
+      // Rasterise the same drawing once into a canvas, as a cheap-to-paint
+      // counterpart to the SVG. Once it's a bitmap the browser has a single
+      // texture to draw rather than a few hundred paths to re-rasterise, so
+      // ticking the checkbox isolates how much of the per-frame cost is vector
+      // work rather than the transform itself.
+      statusEl.textContent = 'Rasterising bitmap…';
+
+      const canvas = document.createElement('canvas');
+      const SVG_WIDTH = 900;
+      const SVG_HEIGHT = 600;
+
+      // Backing store at device resolution, so the bitmap isn't visibly softer
+      // than the SVG on a HiDPI screen — which would make the comparison look
+      // like a quality trade rather than a cost one.
+      const scale = devicePixelRatio || 1;
+      canvas.width = SVG_WIDTH * scale;
+      canvas.height = SVG_HEIGHT * scale;
+      // The CSS box stays in layout pixels, matching the SVG's aspect ratio.
+      canvas.style.aspectRatio = `${SVG_WIDTH} / ${SVG_HEIGHT}`;
+
+      // Drawn via an <img> of the original file. A blob URL rather than the
+      // path so this works the same if the SVG is ever inlined, and because the
+      // image needs to be fully decoded before drawImage.
+      const blobUrl = URL.createObjectURL(
+        new Blob([source], { type: 'image/svg+xml' }),
+      );
+
+      try {
+        const image = new Image();
+        image.src = blobUrl;
+        await image.decode();
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        target.append(canvas);
+      } finally {
+        URL.revokeObjectURL(blobUrl);
+      }
+
+      // Toggling mid-run is fine: it swaps which child is displayed without
+      // touching the animation, so the transform keeps running throughout.
+      bitmapCheckbox.addEventListener('change', () => {
+        target.classList.toggle('show-bitmap', bitmapCheckbox.checked);
+      });
+
+      bitmapCheckbox.disabled = false;
 
       // Wait for the font too, so the first run can't animate with fallback
       // glyphs while the font is still downloading. document.fonts.ready resolves

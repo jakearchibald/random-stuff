@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Document picture-in-picture</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem;
+        background: #222;
+        color: #fff;
+        line-height: 1.5;
+      }
+
+      p {
+        max-width: 42rem;
+      }
+
+      button {
+        font: inherit;
+        padding: 0.4rem 0.9rem;
+        border-radius: 0.3rem;
+        border: 1px solid #777;
+        background: #333;
+        color: #fff;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+      }
+
+      /* The player is styled entirely from this stylesheet, and it keeps
+         these styles once it's in the PiP window because the script copies
+         the page's stylesheets over. Without that copy it'd render as
+         unstyled HTML in there. */
+      #player {
+        max-width: 42rem;
+        padding: 1rem;
+        border: 1px solid #555;
+        border-radius: 0.4rem;
+        background: #2c2c2c;
+        display: grid;
+        gap: 0.75rem;
+        justify-items: start;
+      }
+
+      /* The PiP window is small, so let the player fill whatever it gets.
+         :fullscreen-style media queries don't apply here — it's a real
+         window, so a plain width query is the right tool. */
+      @media (width < 30rem) {
+        #player {
+          border: none;
+          border-radius: 0;
+          margin: 0;
+          min-height: 100vh;
+          align-content: center;
+        }
+      }
+
+      #time {
+        font-variant-numeric: tabular-nums;
+        font-size: 2rem;
+        font-weight: 600;
+      }
+
+      #bar {
+        width: 100%;
+        height: 0.5rem;
+        border-radius: 0.25rem;
+        background: #555;
+        overflow: hidden;
+      }
+
+      #bar > div {
+        height: 100%;
+        width: 0;
+        background: #6ab04c;
+      }
+
+      #logo {
+        width: 6rem;
+        height: 6rem;
+      }
+
+      /* Not display:none — an unset src on a hidden img still wouldn't load,
+         and we want the element present so only the src changes on click. */
+      #logo:not([src]) {
+        display: none;
+      }
+
+      /* Where the player sits while it's away, so the page doesn't reflow
+         around a suddenly-missing element. */
+      #slot:empty::after {
+        content: 'Player is in the picture-in-picture window.';
+        display: block;
+        max-width: 42rem;
+        padding: 1rem;
+        border: 1px dashed #555;
+        border-radius: 0.4rem;
+        color: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Document picture-in-picture</h1>
+
+    <p>
+      Unlike video picture-in-picture, this opens an always-on-top window that
+      holds arbitrary DOM. The player below is <em>moved</em> into that window
+      rather than copied, so its state — the running timer, the counter — just
+      carries on. Move it back and it's still the same element.
+    </p>
+
+    <p id="support"></p>
+
+    <p><button id="toggle">Open picture-in-picture</button></p>
+
+    <div id="slot">
+      <div id="player">
+        <div id="time">0.0s</div>
+        <div id="bar"><div></div></div>
+        <button id="count">Clicked 0 times</button>
+        <button id="load-image">Load image</button>
+        <img id="logo" alt="Firefox logo" />
+      </div>
+    </div>
+
+    <script type="module">
+      const supportEl = document.querySelector('#support');
+      const toggleButton = document.querySelector('#toggle');
+      const slot = document.querySelector('#slot');
+      const player = document.querySelector('#player');
+      const timeEl = document.querySelector('#time');
+      const barEl = document.querySelector('#bar > div');
+      const countButton = document.querySelector('#count');
+      const loadImageButton = document.querySelector('#load-image');
+      const logo = document.querySelector('#logo');
+
+      // State lives here, in the opener document. The player element moves
+      // between documents but the script never does, so nothing needs
+      // re-wiring on the way across — this listener survives the move.
+      let clicks = 0;
+      countButton.addEventListener('click', () => {
+        clicks++;
+        countButton.textContent = `Clicked ${clicks} time${clicks === 1 ? '' : 's'}`;
+      });
+
+      // Relative URLs would resolve against the PiP document, which isn't
+      // this page's URL — so resolve against this document up front and the
+      // image loads the same whichever window the player is currently in.
+      const logoUrl = new URL('firefox-logo.svg', location.href).href;
+
+      loadImageButton.addEventListener('click', () => {
+        logo.src = logoUrl;
+        loadImageButton.disabled = true;
+      });
+
+      const start = performance.now();
+      const loop = () => {
+        const elapsed = (performance.now() - start) / 1000;
+        timeEl.textContent = `${elapsed.toFixed(1)}s`;
+        // Sawtooth over 5s, just so there's something obviously animating.
+        barEl.style.width = `${((elapsed % 5) / 5) * 100}%`;
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+
+      if (!('documentPictureInPicture' in window)) {
+        supportEl.textContent =
+          'documentPictureInPicture is not supported in this browser.';
+        toggleButton.disabled = true;
+      } else {
+        toggleButton.addEventListener('click', toggle);
+      }
+
+      async function toggle() {
+        // Only one PiP window can exist at a time, and the spec exposes the
+        // current one here — so this doubles as the "is it open?" check.
+        if (documentPictureInPicture.window) {
+          documentPictureInPicture.window.close();
+          return;
+        }
+
+        // Requires transient activation, so this must happen in a click
+        // handler. The size is a request, not a guarantee — the browser
+        // clamps it, and remembers whatever the user resizes it to.
+        const pipWindow = await documentPictureInPicture.requestWindow({
+          width: 320,
+          height: 220,
+        });
+
+        copyStyles(pipWindow.document);
+        // Moving the node adopts it into the other document automatically;
+        // there's no need for importNode, and appending a live node removes
+        // it from where it was.
+        pipWindow.document.body.append(player);
+        toggleButton.textContent = 'Close picture-in-picture';
+
+        // Fires when the window closes for any reason — our close() above,
+        // the user's close button, or the browser reclaiming it. Put the
+        // player back before the document goes away, otherwise it's
+        // destroyed along with the window.
+        pipWindow.addEventListener('pagehide', () => {
+          slot.append(player);
+          toggleButton.textContent = 'Open picture-in-picture';
+        });
+      }
+
+      // The PiP document starts completely empty — no stylesheets, not even
+      // the UA-inherited ones from the opener. Anything moved in there is
+      // unstyled until the page's own styles are copied across.
+      function copyStyles(pipDocument) {
+        for (const sheet of document.styleSheets) {
+          try {
+            const css = [...sheet.cssRules]
+              .map((rule) => rule.cssText)
+              .join('');
+            const style = document.createElement('style');
+            style.textContent = css;
+            pipDocument.head.append(style);
+          } catch {
+            // cssRules throws on cross-origin sheets. Re-link those instead
+            // and let the PiP document fetch them itself.
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = sheet.href;
+            pipDocument.head.append(link);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
