@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Computed custom properties &amp; sibling-index()</title>
+    <style>
+      @property --index-b {
+        syntax: '<integer>';
+        inherits: true;
+        initial-value: 0;
+      }
+
+      html {
+        font-family: system-ui;
+      }
+
+      .demo {
+        display: flex;
+        gap: 50px;
+        margin-block: 50px;
+      }
+
+      .demo > * {
+        width: 100px;
+        height: 100px;
+        background: #ccc;
+        display: grid;
+        place-items: center;
+      }
+
+      /* Demo one: unregistered custom property */
+      .demo-a .second-item {
+        --index: sibling-index();
+
+        & > :first-child {
+          scale: var(--index);
+        }
+      }
+
+      /* Demo two: registered with @property */
+      .demo-b .second-item {
+        --index-b: sibling-index();
+
+        & > :first-child {
+          scale: var(--index-b);
+        }
+      }
+
+      /* Demo three: unregistered, with a multiplier redefined on the child */
+      .demo-c .second-item {
+        --multiplier: 1;
+        --index: calc(sibling-index() * var(--multiplier));
+
+        & > :first-child {
+          --multiplier: 3;
+          scale: var(--index);
+        }
+      }
+
+      /* Demo four: registered, with a multiplier redefined on the child */
+      .demo-d .second-item {
+        --multiplier: 1;
+        --index-b: calc(sibling-index() * var(--multiplier));
+
+        & > :first-child {
+          --multiplier: 3;
+          scale: var(--index-b);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Demo A — unregistered <code>--index</code></h2>
+    <div class="demo demo-a">
+      <div></div>
+      <div class="second-item">
+        <p>…</p>
+      </div>
+    </div>
+
+    <h2>Demo B — registered <code>--index-b</code></h2>
+    <div class="demo demo-b">
+      <div></div>
+      <div class="second-item">
+        <p>…</p>
+      </div>
+    </div>
+
+    <h2>
+      Demo C — unregistered <code>--index</code>, <code>--multiplier</code>
+      redefined on the child
+    </h2>
+    <div class="demo demo-c">
+      <div></div>
+      <div class="second-item">
+        <p>…</p>
+      </div>
+    </div>
+
+    <h2>
+      Demo D — registered <code>--index-b</code>, <code>--multiplier</code>
+      redefined on the child
+    </h2>
+    <div class="demo demo-d">
+      <div></div>
+      <div class="second-item">
+        <p>…</p>
+      </div>
+    </div>
+
+    <script type="module">
+      function log(label, prop) {
+        const div = document.querySelector(`.${label} .second-item`);
+        const p = div.querySelector('p');
+        const divStyle = getComputedStyle(div);
+        const pStyle = getComputedStyle(p);
+
+        console.log(label, {
+          [`div ${prop}`]: divStyle.getPropertyValue(prop),
+          'div --multiplier': divStyle.getPropertyValue('--multiplier'),
+          [`p ${prop}`]: pStyle.getPropertyValue(prop),
+          'p --multiplier': pStyle.getPropertyValue('--multiplier'),
+          'p scale': pStyle.scale,
+        });
+      }
+
+      log('demo-a', '--index');
+      log('demo-b', '--index-b');
+      log('demo-c', '--index');
+      log('demo-d', '--index-b');
+    </script>
+  </body>
+</html>

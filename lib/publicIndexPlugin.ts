@@ -1,11 +1,34 @@
 import { promises as fs } from 'fs';
+import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'vite';
 import { glob } from 'glob';
-import dedent from 'dedent';
+
+const indexPath = new URL('../public/index.html', import.meta.url);
+const indexFilePath = fileURLToPath(indexPath);
+const stylesPath = new URL('./index-page/styles.css', import.meta.url);
+const searchScriptPath = new URL('./index-page/search.js', import.meta.url);
+
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0*39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+function escapeHTML(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 function extractHTMLTitle(html: string): string {
-  const match = html.match(/<title>(.*?)<\/title>/);
-  return match?.[1].trim() || '';
+  const match = html.match(/<title>(.*?)<\/title>/s);
+  return match ? decodeEntities(match[1].trim()) : '';
 }
 
 function extractScriptTitle(script: string): string {
@@ -18,17 +41,86 @@ async function writeIfChanged(filePath: string | URL, content: string) {
   if (current !== content) await fs.writeFile(filePath, content);
 }
 
+interface Entry {
+  path: string;
+  title: string;
+}
+
+interface TreeNode {
+  children: Map<string, TreeNode>;
+  entry?: Entry;
+}
+
+function buildTree(entries: Entry[]): TreeNode {
+  const root: TreeNode = { children: new Map() };
+
+  for (const entry of entries) {
+    const parts = entry.path.split('/');
+    let current = root;
+
+    for (const [i, part] of parts.entries()) {
+      if (!current.children.has(part)) {
+        current.children.set(part, { children: new Map() });
+      }
+      current = current.children.get(part)!;
+      if (i === parts.length - 1) current.entry = entry;
+    }
+  }
+
+  return root;
+}
+
+function renderTree(node: TreeNode, indent: string): string {
+  const items: string[] = [];
+
+  for (const [name, child] of node.children) {
+    const parts: string[] = [];
+
+    if (child.entry) {
+      const { path, title } = child.entry;
+      parts.push(
+        `<a href="/${escapeHTML(path)}/">` +
+          `<span class="name">${escapeHTML(name)}</span>` +
+          (title ? `<span class="desc">${escapeHTML(title)}</span>` : '') +
+          `</a>`,
+      );
+    } else {
+      parts.push(`<span class="group-name">${escapeHTML(name)}</span>`);
+    }
+
+    // A directory can be a page in its own right and still have children.
+    if (child.children.size) {
+      parts.push(
+        `<ul class="nested">\n` +
+          renderTree(child, indent + '    ') +
+          `${indent}  </ul>`,
+      );
+    }
+
+    const className = child.entry ? 'item' : 'group';
+    items.push(
+      `${indent}<li class="${className}">` +
+        parts.join(`\n${indent}  `) +
+        `</li>\n`,
+    );
+  }
+
+  return items.join('');
+}
+
 export function publicIndexPlugin(): Plugin {
   async function generateIndex() {
     const paths = [
       ...(await glob('public/**/index.html')),
       ...(await glob('apps/*/index.html')),
       ...(await glob('worker-src/routes/*/index.ts')),
-    ];
+    ]
+      // The generated index itself isn't a project.
+      .filter((path) => path !== 'public/index.html');
 
     const entries = (
       await Promise.all(
-        paths.map(async (path) => {
+        paths.map(async (path): Promise<Entry> => {
           const dirName = (() => {
             if (path.endsWith('.ts')) {
               return path
@@ -46,93 +138,55 @@ export function publicIndexPlugin(): Plugin {
 
           const fileContent = await fs.readFile(
             new URL('../' + path, import.meta.url),
-            'utf8'
+            'utf8',
           );
 
           const title = path.endsWith('.html')
             ? extractHTMLTitle(fileContent)
             : extractScriptTitle(fileContent);
 
-          return [dirName, title];
-        })
+          return { path: dirName, title };
+        }),
       )
-    ).sort((a, b) => a[0].localeCompare(b[0]));
+    ).sort((a, b) => a.path.localeCompare(b.path));
 
-    // Build nested structure
-    interface TreeNode {
-      children: Map<string, TreeNode>;
-      entry?: [string, string];
-    }
+    const [styles, searchScript] = await Promise.all([
+      fs.readFile(stylesPath, 'utf8'),
+      fs.readFile(searchScriptPath, 'utf8'),
+    ]);
 
-    const root: TreeNode = { children: new Map() };
-
-    for (const entry of entries) {
-      const [dirName] = entry;
-      const parts = dirName.split('/');
-      let current = root;
-
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-        if (!current.children.has(part)) {
-          current.children.set(part, { children: new Map() });
-        }
-        current = current.children.get(part)!;
-
-        // Store the entry at the final node
-        if (i === parts.length - 1) {
-          current.entry = entry as [string, string];
-        }
-      }
-    }
-
-    // Render nested lists
-    function renderTree(node: TreeNode, indent: string = ''): string {
-      const items: string[] = [];
-
-      for (const [name, child] of node.children) {
-        if (child.entry) {
-          const [dirName, title] = child.entry;
-          items.push(
-            indent +
-              dedent`
-                <li>
-                  <a href="/${dirName}/">${name}</a>
-                  ${title && `- ${title}`}
-                </li>
-              `
-          );
-        } else {
-          // Directory with children
-          items.push(
-            indent +
-              `<li>${name}\n` +
-              indent +
-              `  <ul>\n` +
-              renderTree(child, indent + '    ') +
-              indent +
-              `  </ul>\n` +
-              indent +
-              `</li>`
-          );
-        }
-      }
-
-      return items.join('\n');
-    }
-
-    const links = renderTree(root);
-
-    const html = dedent`
-      <!DOCTYPE html>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>Index</title>
-      <ul>
-        ${links}
-      </ul>
-    `;
-
-    const indexPath = new URL('../public/index.html', import.meta.url);
+    const html = `<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Index</title>
+<style>
+${styles.trim()}
+</style>
+<div class="page">
+  <header>
+    <h1>Random stuff</h1>
+    <div class="search">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14.5 14.5"/>
+      </svg>
+      <input id="search" type="search" autofocus autocomplete="off" spellcheck="false"
+        placeholder="Search ${entries.length} pages…" aria-label="Search pages">
+    </div>
+    <p class="status" id="status" role="status"></p>
+  </header>
+  <main>
+    <ul class="tree" id="tree">
+${renderTree(buildTree(entries), '      ')}    </ul>
+    <ul class="results" id="results" hidden></ul>
+  </main>
+</div>
+<script type="application/json" id="entry-data">${JSON.stringify(
+      entries,
+    ).replace(/</g, '\\u003c')}</script>
+<script type="module">
+${searchScript.trim()}
+</script>
+`;
 
     await writeIfChanged(indexPath, html);
   }
@@ -142,7 +196,14 @@ export function publicIndexPlugin(): Plugin {
     async buildStart() {
       await generateIndex();
     },
-    async handleHotUpdate() {
+    async handleHotUpdate({ file }) {
+      // Generating writes public/index.html, which fires this hook again. The
+      // content is stable so writeIfChanged normally breaks the cycle, but if
+      // anything else is writing the file too — an old dev server left
+      // watching after a config restart, say — the two take turns rewriting
+      // it forever. The generated file is an output, so never treat it as a
+      // reason to regenerate.
+      if (file === indexFilePath) return;
       await generateIndex();
     },
   };
