@@ -11,9 +11,17 @@
         initial-value: 'hi';
       }
 
+      @property --foo {
+        syntax: '<color>';
+        inherits: true;
+        initial-value: red;
+      }
+
       .outer {
         --unreg: attr(data-foo);
         --reg: attr(data-foo);
+        --foo: green;
+        background: attr(data-bar type(<color>));
       }
 
       .inner::before {
@@ -25,7 +33,7 @@
     </style>
   </head>
   <body>
-    <div class="outer" data-foo="outer">
+    <div class="outer" data-foo="outer" data-bar="var(--foo)">
       <div class="inner" data-foo="inner"></div>
     </div>
   </body>
