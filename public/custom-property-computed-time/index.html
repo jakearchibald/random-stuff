@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>How @property changes computation</title>
+    <style id="property-rule">
+      @property --index {
+        syntax: '<number>';
+        inherits: true;
+        initial-value: 0;
+      }
+    </style>
+    <style>
+      html {
+        font-family: system-ui;
+        line-height: 1.5;
+        color-scheme: light dark;
+      }
+
+      body {
+        margin: 2rem;
+      }
+
+      .demo {
+        display: flex;
+        gap: 50px;
+        margin-block: 50px;
+      }
+
+      .demo > * {
+        width: 100px;
+        height: 100px;
+        background: light-dark(#ccc, #333);
+        display: grid;
+        place-items: center;
+      }
+
+      .readout {
+        padding-left: 0;
+        list-style: none;
+      }
+
+      .readout output {
+        font-family: monospace;
+        background: light-dark(#eee, #2a2a2a);
+        padding: 0 0.25em;
+      }
+
+      .second-item {
+        --index: sibling-index();
+
+        & > :first-child {
+          scale: var(--index);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Toggling an <code>@property</code> rule</h1>
+
+    <label>
+      <input type="checkbox" id="toggle" checked />
+      <code>@property --index</code> rule enabled
+    </label>
+
+    <div class="demo">
+      <div></div>
+      <div class="second-item">
+        <p>…</p>
+      </div>
+    </div>
+
+    <p>
+      Registered, <code>--index</code> computes to a number on
+      <code>.second-item</code>, and that computed <code>2</code> inherits to
+      the child.
+    </p>
+    <p>
+      Unregistered, the child inherits the unresolved token
+      <code>sibling-index()</code>, which resolves against the
+      <em>child's</em> position instead, giving <code>1</code>.
+    </p>
+
+    <ul class="readout">
+      <li>
+        <code>--index</code> on <code>.second-item</code>:
+        <output id="parent-index"></output>
+      </li>
+      <li>
+        <code>--index</code> on the child: <output id="child-index"></output>
+      </li>
+      <li>
+        <code>scale</code> on the child: <output id="child-scale"></output>
+      </li>
+    </ul>
+
+    <script type="module">
+      const toggle = document.querySelector('#toggle');
+      const rule = document.querySelector('#property-rule');
+      const parent = document.querySelector('.second-item');
+      const child = parent.firstElementChild;
+      const parentIndex = document.querySelector('#parent-index');
+      const childIndex = document.querySelector('#child-index');
+      const childScale = document.querySelector('#child-scale');
+
+      function update() {
+        rule.sheet.disabled = !toggle.checked;
+        // Let style recalc settle before reading it back.
+        requestAnimationFrame(() => {
+          const parentStyle = getComputedStyle(parent);
+          const childStyle = getComputedStyle(child);
+
+          parentIndex.textContent = parentStyle.getPropertyValue('--index');
+          childIndex.textContent = childStyle.getPropertyValue('--index');
+          childScale.textContent = childStyle.scale;
+        });
+      }
+
+      toggle.addEventListener('change', update);
+      update();
+    </script>
+  </body>
+</html>

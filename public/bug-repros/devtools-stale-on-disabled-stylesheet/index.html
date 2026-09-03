@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stale computed styles in Firefox DevTools</title>
+    <style>
+      html {
+        font-family: system-ui;
+        line-height: 1.5;
+        color-scheme: light dark;
+      }
+
+      body {
+        margin: 2rem;
+      }
+
+      .box {
+        width: 150px;
+        height: 150px;
+        background: light-dark(#ccc, #333);
+        margin-block: 1.5rem;
+      }
+
+      .green {
+        background: green;
+      }
+    </style>
+    <style id="toggled-sheet">
+      .box {
+        background: green;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Stale computed styles in Firefox DevTools</h1>
+
+    <label>
+      <input type="checkbox" id="toggle" />
+      Enable the stylesheet that makes the box green
+    </label>
+
+    <br />
+
+    <label>
+      <input type="checkbox" id="class-toggle" />
+      Add the class that makes the box green
+    </label>
+
+    <div class="box"></div>
+
+    <p>
+      The checkbox sets <code>sheet.disabled</code> on a
+      <code>&lt;style&gt;</code> element containing
+      <code>.box { background: green }</code>. The box repaints correctly, but
+      the DevTools Rules and Computed panels don't update — inspect the box,
+      then toggle the checkbox.
+    </p>
+
+    <p>
+      The second checkbox adds a <code>green</code> class from the main
+      (never-disabled) stylesheet, as a control — DevTools updates as expected
+      for that one.
+    </p>
+
+    <script type="module">
+      const toggle = document.querySelector('#toggle');
+      const sheet = document.querySelector('#toggled-sheet').sheet;
+
+      sheet.disabled = !toggle.checked;
+
+      toggle.addEventListener('change', () => {
+        sheet.disabled = !toggle.checked;
+      });
+
+      const classToggle = document.querySelector('#class-toggle');
+      const box = document.querySelector('.box');
+
+      classToggle.addEventListener('change', () => {
+        box.classList.toggle('green', classToggle.checked);
+      });
+    </script>
+  </body>
+</html>
