@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>attr() and style queries</title>
+    <style>
+      @property --state {
+        syntax: '<string>';
+        inherits: true;
+        initial-value: '';
+      }
+
+      .wrapper {
+        --state: attr(data-state);
+      }
+
+      .box {
+        padding: 1em;
+        background: #eee;
+      }
+
+      /* the style query reads that custom property */
+      @container style(--state: "good") {
+        .box {
+          background: green;
+          color: white;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>attr() in style queries</h1>
+
+    <div class="wrapper" data-state="good">
+      <div class="box">Should be green</div>
+    </div>
+
+    <div class="wrapper" data-state="bad">
+      <div class="box">Should stay grey</div>
+    </div>
+  </body>
+</html>
