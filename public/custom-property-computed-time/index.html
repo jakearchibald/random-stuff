@@ -54,15 +54,34 @@
           scale: var(--index);
         }
       }
+
+      .mult-active.second-item {
+        --index: calc(sibling-index() * var(--multiplier));
+        --multiplier: 1;
+
+        & > :first-child {
+          scale: var(--index);
+          --multiplier: 3;
+        }
+      }
     </style>
   </head>
   <body>
     <h1>Toggling an <code>@property</code> rule</h1>
 
-    <label>
-      <input type="checkbox" id="toggle" checked />
-      <code>@property --index</code> rule enabled
-    </label>
+    <p>
+      <label>
+        <input type="checkbox" id="toggle" checked />
+        <code>@property --index</code> rule enabled
+      </label>
+    </p>
+
+    <p>
+      <label>
+        <input type="checkbox" id="mult-toggle" />
+        <code>--multiplier</code> in the value
+      </label>
+    </p>
 
     <div class="demo">
       <div></div>
@@ -97,6 +116,7 @@
 
     <script type="module">
       const toggle = document.querySelector('#toggle');
+      const multToggle = document.querySelector('#mult-toggle');
       const rule = document.querySelector('#property-rule');
       const parent = document.querySelector('.second-item');
       const child = parent.firstElementChild;
@@ -106,6 +126,7 @@
 
       function update() {
         rule.sheet.disabled = !toggle.checked;
+        parent.classList.toggle('mult-active', multToggle.checked);
         // Let style recalc settle before reading it back.
         requestAnimationFrame(() => {
           const parentStyle = getComputedStyle(parent);
@@ -118,6 +139,7 @@
       }
 
       toggle.addEventListener('change', update);
+      multToggle.addEventListener('change', update);
       update();
     </script>
   </body>
