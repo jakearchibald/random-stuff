@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ssimulacra2 50 vs 65 vs 90</title>
+    <link rel="preload" href="50.avif" as="image" type="image/avif" />
+    <link rel="preload" href="65.avif" as="image" type="image/avif" />
+    <link rel="preload" href="90.avif" as="image" type="image/avif" />
+    <style>
+      html {
+        color-scheme: dark;
+        background: #000;
+        color: #fff;
+        font:
+          1rem system-ui,
+          sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .compare {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .controls {
+        display: flex;
+        gap: 1.5rem;
+        user-select: none;
+      }
+
+      .controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+      }
+
+      .image {
+        width: 1000px;
+        aspect-ratio: 2000 / 1500;
+        background-image: url('50.avif');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      .compare:has(#q65:checked) .image {
+        background-image: url('65.avif');
+      }
+
+      .compare:has(#q90:checked) .image {
+        background-image: url('90.avif');
+      }
+    </style>
+  </head>
+  <body>
+    <div class="compare">
+      <div class="image"></div>
+      <div class="controls">
+        <label>
+          <input type="radio" name="quality" id="q50" checked />
+          50
+        </label>
+        <label>
+          <input type="radio" name="quality" id="q65" />
+          65
+        </label>
+        <label>
+          <input type="radio" name="quality" id="q90" />
+          90
+        </label>
+      </div>
+    </div>
+  </body>
+</html>
