@@ -52,6 +52,19 @@ const PartialImage: FunctionalComponent<Props> = ({
           }
         />
       </div>
+      <p>
+        <button
+          type="button"
+          onClick={() => {
+            navigator.serviceWorker.controller?.postMessage({
+              action: 'terminate-img',
+              id: imageId,
+            });
+          }}
+        >
+          Terminate request
+        </button>
+      </p>
       <img
         class="partial-img"
         srcset={`${imgURL} ${density}x`}

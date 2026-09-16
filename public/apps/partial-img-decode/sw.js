@@ -32,6 +32,12 @@ const blobMap = new Map();
 const blobResolver = new Map();
 
 /**
+ * Controllers of in-flight never-ending responses, keyed by image id.
+ * @type {Map<string, Set<ReadableStreamDefaultController>>}
+ */
+const openControllers = new Map();
+
+/**
  * @param {FetchEvent} event
  */
 async function partialImgFetch(event) {
@@ -63,7 +69,7 @@ async function partialImgFetch(event) {
 
   if (length === blob.size) return new Response(blob);
 
-  return neverEndingResponse(blob.slice(0, length, blob.type));
+  return neverEndingResponse(blob.slice(0, length, blob.type), id);
 }
 
 onmessage = (event) => {
@@ -74,19 +80,49 @@ onmessage = (event) => {
       resolve(blob);
       blobResolver.delete(id);
     }
+  } else if (event.data.action === 'terminate-img') {
+    const { id } = event.data;
+    const controllers = openControllers.get(id);
+    if (!controllers) return;
+    openControllers.delete(id);
+    for (const controller of controllers) {
+      try {
+        controller.error(new Error('Image request terminated'));
+      } catch {
+        // Already closed or errored
+      }
+    }
   }
 };
 
 /**
+ * A response that sends the given bytes, then stays open forever, until
+ * terminated via a `terminate-img` message.
+ *
  * @param {Blob} blob
+ * @param {string} id
  * @returns
  */
-function neverEndingResponse(blob) {
+function neverEndingResponse(blob, id) {
+  /** @type {ReadableStreamDefaultController} */
+  let streamController;
+
   const body = new ReadableStream({
     async start(controller) {
+      streamController = controller;
+      let controllers = openControllers.get(id);
+      if (!controllers) {
+        controllers = new Set();
+        openControllers.set(id, controllers);
+      }
+      controllers.add(controller);
+
       const ab = await blob.arrayBuffer();
       const bytes = new Uint8Array(ab);
       controller.enqueue(bytes);
+    },
+    cancel() {
+      openControllers.get(id)?.delete(streamController);
     },
   });
 
