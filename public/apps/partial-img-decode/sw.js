@@ -81,13 +81,17 @@ onmessage = (event) => {
       blobResolver.delete(id);
     }
   } else if (event.data.action === 'terminate-img') {
-    const { id } = event.data;
+    const { id, errorStream } = event.data;
     const controllers = openControllers.get(id);
     if (!controllers) return;
     openControllers.delete(id);
     for (const controller of controllers) {
       try {
-        controller.error(new Error('Image request terminated'));
+        if (errorStream) {
+          controller.error(new Error('Image request terminated'));
+        } else {
+          controller.close();
+        }
       } catch {
         // Already closed or errored
       }
@@ -97,7 +101,7 @@ onmessage = (event) => {
 
 /**
  * A response that sends the given bytes, then stays open forever, until
- * terminated via a `terminate-img` message.
+ * closed or errored via a `terminate-img` message.
  *
  * @param {Blob} blob
  * @param {string} id

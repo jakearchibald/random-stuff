@@ -36,6 +36,14 @@ const PartialImage: FunctionalComponent<Props> = ({
     }, 300);
   });
 
+  const terminate = (errorStream: boolean) => {
+    navigator.serviceWorker.controller?.postMessage({
+      action: 'terminate-img',
+      id: imageId,
+      errorStream,
+    });
+  };
+
   return (
     <div>
       <p class="progress">
@@ -53,16 +61,11 @@ const PartialImage: FunctionalComponent<Props> = ({
         />
       </div>
       <p>
-        <button
-          type="button"
-          onClick={() => {
-            navigator.serviceWorker.controller?.postMessage({
-              action: 'terminate-img',
-              id: imageId,
-            });
-          }}
-        >
-          Terminate request
+        <button type="button" onClick={() => terminate(false)}>
+          End request
+        </button>{' '}
+        <button type="button" onClick={() => terminate(true)}>
+          Fail request
         </button>
       </p>
       <img
