@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interesting text-box side-effect</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 2rem 1rem 6rem;
+        font-family: system-ui, sans-serif;
+        line-height: 1.5;
+      }
+      main {
+        max-width: 40rem;
+        margin-inline: auto;
+      }
+      h1 {
+        font-size: 1.1rem;
+      }
+      .note {
+        margin-block: 1rem 2rem;
+        padding: 0.75rem 1rem;
+        border-inline-start: 0.25rem solid currentColor;
+        font-size: 0.9rem;
+      }
+      button {
+        font: inherit;
+        padding: 0.4rem 0.8rem;
+      }
+
+      .block {
+        text-box: trim-both cap alphabetic;
+        padding: 1rem;
+        background: #210340;
+        color: #fff;
+        font-size: 1rem;
+        line-height: 1.65;
+      }
+
+      .line {
+        min-height: 26px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>1. Minimum reproduction</h1>
+
+      <div class="note">
+        <p>
+          Two declarations. <code>text-box-trim</code> on the block,
+          <code>min-height</code> on its first child. Removing either
+          declaration renders correctly.
+        </p>
+      </div>
+
+      <div class="block">
+        <div class="line">first line</div>
+        <div class="line">second line</div>
+        <div class="line">third line</div>
+      </div>
+    </main>
+  </body>
+</html>
