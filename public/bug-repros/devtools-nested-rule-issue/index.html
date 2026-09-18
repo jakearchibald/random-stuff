@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevTools nested rule issue</title>
+    <link rel="stylesheet" href="prose.css" />
+  </head>
+  <body>
+    <div class="prose">
+      <dl>
+        <div>
+          <dt>yo</dt>
+          <dd>yo</dd>
+        </div>
+
+        <div>
+          <dt>yo</dt>
+          <dd>
+            yo
+
+            <dl>
+              <div>
+                <dt>yo</dt>
+                <dd>yo</dd>
+              </div>
+              <div>
+                <dt>yo</dt>
+                <dd>yo</dd>
+              </div>
+            </dl>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </body>
+</html>

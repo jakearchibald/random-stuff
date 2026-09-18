@@ -1,0 +1,14 @@
+.prose {
+  container-type: inline-size;
+}
+
+dl > div {
+  @container (width >= 1rem) {
+    /* Narrow: the term sits above its description in one column. */
+    display: grid;
+
+    & dt {
+      display: block;
+    }
+  }
+}
