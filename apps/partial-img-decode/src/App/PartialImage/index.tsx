@@ -74,6 +74,7 @@ const PartialImage: FunctionalComponent<Props> = ({
         alt="Partial image"
         key={debouncedBytes.value}
       />
+      <p>This content is after the image.</p>
     </div>
   );
 };
