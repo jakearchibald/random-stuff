@@ -1,0 +1,205 @@
+diff --git a/av1/encoder/av1_quantize.c b/av1/encoder/av1_quantize.c
+index e7367c806b..59a0090c9f 100644
+--- a/av1/encoder/av1_quantize.c
++++ b/av1/encoder/av1_quantize.c
+@@ -10,6 +10,8 @@
+  */
+ 
+ #include <math.h>
++#include <stdio.h>
++#include <stdlib.h>
+ 
+ #include "config/aom_dsp_rtcd.h"
+ 
+@@ -880,6 +882,9 @@ void av1_set_quantizer(AV1_COMMON *const cm, int min_qmlevel, int max_qmlevel,
+   // quantizer has to be reinitialized with av1_init_quantizer() if any
+   // delta_q changes.
+   CommonQuantParams *quant_params = &cm->quant_params;
++  // avifpreview experiment: force base qindex (finer rate control than -q).
++  const char *preview_q = getenv("AOM_PREVIEW_QINDEX");
++  if (preview_q && q) q = atoi(preview_q);
+   quant_params->base_qindex = AOMMAX(cm->delta_q_info.delta_q_present_flag, q);
+   quant_params->y_dc_delta_q = 0;
+ 
+@@ -968,6 +973,16 @@ void av1_set_quantizer(AV1_COMMON *const cm, int min_qmlevel, int max_qmlevel,
+     quant_params->v_ac_delta_q = 0;
+   }
+ 
++  // avifpreview experiment: force the frame-level chroma delta_q ("dc,ac").
++  const char *preview_cdq = getenv("AOM_PREVIEW_CHROMA_DQ");
++  if (preview_cdq && q) {
++    int dc, ac;
++    if (sscanf(preview_cdq, "%d,%d", &dc, &ac) == 2) {
++      quant_params->u_dc_delta_q = quant_params->v_dc_delta_q = dc;
++      quant_params->u_ac_delta_q = quant_params->v_ac_delta_q = ac;
++    }
++  }
++
+   // following section 8.3.2 in T-REC-H.Sup15 document
+   // to apply to AV1 qindex in the range of [0, 255]
+   if (enable_hdr_deltaq && q) {
+diff --git a/av1/encoder/encodeframe.c b/av1/encoder/encodeframe.c
+index 76c73aca98..bec1546979 100644
+--- a/av1/encoder/encodeframe.c
++++ b/av1/encoder/encodeframe.c
+@@ -10,6 +10,7 @@
+  */
+ 
+ #include <limits.h>
++#include <stdlib.h>
+ #include <float.h>
+ #include <math.h>
+ #include <stdbool.h>
+@@ -2763,8 +2764,11 @@ void av1_encode_frame(AV1_COMP *cpi) {
+       skip_mode_info->skip_mode_flag = 0;
+ 
+     if (!cm->tiles.large_scale) {
++      // avifpreview experiment: AOM_PREVIEW_TX_SELECT keeps TX_MODE_SELECT so
++      // the frame header stays fixed.
+       if (features->tx_mode == TX_MODE_SELECT &&
+-          cpi->td.mb.txfm_search_info.txb_split_count == 0)
++          cpi->td.mb.txfm_search_info.txb_split_count == 0 &&
++          !getenv("AOM_PREVIEW_TX_SELECT"))
+         features->tx_mode = TX_MODE_LARGEST;
+     }
+   } else {
+diff --git a/av1/encoder/encoder.c b/av1/encoder/encoder.c
+index b1c02e4f02..c3dbd411d5 100644
+--- a/av1/encoder/encoder.c
++++ b/av1/encoder/encoder.c
+@@ -2438,6 +2438,12 @@ static void estimate_screen_content_antialiasing_aware(AV1_COMP *cpi,
+ void av1_set_screen_content_options(AV1_COMP *cpi, FeatureFlags *features) {
+   const AV1_COMMON *const cm = &cpi->common;
+ 
++  // avifpreview experiment: AOM_PREVIEW_NO_SCT disables screen content tools.
++  if (getenv("AOM_PREVIEW_NO_SCT")) {
++    features->allow_screen_content_tools = features->allow_intrabc = 0;
++    return;
++  }
++
+   if (cm->seq_params->force_screen_content_tools != 2) {
+     features->allow_screen_content_tools = features->allow_intrabc =
+         cm->seq_params->force_screen_content_tools;
+diff --git a/av1/encoder/encoder_utils.c b/av1/encoder/encoder_utils.c
+index 2bc36d3937..724cfd1d00 100644
+--- a/av1/encoder/encoder_utils.c
++++ b/av1/encoder/encoder_utils.c
+@@ -1,3 +1,4 @@
++#include <stdlib.h>
+ /*
+  * Copyright (c) 2020, Alliance for Open Media. All rights reserved.
+  *
+@@ -1162,7 +1163,7 @@ static void screen_content_tools_determination(
+   const int ratio_is_large =
+       ((palette_ratio >= 0.0001) && ((psnr_diff / palette_ratio) > 4));
+   const int is_sc_encoding_much_better = (psnr_diff_is_large || ratio_is_large);
+-  if (is_sc_encoding_much_better) {
++  if (is_sc_encoding_much_better && !getenv("AOM_PREVIEW_NO_SCT")) {
+     // Use screen content tools, if we get coding gain.
+     features->allow_screen_content_tools = 1;
+     features->allow_intrabc = cpi->intrabc_used;
+diff --git a/av1/encoder/picklpf.c b/av1/encoder/picklpf.c
+index 4c652d478e..917a7a312f 100644
+--- a/av1/encoder/picklpf.c
++++ b/av1/encoder/picklpf.c
+@@ -10,6 +10,8 @@
+  */
+ 
+ #include <assert.h>
++#include <stdio.h>
++#include <stdlib.h>
+ #include <limits.h>
+ 
+ #include "config/aom_scale_rtcd.h"
+@@ -208,8 +210,8 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, AV1_COMP *cpi,
+   return filt_best;
+ }
+ 
+-void av1_pick_filter_level(const YV12_BUFFER_CONFIG *sd, AV1_COMP *cpi,
+-                           LPF_PICK_METHOD method) {
++static void pick_filter_level(const YV12_BUFFER_CONFIG *sd, AV1_COMP *cpi,
++                              LPF_PICK_METHOD method) {
+   AV1_COMMON *const cm = &cpi->common;
+   const SequenceHeader *const seq_params = cm->seq_params;
+   const int num_planes = av1_num_planes(cm);
+@@ -461,3 +463,19 @@ void av1_pick_filter_level(const YV12_BUFFER_CONFIG *sd, AV1_COMP *cpi,
+     cm->cur_frame->filter_level[1] = lf->filter_level[1];
+   }
+ }
++
++// avifpreview experiment: force deblocking levels. AOM_PREVIEW_LF="y,uv[,sharpness]".
++void av1_pick_filter_level(const YV12_BUFFER_CONFIG *sd, AV1_COMP *cpi,
++                           LPF_PICK_METHOD method) {
++  pick_filter_level(sd, cpi, method);
++  const char *env = getenv("AOM_PREVIEW_LF");
++  if (!env) return;
++  int y, uv, sharp = -1;
++  if (sscanf(env, "%d,%d,%d", &y, &uv, &sharp) < 2) return;
++  struct loopfilter *const lf = &cpi->common.lf;
++  lf->filter_level[0] = lf->filter_level[1] = y;
++  lf->filter_level_u = lf->filter_level_v = uv;
++  if (sharp >= 0) lf->sharpness_level = sharp;
++  cpi->common.cur_frame->filter_level[0] = y;
++  cpi->common.cur_frame->filter_level[1] = y;
++}
+diff --git a/av1/encoder/pickrst.c b/av1/encoder/pickrst.c
+index cd79ed9248..17102b8fcf 100644
+--- a/av1/encoder/pickrst.c
++++ b/av1/encoder/pickrst.c
+@@ -10,6 +10,8 @@
+  */
+ 
+ #include <assert.h>
++#include <stdio.h>
++#include <stdlib.h>
+ #include <float.h>
+ #include <limits.h>
+ #include <math.h>
+@@ -2037,7 +2039,7 @@ static void set_restoration_unit_size(AV1_COMMON *cm, RestorationInfo *rsi,
+   rsi->vert_units = vert_units;
+ }
+ 
+-void av1_pick_filter_restoration(const YV12_BUFFER_CONFIG *src, AV1_COMP *cpi) {
++static void pick_filter_restoration(const YV12_BUFFER_CONFIG *src, AV1_COMP *cpi) {
+   AV1_COMMON *const cm = &cpi->common;
+   MACROBLOCK *const x = &cpi->td.mb;
+   const SequenceHeader *const seq_params = cm->seq_params;
+@@ -2256,3 +2258,38 @@ void av1_pick_filter_restoration(const YV12_BUFFER_CONFIG *src, AV1_COMP *cpi) {
+     cpi->pick_lr_ctxt.rusi[plane] = NULL;
+   }
+ }
++
++// avifpreview experiment: force a fixed (e.g. low-pass) Wiener filter on every
++// restoration unit of every plane.  AOM_PREVIEW_WIENER="y0,y1,y2/c1,c2" gives
++// the outer taps (units of 1/128); the centre tap is implied.
++static void set_sym_taps(InterpKernel f, int t0, int t1, int t2) {
++  f[0] = f[WIENER_WIN - 1] = (int16_t)t0;
++  f[1] = f[WIENER_WIN - 2] = (int16_t)t1;
++  f[2] = f[WIENER_WIN - 3] = (int16_t)t2;
++  f[3] = (int16_t)(-2 * (t0 + t1 + t2));
++  f[7] = 0;
++}
++
++void av1_pick_filter_restoration(const YV12_BUFFER_CONFIG *src, AV1_COMP *cpi) {
++  pick_filter_restoration(src, cpi);
++  const char *env = getenv("AOM_PREVIEW_WIENER");
++  if (!env) return;
++  int y0, y1, y2, c1 = 0, c2 = 0;
++  const int n = sscanf(env, "%d,%d,%d/%d,%d", &y0, &y1, &y2, &c1, &c2);
++  if (n < 3) return;
++  AV1_COMMON *const cm = &cpi->common;
++  for (int plane = 0; plane < av1_num_planes(cm); ++plane) {
++    RestorationInfo *rsi = &cm->rst_info[plane];
++    const int uv = plane > 0;
++    if (uv && n < 5) continue;  // no chroma taps: leave chroma to the search
++    // One unit per plane (for frames up to 384 px) so the taps are coded once.
++    set_restoration_unit_size(cm, rsi, uv, RESTORATION_UNITSIZE_MAX);
++    rsi->frame_restoration_type = RESTORE_WIENER;
++    for (int u = 0; u < rsi->num_rest_units; ++u) {
++      RestorationUnitInfo *rui = &rsi->unit_info[u];
++      rui->restoration_type = RESTORE_WIENER;
++      set_sym_taps(rui->wiener_info.vfilter, uv ? 0 : y0, uv ? c1 : y1, uv ? c2 : y2);
++      set_sym_taps(rui->wiener_info.hfilter, uv ? 0 : y0, uv ? c1 : y1, uv ? c2 : y2);
++    }
++  }
++}

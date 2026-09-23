@@ -38,6 +38,9 @@ importers:
       three:
         specifier: ^0.185.1
         version: 0.185.1
+      thumbhash:
+        specifier: ^0.1.1
+        version: 0.1.1
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -1324,6 +1327,9 @@ packages:
   three@0.185.1:
     resolution: {integrity: sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg==}
 
+  thumbhash@0.1.1:
+    resolution: {integrity: sha512-kH5pKeIIBPQXAOni2AiY/Cu/NKdkFREdpH+TLdM0g6WA7RriCv0kPLgP731ady67MhTAqrVG/4mnEeibVuCJcg==}
+
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -2459,6 +2465,8 @@ snapshots:
   supports-color@10.2.2: {}
 
   three@0.185.1: {}
+
+  thumbhash@0.1.1: {}
 
   tinyglobby@0.2.17:
     dependencies:
