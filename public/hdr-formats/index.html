@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>HDR formats</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #000;
+        font-family: system-ui, sans-serif;
+      }
+      body {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        height: 100dvh;
+        box-sizing: border-box;
+        padding: 1rem;
+        gap: 1rem;
+      }
+      form {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem 1.5rem;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+        cursor: pointer;
+      }
+      img {
+        display: block;
+        justify-self: center;
+        width: 100%;
+        height: 100%;
+        max-width: 1000px;
+        object-fit: contain;
+        min-height: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <form class="image-switcher">
+      <label>
+        <input type="radio" name="image" value="pq.avif" checked />
+        PQ (AVIF)
+      </label>
+      <label>
+        <input type="radio" name="image" value="pq.jxl" />
+        PQ (JPEG XL)
+      </label>
+      <label>
+        <input type="radio" name="image" value="hdr-based-gainmap.avif" />
+        HDR-based gain map (AVIF)
+      </label>
+      <label>
+        <input type="radio" name="image" value="sdr-based-gainmap.avif" />
+        SDR-based gain map (AVIF)
+      </label>
+    </form>
+    <img class="preview" src="pq.avif" alt="" />
+    <script>
+      const form = document.querySelector('.image-switcher');
+      const img = document.querySelector('.preview');
+
+      form.addEventListener('change', () => {
+        img.src = form.elements.image.value;
+      });
+    </script>
+  </body>
+</html>
