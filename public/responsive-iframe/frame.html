@@ -1,0 +1,134 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="responsive-embedded-sizing" content="allow-origins=*" />
+<title>Responsive iframe content</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    font-family: system-ui, sans-serif;
+    line-height: 1.5;
+    interpolate-size: allow-keywords;
+  }
+  body {
+    margin: 0;
+    padding: 1rem;
+  }
+  h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+  }
+  p {
+    margin: 0 0 1rem;
+  }
+  details {
+    border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+    border-radius: 0.5rem;
+    margin-block: 0.5rem;
+  }
+  summary {
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  details[open] > summary {
+    border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block: 0 1rem;
+    cursor: pointer;
+  }
+  details > :not(summary) {
+    margin: 0.75rem 0.9rem;
+  }
+  details::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 0.3s ease,
+      content-visibility 0.3s allow-discrete;
+  }
+  details[open]::details-content {
+    block-size: auto;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    details::details-content {
+      transition: none;
+    }
+  }
+</style>
+
+<h2>I'm inside the iframe</h2>
+<p>
+  This document opts in to responsive sizing with a
+  <code>&lt;meta name="responsive-embedded-sizing"&gt;</code> tag. The browser
+  measures it on load. After that, it only resizes if the document calls
+  <code>window.requestResize()</code>.
+</p>
+
+<label class="option">
+  <input type="checkbox" class="resize-observer-toggle" autocomplete="off" />
+  Call <code>requestResize</code> in <code>ResizeObserver</code>
+</label>
+
+<details>
+  <summary>What is this?</summary>
+  <p>
+    The embedding page sets <code>frame-sizing: content-height</code> on the
+    iframe, so the browser sizes the iframe to the height of this document, with
+    no scrollbars or postMessage code.
+  </p>
+</details>
+
+<details>
+  <summary>A longer section</summary>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere
+    erat a ante venenatis dapibus posuere velit aliquet. Donec ullamcorper nulla
+    non metus auctor fringilla.
+  </p>
+  <p>
+    Cras mattis consectetur purus sit amet fermentum. Maecenas sed diam eget
+    risus varius blandit sit amet non magna. Vestibulum id ligula porta felis
+    euismod semper. Nullam quis risus eget urna mollis ornare vel eu leo.
+  </p>
+  <p>
+    Aenean lacinia bibendum nulla sed consectetur. Curabitur blandit tempus
+    porttitor. Etiam porta sem malesuada magna mollis euismod.
+  </p>
+</details>
+
+<details>
+  <summary>Nested details</summary>
+  <p>Details elements can be nested.</p>
+  <details>
+    <summary>Open me too</summary>
+    <p>
+      Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh,
+      ut fermentum massa justo sit amet risus.
+    </p>
+  </details>
+</details>
+
+<script>
+  const toggle = document.querySelector('.resize-observer-toggle');
+
+  if ('requestResize' in window) {
+    // Resize the frame whenever the content changes height, including on
+    // every frame of the details animation.
+    const observer = new ResizeObserver(() => requestResize());
+
+    toggle.addEventListener('change', () => {
+      if (toggle.checked) {
+        observer.observe(document.documentElement);
+      } else {
+        observer.disconnect();
+      }
+    });
+  } else {
+    toggle.disabled = true;
+  }
+</script>

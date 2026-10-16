@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Responsive iframe demo</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    font-family: system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  body {
+    margin: 0;
+    padding: 2rem 1rem;
+  }
+  main {
+    max-width: 60rem;
+    margin: 0 auto;
+  }
+  h1 {
+    margin-top: 0;
+  }
+  .unsupported {
+    background: light-dark(#fff3cd, #4d3b00);
+    border: 1px solid light-dark(#e0b100, #a07c00);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  @supports (frame-sizing: content-height) {
+    .unsupported {
+      display: none;
+    }
+  }
+  iframe {
+    display: block;
+    box-sizing: border-box;
+    width: 70%;
+    height: 300px;
+    border: 2px dashed light-dark(#4a7dff, #7aa0ff);
+    border-radius: 0.5rem;
+    background: Canvas;
+  }
+  @supports (frame-sizing: content-height) {
+    iframe {
+      height: auto;
+      frame-sizing: content-height;
+    }
+  }
+</style>
+
+<main>
+  <h1>Responsive iframe demo</h1>
+
+  <p class="unsupported">
+    Your browser doesn't support <code>frame-sizing</code>, so this demo won't
+    work. The iframe below has a fixed height, and will scroll. Try it in
+    Chrome 154 or later.
+  </p>
+
+  <p>
+    The iframe below (dashed border) is 70% of the page width, and uses
+    <code>frame-sizing: content-height</code>, so it's sized to the height of
+    its content. Expand the sections inside it to see it grow.
+  </p>
+  <p>
+    The width matters too. Resize the window and reload, and the height will
+    change to fit. In Chrome 155, the height doesn't update when the window
+    is resized without a reload.
+  </p>
+
+  <iframe src="frame.html" title="Responsive iframe content"></iframe>
+
+  <p>This paragraph is after the iframe, and will move as the iframe resizes.</p>
+</main>
