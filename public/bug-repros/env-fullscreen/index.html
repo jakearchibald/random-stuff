@@ -1,5 +1,9 @@
 <!doctype html>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  id="viewport"
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
 <title>env(safe-area-inset-*) within requestFullscreen</title>
 <style>
   #fs {
@@ -30,6 +34,9 @@
   The green box should sit inside the safe area. Red shows the
   <code>env(safe-area-inset-*)</code> padding.
 </p>
+<p>
+  <label><input type="checkbox" id="cover" /> viewport-fit=cover</label>
+</p>
 <p><button id="enter">Enter fullscreen</button></p>
 <div id="fs">
   <div class="safe-area">
@@ -54,4 +61,13 @@
 
   enter.onclick = () => fs.requestFullscreen();
   exit.onclick = () => document.exitFullscreen();
+
+  cover.onchange = () => {
+    viewport.content =
+      'width=device-width, initial-scale=1.0' +
+      (cover.checked ? ', viewport-fit=cover' : '');
+  };
+
+  // Browsers can restore checkbox state on reload
+  cover.onchange();
 </script>
