@@ -3,3 +3,6 @@ node_modules/
 .wrangler
 public/index.html
 dist
+.agents/skills/modern-web-guidance
+.claude/skills/modern-web-guidance
+skills-lock.json
