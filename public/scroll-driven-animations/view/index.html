@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <title>View-driven animation</title>
+  <style>
+    html {
+      scrollbar-gutter: stable;
+    }
+    body {
+      margin: 0;
+    }
+    .box {
+      width: 100px;
+      height: 100px;
+      margin: 150vh 0;
+      background: green;
+      animation: move linear both;
+      animation-timeline: view();
+    }
+    @keyframes move {
+      to {
+        translate: calc(100vw - 100%);
+        rotate: 1turn;
+      }
+    }
+  </style>
+  <div class="box"></div>
+</html>

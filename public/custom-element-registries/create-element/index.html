@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scoped registries: createElement</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+  <p>
+    A <code>test-element</code> is created with
+    <code>document.createElement</code> and appended to a shadow root that has
+    a scoped registry.
+  </p>
+  <div class="host"></div>
+  <script type="module">
+    customElements.define(
+      'test-element',
+      class extends HTMLElement {
+        connectedCallback() {
+          this.textContent = 'Document-level definition';
+          this.style.cssText = 'display:block;padding:1em;background:#c00;color:#fff';
+        }
+      },
+    );
+
+    const registry = new CustomElementRegistry();
+
+    registry.define(
+      'test-element',
+      class extends HTMLElement {
+        connectedCallback() {
+          this.textContent = 'Scoped definition';
+          this.style.cssText = 'display:block;padding:1em;background:#070;color:#fff';
+        }
+      },
+    );
+
+    const shadowRoot = document.querySelector('.host').attachShadow({
+      mode: 'open',
+      customElementRegistry: registry,
+    });
+
+    const el = document.createElement('test-element');
+    shadowRoot.append(el);
+  </script>
+</html>

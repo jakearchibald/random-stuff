@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <title>Scroll-driven animation</title>
+  <style>
+    html {
+      scrollbar-gutter: stable;
+    }
+    body {
+      height: 400vh;
+      margin: 0;
+    }
+    .box {
+      position: fixed;
+      top: calc(50% - 50px);
+      left: 0;
+      width: 100px;
+      height: 100px;
+      background: green;
+      animation: move ease-in-out;
+      animation-timeline: scroll();
+    }
+    @keyframes move {
+      to {
+        translate: calc(100vw - 100%);
+        rotate: 0.5turn;
+      }
+    }
+  </style>
+  <div class="box"></div>
+</html>

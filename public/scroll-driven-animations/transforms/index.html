@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>View timelines vs transforms</title>
+  <style>
+    html {
+      font-family: system-ui, sans-serif;
+      color-scheme: light dark;
+    }
+    body {
+      margin: 1rem;
+    }
+    p {
+      max-width: 70ch;
+    }
+    .cases {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 2rem 1rem;
+      align-items: start;
+    }
+    .case {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .case h2 {
+      font-size: 1rem;
+      margin: 0;
+    }
+    .case code {
+      font-size: 0.8rem;
+    }
+    .expect {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      margin: 0;
+      min-height: 3lh;
+    }
+    .readout {
+      display: grid;
+      gap: 0.3rem;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8rem;
+    }
+    .bar {
+      height: 8px;
+      background: color-mix(in srgb, currentColor 15%, transparent);
+    }
+    .bar-fill {
+      height: 100%;
+      background: currentColor;
+      transform-origin: left;
+      scale: 0 1;
+    }
+    .badge {
+      font-weight: bold;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      justify-self: start;
+    }
+    .badge.same {
+      background: #2a7;
+      color: white;
+    }
+    .badge.different {
+      background: #d33;
+      color: white;
+    }
+    .scroller {
+      position: relative;
+      height: 300px;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      border: 2px solid currentColor;
+    }
+    .content {
+      height: 1200px;
+      padding-top: 550px;
+      box-sizing: border-box;
+    }
+    .subject {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto;
+      view-timeline: --subject;
+      animation: progress linear both;
+      animation-timeline: --subject;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: bold;
+    }
+    @keyframes progress {
+      from {
+        background: oklch(55% 0.2 30);
+      }
+      to {
+        background: oklch(55% 0.2 270);
+      }
+    }
+    /* Where the subject would be without any transforms */
+    .ghost {
+      position: absolute;
+      top: 550px;
+      left: calc(50% - 50px);
+      width: 100px;
+      height: 100px;
+      box-sizing: border-box;
+      outline: 2px dashed currentColor;
+      outline-offset: -2px;
+      display: grid;
+      place-items: center;
+      font-size: 0.7rem;
+      text-align: center;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* The cases */
+    .ancestor-translate .wrapper {
+      translate: 0 200px;
+    }
+    .ancestor-scale .wrapper {
+      scale: 2.5;
+    }
+    .distant-ancestor-scale .content {
+      scale: 0.5;
+      transform-origin: top;
+    }
+    .ancestor-rotate .wrapper {
+      rotate: 180deg;
+      transform-origin: 50% -50px;
+    }
+    .subject-translate .subject {
+      translate: 0 200px;
+    }
+    .multiple .content {
+      scale: 0.8;
+      transform-origin: top;
+    }
+    .multiple .wrapper {
+      rotate: 20deg;
+    }
+    .multiple .subject {
+      translate: 0 -100px;
+    }
+    .relative .wrapper {
+      position: relative;
+      top: 200px;
+    }
+    .scroller-transformed .scroller {
+      scale: 0.7;
+      rotate: 10deg;
+    }
+    .outside-ancestor .outside {
+      translate: 0 100px;
+      scale: 0.8;
+    }
+  </style>
+
+  <h1>Are transforms ignored by view timelines?</h1>
+  <p>
+    Each box drives a view progress timeline (<code>cover</code> range) from its own scroller,
+    and colours itself with it. The scrollers scroll in sync, so every column should show the
+    same progress as the control, unless something about that case changes the timeline.
+  </p>
+  <p>
+    The dashed outline shows where the box would be <em>without</em> transforms. The spec says
+    "Transforms are ignored, but relative and absolute positioning are accounted for", so the
+    timeline should follow the dashed outline, not the visible box.
+  </p>
+
+  <div class="cases">
+    <section class="case control">
+      <h2>Control</h2>
+      <p class="expect">No transforms.</p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="ghost"></div>
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case relative">
+      <h2>Ancestor <code>position: relative; top: 200px</code></h2>
+      <p class="expect">
+        Sanity check: positioning is accounted for, so this should <strong>differ</strong>.
+      </p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case ancestor-translate">
+      <h2>Ancestor <code>translate: 0 200px</code></h2>
+      <p class="expect">If ancestor transforms are ignored, should match control.</p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="ghost">untransformed</div>
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case ancestor-scale">
+      <h2>Ancestor <code>scale: 2.5</code></h2>
+      <p class="expect">
+        Same centre, bigger box. If transforms were applied, the range would start earlier and
+        end later.
+      </p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="ghost">untransformed</div>
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case distant-ancestor-scale">
+      <h2>Distant ancestor <code>scale: 0.5</code> (origin top)</h2>
+      <p class="expect">
+        Transform on the whole scrolled content, a couple of levels up from the subject.
+      </p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="ghost">untransformed</div>
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case ancestor-rotate">
+      <h2>Ancestor <code>rotate: 180deg</code></h2>
+      <p class="expect">Rotated around a point above the box, flipping it 200px upward.</p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="ghost">untransformed</div>
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case subject-translate">
+      <h2>Subject's own <code>translate: 0 200px</code></h2>
+      <p class="expect">Transform on the subject itself. Should match control.</p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="ghost">untransformed</div>
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case multiple">
+      <h2>Transforms at every level</h2>
+      <p class="expect">
+        Content <code>scale: 0.8</code>, parent <code>rotate: 20deg</code>, subject
+        <code>translate: 0 -100px</code>. Should match control.
+      </p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="ghost">untransformed</div>
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case scroller-transformed">
+      <h2>Scroller <code>scale: 0.7; rotate: 10deg</code></h2>
+      <p class="expect">
+        Transform on the scroller itself. Scrollport and subject transform together, so this
+        should match either way.
+      </p>
+      <div class="readout"></div>
+      <div class="scroller">
+        <div class="ghost"></div>
+        <div class="content">
+          <div class="wrapper"><div class="subject"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="case outside-ancestor">
+      <h2>Scroller's ancestor <code>translate</code> + <code>scale</code></h2>
+      <p class="expect">Transform outside the scroller. Should match either way.</p>
+      <div class="readout"></div>
+      <div class="outside">
+        <div class="scroller">
+          <div class="ghost"></div>
+          <div class="content">
+            <div class="wrapper"><div class="subject"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    const cases = [...document.querySelectorAll('.case')].map((el) => {
+      const readout = el.querySelector('.readout');
+      readout.innerHTML = `
+        <div class="bar"><div class="bar-fill"></div></div>
+        <div class="numbers"></div>
+        <div class="badge"></div>
+      `;
+      return {
+        subject: el.querySelector('.subject'),
+        scroller: el.querySelector('.scroller'),
+        fill: readout.querySelector('.bar-fill'),
+        numbers: readout.querySelector('.numbers'),
+        badge: readout.querySelector('.badge'),
+      };
+    });
+
+    const control = cases[0];
+
+    // Keep all scrollers at the same scroll position
+    let syncing = false;
+    for (const { scroller } of cases) {
+      scroller.addEventListener('scroll', () => {
+        if (syncing) return;
+        syncing = true;
+        for (const other of cases) {
+          if (other.scroller !== scroller) other.scroller.scrollTop = scroller.scrollTop;
+        }
+        requestAnimationFrame(() => (syncing = false));
+      });
+    }
+
+    // Start part way through so there's something to see
+    for (const { scroller } of cases) scroller.scrollTop = 350;
+
+    function getInfo(subject) {
+      const anim = subject.getAnimations()[0];
+      if (!anim) return null;
+      const toPx = (value) => (value == null ? null : Math.round(value.to('px').value));
+      return {
+        progress: anim.effect.getComputedTiming().progress,
+        start: toPx(anim.timeline?.startOffset),
+        end: toPx(anim.timeline?.endOffset),
+      };
+    }
+
+    function update() {
+      const controlInfo = getInfo(control.subject);
+
+      for (const c of cases) {
+        const info = getInfo(c.subject);
+        if (!info) {
+          c.numbers.textContent = 'No animation';
+          continue;
+        }
+        const pct = info.progress == null ? null : info.progress * 100;
+        c.fill.style.scale = `${info.progress ?? 0} 1`;
+        c.subject.textContent = pct == null ? '–' : `${pct.toFixed(0)}%`;
+        c.numbers.textContent =
+          `${pct == null ? '–' : pct.toFixed(1) + '%'}` +
+          (info.start == null ? '' : ` · cover ${info.start}px → ${info.end}px`);
+
+        if (c === control) {
+          c.badge.textContent = 'Reference';
+          c.badge.className = 'badge';
+          continue;
+        }
+
+        // Compare the timeline offsets where available, since progress is clamped at 0/100%
+        const same =
+          info.start != null && controlInfo.start != null
+            ? info.start === controlInfo.start && info.end === controlInfo.end
+            : Math.abs((info.progress ?? 0) - (controlInfo.progress ?? 0)) < 0.005;
+
+        c.badge.textContent = same ? 'Same as control' : 'Different from control';
+        c.badge.className = `badge ${same ? 'same' : 'different'}`;
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    update();
+  </script>
+</html>
