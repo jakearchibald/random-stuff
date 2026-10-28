@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scoped registries: parser attributes</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 60rem;
+      margin: 0 auto;
+      padding: 1rem;
+      line-height: 1.4;
+    }
+    pre {
+      background: #f3f3f3;
+      padding: 0.75em;
+      overflow-x: auto;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1rem;
+    }
+    .support {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      color: #fff;
+      background: #666;
+    }
+    .support h3 {
+      margin: 0 0 0.25em;
+      font-family: ui-monospace, monospace;
+      font-size: 1rem;
+      overflow-wrap: anywhere;
+    }
+    .support .verdict {
+      font-size: 1.75rem;
+      font-weight: bold;
+    }
+    .support p {
+      margin: 0.25em 0 0;
+    }
+    .pass {
+      background: #070;
+    }
+    .fail {
+      background: #c00;
+    }
+    .untestable {
+      background: #a60;
+    }
+    .panels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1rem;
+    }
+    .panel {
+      border: 4px solid #666;
+      border-radius: 0.5rem;
+      padding: 0 1rem 1rem;
+    }
+    .panel.pass {
+      border-color: #070;
+      background: none;
+    }
+    .panel.fail {
+      border-color: #c00;
+      background: none;
+    }
+    .panel h3 {
+      font-size: 1rem;
+    }
+    .panel dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.25em 0.75em;
+      font-size: 0.9rem;
+    }
+    .panel dt {
+      font-weight: bold;
+    }
+    .panel dd {
+      margin: 0;
+      font-family: ui-monospace, monospace;
+    }
+    .legend span {
+      display: inline-block;
+      padding: 0.1em 0.5em;
+      color: #fff;
+    }
+  </style>
+
+  <h1>Scoped registries: parser attributes</h1>
+
+  <p>
+    This page tests two parser-level opt-outs that leave a subtree with a
+    <code>null</code> custom element registry, so a scoped registry can be
+    attached later using <code>registry.initialize(node)</code>:
+  </p>
+  <ul>
+    <li>
+      <code>&lt;template shadowrootmode shadowrootcustomelementregistry></code>
+      gives the declarative shadow root a <code>null</code> registry.
+    </li>
+    <li>
+      <code>scopedcustomelementregistry</code> is a global attribute
+      (<a href="https://github.com/whatwg/html/pull/12000">whatwg/html#12000</a>)
+      that gives the element, and the descendants the parser creates inside it,
+      a <code>null</code> registry.
+    </li>
+  </ul>
+
+  <p class="legend">
+    <code>test-element</code> is defined in both registries:
+    <span style="background: #c00">Global definition</span>
+    <span style="background: #070">Scoped definition</span>
+    <span style="background: #666">Not upgraded</span>
+  </p>
+
+  <h2>Support</h2>
+  <div class="summary">
+    <div class="support" id="support-base">
+      <h3>Scoped registries (prerequisite)</h3>
+      <div class="verdict">Testing…</div>
+      <p class="detail"></p>
+    </div>
+    <div class="support" id="support-shadowroot">
+      <h3>shadowrootcustomelementregistry</h3>
+      <div class="verdict">Testing…</div>
+      <p class="detail"></p>
+    </div>
+    <div class="support" id="support-scoped">
+      <h3>scopedcustomelementregistry</h3>
+      <div class="verdict">Testing…</div>
+      <p class="detail"></p>
+    </div>
+  </div>
+
+  <h2><code>shadowrootcustomelementregistry</code></h2>
+  <p>This markup is parsed with <code>setHTMLUnsafe()</code>:</p>
+  <pre id="shadowroot-markup"></pre>
+  <div class="panels" id="shadowroot-panels"></div>
+
+  <h2><code>scopedcustomelementregistry</code></h2>
+  <p>This markup is parsed with <code>setHTMLUnsafe()</code>:</p>
+  <pre id="scoped-markup"></pre>
+  <div class="panels" id="scoped-panels"></div>
+
+  <script type="module">
+    const notUpgradedStyle =
+      'display:block;padding:1em;background:#666;color:#fff';
+
+    const shadowRootMarkup = `<div class="host">
+  <template shadowrootmode="open" shadowrootcustomelementregistry>
+    <test-element style="${notUpgradedStyle}">Not upgraded</test-element>
+  </template>
+</div>`;
+
+    const scopedMarkup = `<div class="scope" scopedcustomelementregistry>
+  <test-element style="${notUpgradedStyle}">Not upgraded</test-element>
+  <section>
+    <test-element style="${notUpgradedStyle}">Not upgraded (nested)</test-element>
+  </section>
+</div>`;
+
+    document.querySelector('#shadowroot-markup').textContent = shadowRootMarkup;
+    document.querySelector('#scoped-markup').textContent = scopedMarkup;
+
+    function createDefinition(label, background) {
+      return class extends HTMLElement {
+        connectedCallback() {
+          this.textContent = label;
+          this.style.cssText = `display:block;padding:1em;background:${background};color:#fff`;
+        }
+      };
+    }
+
+    function setSupport(id, state, verdict, detail) {
+      const el = document.querySelector(`#${id}`);
+      el.classList.add(state);
+      el.querySelector('.verdict').textContent = verdict;
+      el.querySelector('.detail').textContent = detail;
+    }
+
+    customElements.define('test-element', createDefinition('Global definition', '#c00'));
+
+    // Prerequisite: the base scoped registries feature.
+    let registry;
+    const baseProblems = [];
+
+    try {
+      registry = new CustomElementRegistry();
+      registry.define('test-element', createDefinition('Scoped definition', '#070'));
+    } catch (error) {
+      baseProblems.push(`new CustomElementRegistry() failed: ${error.message.replace(/\.$/, '')}`);
+    }
+    if (registry && typeof registry.initialize !== 'function') {
+      baseProblems.push('registry.initialize() is missing');
+    }
+    if (!('customElementRegistry' in Element.prototype)) {
+      baseProblems.push('element.customElementRegistry is missing');
+    }
+    if (!('customElementRegistry' in ShadowRoot.prototype)) {
+      baseProblems.push('shadowRoot.customElementRegistry is missing');
+    }
+    if (typeof Element.prototype.setHTMLUnsafe !== 'function') {
+      baseProblems.push('element.setHTMLUnsafe() is missing');
+    }
+
+    const baseSupported = baseProblems.length === 0;
+
+    if (baseSupported) {
+      setSupport(
+        'support-base',
+        'pass',
+        'Supported',
+        'new CustomElementRegistry(), initialize(), and customElementRegistry are available.',
+      );
+    } else {
+      setSupport('support-base', 'fail', 'Not supported', baseProblems.join('. ') + '.');
+    }
+
+    function describeRegistry(node) {
+      if (!node) return 'no node';
+      if (!('customElementRegistry' in node)) return 'unknown (property missing)';
+      const value = node.customElementRegistry;
+      if (value === null) return 'null';
+      if (value === customElements) return 'global';
+      if (value === registry) return 'scoped';
+      return 'some other registry';
+    }
+
+    function describeElement(el) {
+      if (!el) return 'missing';
+      if (el.textContent === 'Scoped definition') return 'scoped definition';
+      if (el.textContent === 'Global definition') return 'global definition';
+      return 'not upgraded';
+    }
+
+    // Each panel parses fresh markup, optionally runs a step, then compares
+    // observed values with expected values.
+    function createPanel({ container, title, markup, step, observe, expected }) {
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      panel.innerHTML = `<h3></h3><div class="output"></div><dl></dl>`;
+      panel.querySelector('h3').textContent = title;
+      container.append(panel);
+
+      const output = panel.querySelector('.output');
+      const dl = panel.querySelector('dl');
+      let pass = true;
+
+      try {
+        output.setHTMLUnsafe(markup);
+        step?.(output);
+        const observed = observe(output);
+
+        for (const [key, expectedValue] of Object.entries(expected)) {
+          const actualValue = observed[key];
+          const matches = actualValue === expectedValue;
+          if (!matches) pass = false;
+
+          const dt = document.createElement('dt');
+          dt.textContent = key;
+          const dd = document.createElement('dd');
+          dd.textContent = matches
+            ? `${actualValue} ✓`
+            : `${actualValue} ✗ (expected ${expectedValue})`;
+          dl.append(dt, dd);
+        }
+      } catch (error) {
+        pass = false;
+        const dt = document.createElement('dt');
+        dt.textContent = 'Error';
+        const dd = document.createElement('dd');
+        dd.textContent = String(error);
+        dl.append(dt, dd);
+      }
+
+      panel.classList.add(pass ? 'pass' : 'fail');
+      return pass;
+    }
+
+    function runShadowRootDemo() {
+      const container = document.querySelector('#shadowroot-panels');
+      const observe = (output) => {
+        const shadow = output.querySelector('.host').shadowRoot;
+        return {
+          'Shadow root registry': describeRegistry(shadow),
+          'test-element registry': describeRegistry(shadow?.querySelector('test-element')),
+          'test-element': describeElement(shadow?.querySelector('test-element')),
+        };
+      };
+
+      const results = [
+        createPanel({
+          container,
+          title: 'After parsing',
+          markup: shadowRootMarkup,
+          observe,
+          expected: {
+            'Shadow root registry': 'null',
+            'test-element registry': 'null',
+            'test-element': 'not upgraded',
+          },
+        }),
+        createPanel({
+          container,
+          title: 'After registry.initialize(host.shadowRoot)',
+          markup: shadowRootMarkup,
+          step: (output) => registry.initialize(output.querySelector('.host').shadowRoot),
+          observe,
+          expected: {
+            'Shadow root registry': 'scoped',
+            'test-element registry': 'scoped',
+            'test-element': 'scoped definition',
+          },
+        }),
+      ];
+
+      return results.every(Boolean);
+    }
+
+    function runScopedDemo() {
+      const container = document.querySelector('#scoped-panels');
+      const observe = (output) => {
+        const scope = output.querySelector('.scope');
+        const [direct, nested] = scope.querySelectorAll('test-element');
+        return {
+          'div registry': describeRegistry(scope),
+          'test-element registry': describeRegistry(direct),
+          'test-element': describeElement(direct),
+          'nested test-element': describeElement(nested),
+        };
+      };
+
+      const results = [
+        createPanel({
+          container,
+          title: 'After parsing',
+          markup: scopedMarkup,
+          observe,
+          expected: {
+            'div registry': 'null',
+            'test-element registry': 'null',
+            'test-element': 'not upgraded',
+            'nested test-element': 'not upgraded',
+          },
+        }),
+        createPanel({
+          container,
+          title: 'After registry.initialize(div)',
+          markup: scopedMarkup,
+          step: (output) => registry.initialize(output.querySelector('.scope')),
+          observe,
+          expected: {
+            'div registry': 'scoped',
+            'test-element registry': 'scoped',
+            'test-element': 'scoped definition',
+            'nested test-element': 'scoped definition',
+          },
+        }),
+        createPanel({
+          container,
+          title: 'After initialize(div), then div.innerHTML = …',
+          markup: scopedMarkup,
+          step: (output) => {
+            const scope = output.querySelector('.scope');
+            registry.initialize(scope);
+            scope.innerHTML =
+              `<test-element style="${notUpgradedStyle}">Not upgraded</test-element>` +
+              `<section><test-element style="${notUpgradedStyle}">Not upgraded (nested)</test-element></section>`;
+          },
+          observe,
+          expected: {
+            'div registry': 'scoped',
+            'test-element registry': 'scoped',
+            'test-element': 'scoped definition',
+            'nested test-element': 'scoped definition',
+          },
+        }),
+      ];
+
+      return results.every(Boolean);
+    }
+
+    function reportAttribute(id, idlName, idlSupported, behaviourPassed) {
+      if (!baseSupported) {
+        setSupport(
+          id,
+          'untestable',
+          "Can't test",
+          'Scoped registries are not supported, so this attribute cannot work.',
+        );
+      } else if (behaviourPassed) {
+        setSupport(id, 'pass', 'Supported', `Behaves as expected. IDL ${idlName}: ${idlSupported ? 'present' : 'missing'}.`);
+      } else {
+        setSupport(
+          id,
+          'fail',
+          'Not supported',
+          `The parser ignores the attribute (see the red panels below). IDL ${idlName}: ${idlSupported ? 'present' : 'missing'}.`,
+        );
+      }
+    }
+
+    if (!baseSupported) {
+      for (const container of document.querySelectorAll('.panels')) {
+        const panel = document.createElement('div');
+        panel.className = 'panel fail';
+        panel.innerHTML = '<p>Skipped: scoped registries are not supported in this browser.</p>';
+        container.append(panel);
+      }
+    }
+
+    const shadowRootPassed = baseSupported && runShadowRootDemo();
+    const scopedPassed = baseSupported && runScopedDemo();
+
+    reportAttribute(
+      'support-shadowroot',
+      'template.shadowRootCustomElementRegistry',
+      'shadowRootCustomElementRegistry' in HTMLTemplateElement.prototype,
+      shadowRootPassed,
+    );
+    reportAttribute(
+      'support-scoped',
+      'element.scopedCustomElementRegistry',
+      'scopedCustomElementRegistry' in HTMLElement.prototype,
+      scopedPassed,
+    );
+  </script>
+</html>
