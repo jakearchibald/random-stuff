@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task vs frame style</title>
+  <style>
+    .square {
+      width: 100px;
+      height: 100px;
+      background: green;
+      animation: grow 1s ease-in-out infinite alternate;
+    }
+    @keyframes grow {
+      to { width: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="square"></div>
+  <script>
+    const { port1, port2 } = new MessageChannel();
+    port2.onmessage = () => {
+      document.body.style.backgroundColor = 'red';
+    };
+
+    function frame() {
+      document.body.style.backgroundColor = '';
+      port1.postMessage('');
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    setInterval(() => {
+      const end = performance.now() + 1000;
+      while (performance.now() < end);
+    }, 5000);
+  </script>
+</body>
+</html>
