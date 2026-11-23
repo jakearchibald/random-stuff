@@ -11,20 +11,20 @@
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.51.3",
-    "@mdn/browser-compat-data": "^8.0.10",
+    "@cloudflare/vite-plugin": "^1.70.1",
+    "@mdn/browser-compat-data": "^8.1.10",
     "@preact/preset-vite": "^2.10.6",
-    "@preact/signals": "^2.11.0",
-    "@types/node": "^26.2.0",
-    "@types/three": "^0.185.4",
+    "@preact/signals": "^2.11.4",
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.187.0",
     "dedent": "^1.7.2",
-    "glob": "^13.0.6",
-    "preact": "^10.29.8",
-    "three": "^0.185.1",
+    "glob": "^14.0.6",
+    "preact": "^11.2.0",
+    "three": "^0.187.0",
     "thumbhash": "^0.1.1",
     "typescript": "^7.0.2",
-    "vite": "^8.2.1",
-    "wrangler": "^4.121.0"
+    "vite": "^8.3.8",
+    "wrangler": "^4.166.0"
   },
   "packageManager": "pnpm@10.33.0"
 }

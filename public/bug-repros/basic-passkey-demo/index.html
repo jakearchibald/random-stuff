@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Basic passkey demo</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 1rem;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-block: 1rem;
+      }
+      button,
+      input {
+        font: inherit;
+        padding: 0.5em 0.8em;
+      }
+      #log {
+        font-family: ui-monospace, monospace;
+        font-size: 0.8rem;
+        white-space: pre-wrap;
+        word-break: break-all;
+        background: #f3f3f3;
+        padding: 0.5rem;
+        border-radius: 4px;
+      }
+      #log .error {
+        color: #b00;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Basic passkey demo</h1>
+    <p>No server. Challenges are random and nothing is verified.</p>
+
+    <div class="controls">
+      <input id="username" value="test-user" autocomplete="username webauthn" />
+      <button id="create">Create passkey</button>
+    </div>
+    <div class="controls">
+      <button id="login">Log in (discoverable)</button>
+      <button id="login-allow">Log in (allowCredentials)</button>
+      <button id="login-conditional">Start conditional (autofill)</button>
+    </div>
+    <div class="controls">
+      <button id="forget">Forget stored IDs</button>
+      <button id="clear-log">Clear log</button>
+    </div>
+
+    <h2>Log</h2>
+    <div id="log"></div>
+
+    <script type="module">
+      const logEl = document.getElementById('log');
+      const usernameInput = document.getElementById('username');
+      const STORAGE_KEY = 'passkey-demo-credentials';
+      let conditionalAbort = null;
+
+      function log(msg, data, isError = false) {
+        const line = document.createElement('div');
+        if (isError) line.className = 'error';
+        const time = new Date().toISOString().slice(11, 23);
+        line.textContent =
+          `[${time}] ${msg}` +
+          (data !== undefined ? '\n' + JSON.stringify(data, null, 2) : '');
+        logEl.append(line);
+        (isError ? console.error : console.log)(msg, data ?? '');
+      }
+
+      function logError(context, err) {
+        log(
+          `${context} failed`,
+          { name: err?.name, message: err?.message, stack: err?.stack },
+          true,
+        );
+      }
+
+      function toB64url(buf) {
+        const bytes = new Uint8Array(buf);
+        let str = '';
+        for (const b of bytes) str += String.fromCharCode(b);
+        return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      function fromB64url(str) {
+        const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+        const bin = atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4));
+        return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+      }
+
+      function randomBytes(n) {
+        return crypto.getRandomValues(new Uint8Array(n));
+      }
+
+      function getStored() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch {
+          return [];
+        }
+      }
+
+      function credentialToLoggable(cred) {
+        if (typeof cred.toJSON === 'function') {
+          try {
+            return cred.toJSON();
+          } catch (err) {
+            logError('credential.toJSON()', err);
+          }
+        }
+        const r = cred.response;
+        const out = {
+          id: cred.id,
+          type: cred.type,
+          authenticatorAttachment: cred.authenticatorAttachment,
+          response: {
+            clientDataJSON: new TextDecoder().decode(r.clientDataJSON),
+          },
+        };
+        if (r.userHandle) out.response.userHandle = toB64url(r.userHandle);
+        if (r.getTransports) out.response.transports = r.getTransports();
+        return out;
+      }
+
+      async function logEnvironment() {
+        const env = {
+          userAgent: navigator.userAgent,
+          origin: location.origin,
+          isSecureContext: window.isSecureContext,
+          hasPublicKeyCredential: 'PublicKeyCredential' in window,
+          storedCredentials: getStored(),
+        };
+        log('Environment', env);
+
+        if (!('PublicKeyCredential' in window)) {
+          log('PublicKeyCredential not available', undefined, true);
+          return;
+        }
+
+        const checks = {
+          isUserVerifyingPlatformAuthenticatorAvailable: () =>
+            PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
+          isConditionalMediationAvailable: () =>
+            PublicKeyCredential.isConditionalMediationAvailable?.(),
+          getClientCapabilities: () =>
+            PublicKeyCredential.getClientCapabilities?.(),
+        };
+
+        for (const [name, fn] of Object.entries(checks)) {
+          try {
+            log(`${name}()`, await fn());
+          } catch (err) {
+            logError(`${name}()`, err);
+          }
+        }
+      }
+
+      async function createPasskey() {
+        abortConditional();
+        const username = usernameInput.value || 'test-user';
+        const userId = randomBytes(16);
+        const options = {
+          publicKey: {
+            challenge: randomBytes(32),
+            rp: { name: 'Passkey demo', id: location.hostname },
+            user: { id: userId, name: username, displayName: username },
+            pubKeyCredParams: [
+              { type: 'public-key', alg: -7 },
+              { type: 'public-key', alg: -257 },
+            ],
+            authenticatorSelection: {
+              residentKey: 'required',
+              requireResidentKey: true,
+              userVerification: 'preferred',
+            },
+            attestation: 'none',
+            timeout: 120000,
+          },
+        };
+        log('navigator.credentials.create() options', {
+          rp: options.publicKey.rp,
+          user: { ...options.publicKey.user, id: toB64url(userId) },
+          authenticatorSelection: options.publicKey.authenticatorSelection,
+        });
+
+        try {
+          const cred = await navigator.credentials.create(options);
+          log('create() resolved', credentialToLoggable(cred));
+          const stored = getStored();
+          stored.push({
+            id: cred.id,
+            username,
+            userId: toB64url(userId),
+            transports: cred.response.getTransports?.() ?? [],
+            created: new Date().toISOString(),
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+          log('Stored credential ID locally', stored.at(-1));
+        } catch (err) {
+          logError('create()', err);
+        }
+      }
+
+      async function login({ useAllowCredentials = false, mediation } = {}) {
+        if (mediation !== 'conditional') abortConditional();
+        const publicKey = {
+          challenge: randomBytes(32),
+          rpId: location.hostname,
+          userVerification: 'preferred',
+          timeout: 120000,
+        };
+
+        if (useAllowCredentials) {
+          const stored = getStored();
+          if (!stored.length) {
+            log('No stored credential IDs. Create a passkey first.', undefined, true);
+            return;
+          }
+          publicKey.allowCredentials = stored.map((c) => ({
+            type: 'public-key',
+            id: fromB64url(c.id),
+            ...(c.transports?.length ? { transports: c.transports } : {}),
+          }));
+        }
+
+        const options = { publicKey };
+        if (mediation) {
+          options.mediation = mediation;
+          conditionalAbort = new AbortController();
+          options.signal = conditionalAbort.signal;
+        }
+
+        log('navigator.credentials.get() options', {
+          mediation,
+          rpId: publicKey.rpId,
+          userVerification: publicKey.userVerification,
+          allowCredentials: publicKey.allowCredentials?.map((c) => ({
+            ...c,
+            id: toB64url(c.id),
+          })),
+        });
+
+        try {
+          const cred = await navigator.credentials.get(options);
+          if (!cred) {
+            log('get() resolved with null', undefined, true);
+            return;
+          }
+          log('get() resolved', credentialToLoggable(cred));
+          const match = getStored().find((c) => c.id === cred.id);
+          if (match) {
+            log(`Logged in as "${match.username}"`, match);
+          } else {
+            log('Credential not in local storage (created elsewhere or storage cleared)', {
+              id: cred.id,
+              userHandle: cred.response.userHandle
+                ? toB64url(cred.response.userHandle)
+                : null,
+            });
+          }
+        } catch (err) {
+          logError('get()', err);
+        } finally {
+          if (mediation === 'conditional') conditionalAbort = null;
+        }
+      }
+
+      function abortConditional() {
+        if (conditionalAbort) {
+          log('Aborting pending conditional request');
+          conditionalAbort.abort();
+          conditionalAbort = null;
+        }
+      }
+
+      document.getElementById('create').onclick = createPasskey;
+      document.getElementById('login').onclick = () => login();
+      document.getElementById('login-allow').onclick = () =>
+        login({ useAllowCredentials: true });
+      document.getElementById('login-conditional').onclick = () => {
+        abortConditional();
+        login({ mediation: 'conditional' });
+        log('Conditional request pending. Focus the username field.');
+      };
+      document.getElementById('forget').onclick = () => {
+        localStorage.removeItem(STORAGE_KEY);
+        log('Cleared stored credential IDs (passkeys themselves still exist)');
+      };
+      document.getElementById('clear-log').onclick = () => {
+        logEl.textContent = '';
+      };
+
+      window.addEventListener('error', (e) => logError('Uncaught', e.error));
+      window.addEventListener('unhandledrejection', (e) =>
+        logError('Unhandled rejection', e.reason),
+      );
+
+      logEnvironment();
+    </script>
+  </body>
+</html>
