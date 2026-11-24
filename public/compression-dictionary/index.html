@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Compression dictionary demo</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 60rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+      .buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      table {
+        border-collapse: collapse;
+        margin-top: 1rem;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 0.3rem 0.6rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      td.num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      code {
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Compression dictionary demo</h1>
+    <p>
+      The resource is three.js's <code>Vector4.js</code>. The dictionary is
+      three.js's <code>Vector3.js</code>, which has a lot of code in common
+      with it.
+    </p>
+    <ol>
+      <li>
+        <strong>Fetch resource</strong>. With no dictionary, the response
+        should be regular brotli (<code>br</code>).
+      </li>
+      <li>
+        <strong>Load dictionary</strong>. The response has a
+        <code>Use-As-Dictionary</code> header, so the browser stores it.
+      </li>
+      <li>
+        <strong>Fetch resource</strong> again. The browser should send an
+        <code>Available-Dictionary</code> header, and the server responds with
+        <code>dcb</code> (brotli using the dictionary).
+      </li>
+    </ol>
+    <div class="buttons">
+      <button class="fetch-resource">Fetch resource</button>
+      <button class="load-dictionary">Load dictionary</button>
+      <button class="clear-dictionary">Clear dictionary</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Request</th>
+          <th>Available-Dictionary sent</th>
+          <th>Accept-Encoding sent</th>
+          <th>Content-Encoding</th>
+          <th>Transferred body</th>
+          <th>Decoded body</th>
+        </tr>
+      </thead>
+      <tbody class="log"></tbody>
+    </table>
+    <script type="module">
+      const log = document.querySelector('.log');
+
+      function formatBytes(bytes) {
+        return bytes ? `${bytes.toLocaleString()} bytes` : '?';
+      }
+
+      function addRow(cells) {
+        const row = log.insertRow();
+        for (const [text, className] of cells) {
+          const cell = row.insertCell();
+          if (className) cell.className = className;
+          cell.textContent = text;
+        }
+      }
+
+      // Request headers are echoed back by the resource route only.
+      function echoed(response, name) {
+        const value = response.headers.get(name);
+        if (value === null) return '-';
+        return value || 'No';
+      }
+
+      async function getTiming(url) {
+        // The resource timing entry may be added after the body is read.
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return performance.getEntriesByName(url).at(-1);
+      }
+
+      async function request(label, path) {
+        const url = new URL(path, location.href).href;
+        const response = await fetch(url);
+        await response.text();
+        const timing = await getTiming(url);
+
+        addRow([
+          [label],
+          [echoed(response, 'X-Received-Available-Dictionary')],
+          [echoed(response, 'X-Received-Accept-Encoding')],
+          [response.headers.get('Content-Encoding') || 'none'],
+          [formatBytes(timing?.encodedBodySize), 'num'],
+          [formatBytes(timing?.decodedBodySize), 'num'],
+        ]);
+      }
+
+      document
+        .querySelector('.fetch-resource')
+        .addEventListener('click', () =>
+          request('Resource', '/compression-dictionary/resource/'),
+        );
+
+      document
+        .querySelector('.load-dictionary')
+        .addEventListener('click', () =>
+          request('Dictionary', '/compression-dictionary/dictionary/'),
+        );
+
+      document
+        .querySelector('.clear-dictionary')
+        .addEventListener('click', async () => {
+          await fetch('/compression-dictionary/clear/');
+          addRow([['Cleared'], [''], [''], [''], [''], ['']]);
+        });
+    </script>
+  </body>
+</html>
