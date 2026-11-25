@@ -42,13 +42,13 @@
     <h1>Compression dictionary demo</h1>
     <p>
       The resource is three.js's <code>Vector4.js</code>. The dictionary is
-      three.js's <code>Vector3.js</code>, which has a lot of code in common
-      with it.
+      three.js's <code>Vector3.js</code>, which has a lot of code in common with
+      it.
     </p>
     <ol>
       <li>
-        <strong>Fetch resource</strong>. With no dictionary, the response
-        should be regular brotli (<code>br</code>).
+        <strong>Fetch resource</strong>. With no dictionary, the response should
+        be regular compression (<code>br</code> or <code>zstd</code>).
       </li>
       <li>
         <strong>Load dictionary</strong>. The response has a
@@ -57,13 +57,47 @@
       <li>
         <strong>Fetch resource</strong> again. The browser should send an
         <code>Available-Dictionary</code> header, and the server responds with
-        <code>dcb</code> (brotli using the dictionary).
+        <code>dcb</code> (brotli using the dictionary) or <code>dcz</code>
+        (zstd using the dictionary).
       </li>
     </ol>
+    <p>
+      The brotli and zstd sets use separate URLs, so each has its own
+      dictionary. "Clear dictionaries" clears both.
+    </p>
+    <h2>Brotli</h2>
     <div class="buttons">
-      <button class="fetch-resource">Fetch resource</button>
-      <button class="load-dictionary">Load dictionary</button>
-      <button class="clear-dictionary">Clear dictionary</button>
+      <button
+        data-request="Resource (brotli)"
+        data-path="/compression-dictionary/resource/"
+      >
+        Fetch resource
+      </button>
+      <button
+        data-request="Dictionary (brotli)"
+        data-path="/compression-dictionary/dictionary/"
+      >
+        Load dictionary
+      </button>
+    </div>
+    <h2>Zstd</h2>
+    <div class="buttons">
+      <button
+        data-request="Resource (zstd)"
+        data-path="/compression-dictionary/resource-zstd/"
+      >
+        Fetch resource
+      </button>
+      <button
+        data-request="Dictionary (zstd)"
+        data-path="/compression-dictionary/dictionary-zstd/"
+      >
+        Load dictionary
+      </button>
+    </div>
+    <h2>Log</h2>
+    <div class="buttons">
+      <button class="clear-dictionary">Clear dictionaries</button>
     </div>
     <table>
       <thead>
@@ -123,17 +157,11 @@
         ]);
       }
 
-      document
-        .querySelector('.fetch-resource')
-        .addEventListener('click', () =>
-          request('Resource', '/compression-dictionary/resource/'),
+      for (const button of document.querySelectorAll('[data-request]')) {
+        button.addEventListener('click', () =>
+          request(button.dataset.request, button.dataset.path),
         );
-
-      document
-        .querySelector('.load-dictionary')
-        .addEventListener('click', () =>
-          request('Dictionary', '/compression-dictionary/dictionary/'),
-        );
+      }
 
       document
         .querySelector('.clear-dictionary')
