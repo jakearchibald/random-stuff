@@ -20,6 +20,7 @@
     "dedent": "^1.7.2",
     "glob": "^14.0.6",
     "preact": "^11.2.0",
+    "shiki": "^4.6.0",
     "three": "^0.187.0",
     "thumbhash": "^0.1.1",
     "typescript": "^7.0.2",

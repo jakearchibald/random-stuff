@@ -1,0 +1,103 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #1a1a1a;
+  color: #eee;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+
+  & label {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+  }
+
+  & input[aria-invalid='true'] {
+    outline: 2px solid #f14c4c;
+  }
+
+  & input[type='number'] {
+    width: 5em;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error {
+  color: #f14c4c;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.preview {
+  overflow: auto;
+  /* jakearchibald.com page background. */
+  background: #f1f1f1;
+  padding: 1rem;
+
+}
+
+/* The textarea sits over the canvas, with the same text metrics, so editing it
+   looks like editing the output. Its text is transparent; the canvas shows the
+   highlighted version underneath. */
+.editor {
+  display: inline-grid;
+  vertical-align: top;
+  /* Matches the canvas, for when trailing blank lines (which are trimmed from
+     the output) make the textarea taller than it. */
+  background: #2d2d2d;
+
+  & > * {
+    grid-area: 1 / 1;
+  }
+
+  & canvas {
+    display: block;
+  }
+
+  & textarea {
+    field-sizing: content;
+    /* Keep the caret visible and a click target, even when empty. */
+    min-width: 1ch;
+    margin: 0;
+    border: 0;
+    padding: var(--padding);
+    font: var(--font-size) / 1.4 Inconsolata, courier, monospace;
+    white-space: pre;
+    tab-size: 2;
+    overflow: hidden;
+    resize: none;
+    background: transparent;
+    color: transparent;
+    caret-color: #fff;
+    outline: none;
+
+    &::selection {
+      color: transparent;
+      background: rgb(255 255 255 / 0.2);
+    }
+  }
+}
