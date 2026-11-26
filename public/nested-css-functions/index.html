@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nested CSS substitution functions</title>
+  <style>
+    html {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      color-scheme: light dark;
+    }
+    body {
+      max-width: 50rem;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    section {
+      margin-block: 3rem;
+    }
+    /* The demo styles are shown on the page, and can be edited live */
+    style.show {
+      display: block;
+      white-space: pre;
+      font-family: ui-monospace, monospace;
+      font-size: 0.9rem;
+      background: light-dark(#f4f4f4, #222);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      tab-size: 2;
+    }
+    .support {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      background: light-dark(#fde2e2, #511);
+    }
+    .support.yes {
+      background: light-dark(#dff5e3, #143);
+    }
+    .output {
+      margin-block: 1rem;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Nested CSS substitution functions</h1>
+  <p>
+    The name argument of <code>var()</code> and <code>attr()</code> can itself be the result of a
+    <code>var()</code> or <code>attr()</code>. The styles for each demo are shown below it, and
+    are editable.
+  </p>
+  <p class="support">Checking support…</p>
+
+  <section>
+    <h2><code>var(var(…))</code></h2>
+    <p>The inner <code>var()</code> returns a custom property <em>name</em>, which the outer <code>var()</code> then looks up.</p>
+    <div class="output var-var">
+      <div class="controls">
+        <label><input type="radio" name="accent" value="pink" checked> Pink</label>
+        <label><input type="radio" name="accent" value="green"> Green</label>
+        <label><input type="radio" name="accent" value="blue"> Blue</label>
+      </div>
+      <div class="swatch">Accent</div>
+    </div>
+    <style class="show" contenteditable="plaintext-only">.var-var {
+  --pink: deeppink;
+  --green: seagreen;
+  --blue: royalblue;
+
+  --accent: --pink;
+
+  &:has([value=green]:checked) { --accent: --green; }
+  &:has([value=blue]:checked) { --accent: --blue; }
+
+  .swatch {
+    background: var(var(--accent));
+    color: white;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+}</style>
+  </section>
+
+  <section>
+    <h2><code>var(var(var(…)))</code> with a fallback</h2>
+    <p>Chains work too. If any link resolves to something that isn't a custom property name, the fallback is used.</p>
+    <div class="output var-chain">
+      <div class="box good">var(var(var(--start)))</div>
+      <div class="box broken">var(var(var(--start-broken)), grey)</div>
+    </div>
+    <style class="show" contenteditable="plaintext-only">.var-chain {
+  --size: 12rem;
+  --step-2: --size;
+  --start: --step-2;
+
+  --start-broken: --does-not-exist;
+
+  .box {
+    background: darkorange;
+    color: black;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .good {
+    width: var(var(var(--start)));
+  }
+  .broken {
+    width: auto;
+    background: var(var(var(--start-broken)), grey);
+  }
+}</style>
+  </section>
+
+  <section>
+    <h2><code>attr(attr(…))</code></h2>
+    <p>
+      The element's <code>data-show</code> attribute says <em>which other attribute</em> to display.
+      Note the <code>type(&lt;custom-ident&gt;)</code>: without it, the inner <code>attr()</code>
+      returns a string, which isn't a valid attribute name.
+    </p>
+    <div class="output">
+      <div class="controls">
+        <label>Show:
+          <select class="attr-attr-select">
+            <option value="data-name">data-name</option>
+            <option value="data-price">data-price</option>
+            <option value="data-stock">data-stock</option>
+          </select>
+        </label>
+      </div>
+      <p class="product" data-show="data-name" data-name="Squeaky hammer" data-price="£4.99" data-stock="12 left"></p>
+    </div>
+    <style class="show" contenteditable="plaintext-only">.product::before {
+  content: attr(attr(data-show type(<custom-ident>)));
+  font-size: 2rem;
+}</style>
+  </section>
+
+  <section>
+    <h2><code>var(attr(…))</code></h2>
+    <p>Each card names a custom property from the palette in an attribute. The last card names one that doesn't exist, so it gets the fallback.</p>
+    <div class="output cards">
+      <div class="card" data-accent="--pink">--pink</div>
+      <div class="card" data-accent="--green">--green</div>
+      <div class="card" data-accent="--blue">--blue</div>
+      <div class="card" data-accent="--orange">--orange</div>
+    </div>
+    <style class="show" contenteditable="plaintext-only">.cards {
+  --pink: deeppink;
+  --green: seagreen;
+  --blue: royalblue;
+
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .card {
+    border: 4px solid var(attr(data-accent type(<custom-ident>)), grey);
+    padding: 1rem;
+    font-family: ui-monospace, monospace;
+  }
+}</style>
+  </section>
+
+  <section>
+    <h2><code>attr(var(…))</code></h2>
+    <p>
+      CSS decides which attribute to read. Here a container query switches between
+      <code>data-short</code> and <code>data-long</code> labels. Resize the box using its corner.
+    </p>
+    <div class="output toolbar-container">
+      <div class="toolbar">
+        <button data-short="+" data-long="New document"></button>
+        <button data-short="↓" data-long="Download"></button>
+        <button data-short="✕" data-long="Delete"></button>
+      </div>
+    </div>
+    <style class="show" contenteditable="plaintext-only">.toolbar-container {
+  container-type: inline-size;
+  resize: horizontal;
+  overflow: hidden;
+  border: 1px dashed currentColor;
+  padding: 0.5rem;
+  width: 30rem;
+  max-width: 100%;
+  min-width: 6rem;
+  box-sizing: border-box;
+}
+.toolbar {
+  --label: data-long;
+  display: flex;
+  gap: 0.5rem;
+
+  button::after {
+    content: attr(var(--label));
+  }
+}
+@container (width < 20rem) {
+  .toolbar { --label: data-short; }
+}</style>
+  </section>
+
+  <section>
+    <h2><code>attr(data-x var(…))</code></h2>
+    <p>The <em>type</em> of the attribute can come from a variable too. Here the bars' unit is switched between <code>%</code> and <code>px</code>.</p>
+    <div class="output bars">
+      <div class="controls">
+        <label><input type="radio" name="unit" value="percent" checked> %</label>
+        <label><input type="radio" name="unit" value="px"> px</label>
+      </div>
+      <div class="bar" data-value="80">80</div>
+      <div class="bar" data-value="45">45</div>
+      <div class="bar" data-value="20">20</div>
+    </div>
+    <style class="show" contenteditable="plaintext-only">.bars {
+  --unit: %;
+
+  &:has([value=px]:checked) { --unit: px; }
+
+  .bar {
+    width: attr(data-value var(--unit), 0);
+    background: teal;
+    color: white;
+    padding-inline: 0.5rem;
+    margin-top: 0.5rem;
+    box-sizing: border-box;
+  }
+}</style>
+  </section>
+
+  <script>
+    // Feature detect var(var(…))
+    {
+      const el = document.createElement('div');
+      el.style.cssText = '--a: --b; --b: 7px; width: var(var(--a)); position: absolute;';
+      document.body.append(el);
+      const supported = getComputedStyle(el).width === '7px';
+      el.remove();
+      const support = document.querySelector('.support');
+      support.classList.toggle('yes', supported);
+      support.textContent = supported
+        ? '✅ Your browser supports nested substitution functions.'
+        : '❌ Your browser doesn\'t support nested substitution functions, so these demos won\'t work. Try Firefox 161+.';
+    }
+
+    // attr(attr(…)) demo: update data-show from the select
+    {
+      const select = document.querySelector('.attr-attr-select');
+      const product = document.querySelector('.product');
+      select.addEventListener('input', () => {
+        product.dataset.show = select.value;
+      });
+    }
+  </script>
+</body>
+</html>
